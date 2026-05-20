@@ -1307,10 +1307,10 @@ function doExportPDF() {
   const dateVal  = document.getElementById('chk-date').value;
   const dateStr  = dateVal ? new Date(dateVal+'T12:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
   const dest     = destination === 'europe' ? 'Europe (max 180 cm)' : 'Export (max 160 cm)';
-  const delivPN  = document.getElementById('delivery-pn')?.value || '—';
+  const delivPN  = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase() || '—';
   const now      = new Date().toLocaleString('en-GB');
 
-  // Header banner
+  // ── Header banner ──────────────────────────────────────────────────
   doc.setFillColor(10, 31, 54);
   doc.rect(0, 0, PAGE_W, 26, 'F');
   doc.setTextColor(255,255,255);
@@ -1323,22 +1323,22 @@ function doExportPDF() {
   doc.setFontSize(8); doc.setFont(undefined,'normal');
   doc.text(dateStr, PAGE_W - M, 16, { align:'right' });
 
-  // Metadata 4-column strip
+  // ── Metadata strip ─────────────────────────────────────────────────
   doc.setFillColor(248, 250, 252);
   doc.setDrawColor(226, 232, 240);
-  doc.rect(M, 28, CW, 18, 'FD');
-  const metaCols = [['OPERATOR', operator], ['PART NUMBER', delivPN], ['DESTINATION', dest], ['GENERATED', now]];
+  doc.rect(M, 28, CW, 16, 'FD');
+  const metaCols = [['OPERATOR', operator], ['PART NUMBER', delivPN], ['DESTINATION', dest], ['DATE', dateStr]];
   const cw4 = CW / 4;
   metaCols.forEach(function([lbl, val], i) {
     const x = M + cw4 * i + 4;
     doc.setFontSize(7); doc.setTextColor(100,116,139); doc.setFont(undefined,'bold');
     doc.text(lbl, x, 34);
     doc.setFontSize(8.5); doc.setTextColor(15,23,42); doc.setFont(undefined,'normal');
-    const capped = String(val).length > 28 ? String(val).slice(0,27) + '...' : String(val);
-    doc.text(capped, x, 41);
+    const capped = String(val).length > 26 ? String(val).slice(0,25) + '...' : String(val);
+    doc.text(capped, x, 40);
   });
 
-  let y = 54;
+  let y = 50;
 
   const blocks = document.querySelectorAll('.pallet-block');
   let palletIdx = 0;
@@ -1353,152 +1353,180 @@ function doExportPDF() {
     const dims   = PTYPE[ptype] || '—';
     const weight = document.getElementById('weight-' + pid)?.value || '—';
     const height = document.getElementById('height-' + pid)?.value || '—';
-    const boxPN  = document.getElementById('box-pn-' + pid)?.value || '—';
 
+    // Pick label total
     let pickTotal = 0;
     document.querySelectorAll('#pick-rows-' + pid + ' .pick-row input').forEach(function(inp) {
       pickTotal += parseInt(inp?.value) || 0;
     });
 
-    const mode = getBoxMode(pid);
+    // Box mode & pn mode
+    const mode   = getBoxMode(pid);
+    const pnMode = getPNMode(pid);
     let boxTotal = 0, boxCount = 0;
-    const boxGroups = [];
+    const boxGroups = []; // {count, qty}
+    let pnOk = null;
+    let boxPN = '—';
 
     if (mode === 'scan') {
-      const qtyMap = new Map();
-      document.querySelectorAll('#box-rows-' + pid + ' .box-row input').forEach(function(inp) {
-        const qty = parseInt(inp?.value) || 0;
-        if (qty > 0) qtyMap.set(qty, (qtyMap.get(qty) || 0) + 1);
-      });
-      qtyMap.forEach(function(count, qty) {
-        boxGroups.push([String(count), qty.toLocaleString(), (count*qty).toLocaleString()]);
-        boxTotal += count * qty; boxCount += count;
-      });
+      if (pnMode === 'per-box') {
+        let allPNFilled = true, anyPNMismatch = false;
+        document.querySelectorAll('#perbox-rows-' + pid + ' .perbox-row').forEach(function(row) {
+          const inputs = row.querySelectorAll('input');
+          const pn  = (inputs[0]?.value || '').trim().toUpperCase();
+          const qty = parseInt(inputs[1]?.value) || 0;
+          if (!pn) allPNFilled = false;
+          if (pn && delivPN !== '—' && pn !== delivPN) anyPNMismatch = true;
+          if (qty > 0) {
+            const existing = boxGroups.find(function(g){ return g.qty === qty; });
+            if (existing) existing.count++; else boxGroups.push({count:1, qty:qty});
+            boxTotal += qty; boxCount++;
+          }
+        });
+        boxPN = 'per box';
+        if (delivPN !== '—') {
+          if (anyPNMismatch) pnOk = false;
+          else if (allPNFilled && boxCount > 0) pnOk = true;
+        }
+      } else {
+        boxPN = (document.getElementById('box-pn-' + pid)?.value || '').trim().toUpperCase() || '—';
+        const qtyMap = new Map();
+        document.querySelectorAll('#box-rows-' + pid + ' .box-row input').forEach(function(inp) {
+          const qty = parseInt(inp?.value) || 0;
+          if (qty > 0) qtyMap.set(qty, (qtyMap.get(qty) || 0) + 1);
+        });
+        qtyMap.forEach(function(count, qty) {
+          boxGroups.push({count:count, qty:qty});
+          boxTotal += count * qty; boxCount += count;
+        });
+        if (delivPN !== '—' && boxPN !== '—') pnOk = delivPN === boxPN;
+      }
     } else {
+      boxPN = (document.getElementById('box-pn-' + pid)?.value || '').trim().toUpperCase() || '—';
       document.querySelectorAll('#group-rows-' + pid + ' .group-row').forEach(function(row) {
         const inputs = row.querySelectorAll('input');
         const count = parseInt(inputs[0]?.value)||0, qty = parseInt(inputs[1]?.value)||0;
-        boxGroups.push([String(count), qty.toLocaleString(), (count*qty).toLocaleString()]);
-        boxTotal += count * qty; boxCount += count;
+        if (count > 0 && qty > 0) {
+          boxGroups.push({count:count, qty:qty});
+          boxTotal += count * qty; boxCount += count;
+        }
       });
+      if (delivPN !== '—' && boxPN !== '—') pnOk = delivPN === boxPN;
     }
 
     grandPickTotal += pickTotal; grandBoxTotal += boxTotal; grandBoxCount += boxCount;
-    const pnOk  = delivPN !== '—' && boxPN !== '—' && delivPN.trim().toUpperCase() === boxPN.trim().toUpperCase();
-    const qtyOk = pickTotal > 0 && pickTotal === boxTotal;
-    const ready = pickTotal > 0 && boxTotal > 0 && delivPN !== '—' && boxPN !== '—';
-    const palletSt = ready ? ((pnOk && qtyOk) ? 'OK' : 'MISMATCH') : 'PENDING';
-    if (ready && !(pnOk && qtyOk)) anyErr = true;
-    if (!ready || !(pnOk && qtyOk)) allOk = false;
-    consolidado.push(['P' + palletIdx, ptype, dims + ' cm', weight + ' kg', String(boxCount), pickTotal.toLocaleString(), boxTotal.toLocaleString(), palletSt]);
 
-    if (y > 225) { doc.addPage(); y = 14; }
+    const qtyOk    = pickTotal > 0 && pickTotal === boxTotal;
+    const ready    = pickTotal > 0 && boxTotal > 0;
+    const palletSt = ready ? ((pnOk !== false && qtyOk) ? 'OK' : 'MISMATCH') : 'PENDING';
+    if (ready && !(pnOk !== false && qtyOk)) anyErr = true;
+    if (!ready || !(pnOk !== false && qtyOk)) allOk = false;
 
-    // Pallet section header bar
-    doc.setFillColor(15, 41, 66);
-    doc.rect(M, y, CW, 7, 'F');
+    consolidado.push([
+      'P' + palletIdx, ptype, dims + ' cm', weight + ' kg',
+      String(boxCount),
+      pickTotal > 0 ? pickTotal.toLocaleString() : '—',
+      boxTotal  > 0 ? boxTotal.toLocaleString()  : '—',
+      palletSt,
+    ]);
+
+    // ── Page break check ──────────────────────────────────
+    if (y > 248) { doc.addPage(); y = 14; }
+
+    // ── Pallet header bar ─────────────────────────────────
+    const hdrC = palletSt==='OK' ? [16,100,60] : palletSt==='MISMATCH' ? [155,20,20] : [15,41,66];
+    doc.setFillColor(hdrC[0], hdrC[1], hdrC[2]);
+    doc.rect(M, y, CW, 8, 'F');
     doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont(undefined,'bold');
-    doc.text('PALLET ' + palletIdx + '  -  ' + ptype + ' (' + dims + ' cm)  |  ' + weight + ' kg  |  ' + height + ' cm', M+3, y+5);
-
-    // Status badge
-    const bgC = palletSt==='OK' ? [220,252,231] : palletSt==='MISMATCH' ? [254,226,226] : [241,245,249];
-    const txC = palletSt==='OK' ? [21,128,61]   : palletSt==='MISMATCH' ? [185,28,28]   : [100,116,139];
+    doc.text(
+      'PALLET ' + palletIdx + '   ' + ptype + '  (' + dims + ' cm)   ' + weight + ' kg   ' + height + ' cm',
+      M+3, y+5.5
+    );
     const stLabel = palletSt==='OK' ? 'OK' : palletSt==='MISMATCH' ? 'MISMATCH' : 'PENDING';
-    doc.setFillColor(bgC[0], bgC[1], bgC[2]);
-    const bw = doc.getTextWidth(stLabel) + 6;
-    doc.rect(PAGE_W - M - bw, y+1, bw, 5, 'F');
-    doc.setTextColor(txC[0], txC[1], txC[2]); doc.setFontSize(8); doc.setFont(undefined,'bold');
-    doc.text(stLabel, PAGE_W - M - bw/2, y+4.8, { align:'center' });
-    y += 10;
+    doc.setFontSize(8);
+    doc.text(stLabel, PAGE_W - M - 3, y+5.5, { align:'right' });
+    y += 9;
 
-    // PN verification line
-    doc.setFontSize(8); doc.setTextColor(80); doc.setFont(undefined,'normal');
-    doc.text('Pick PN: ' + delivPN + '   |   Box PN: ' + boxPN, M, y);
-    const pnLabel = pnOk ? 'PN OK' : (delivPN !== '—' && boxPN !== '—' ? 'PN MISMATCH' : 'PN not verified');
-    const pnColor = pnOk ? [21,128,61] : (delivPN !== '—' && boxPN !== '—' ? [185,28,28] : [100,116,139]);
-    doc.setTextColor(pnColor[0], pnColor[1], pnColor[2]); doc.setFont(undefined,'bold');
-    doc.text(pnLabel, PAGE_W - M, y, { align:'right' });
-    y += 4;
+    // ── PN line ───────────────────────────────────────────
+    const pnLabel = pnOk === true ? 'PN OK' : pnOk === false ? 'PN MISMATCH' : 'PN not verified';
+    const pnColor = pnOk === true ? [21,128,61] : pnOk === false ? [185,28,28] : [100,116,139];
+    doc.setFontSize(7.5); doc.setTextColor(60,60,60); doc.setFont(undefined,'normal');
+    doc.text('Pick PN: ' + delivPN + '   |   Box PN: ' + boxPN, M+2, y+4);
+    doc.setFont(undefined,'bold'); doc.setTextColor(pnColor[0], pnColor[1], pnColor[2]);
+    doc.text(pnLabel, PAGE_W - M - 2, y+4, { align:'right' });
+    y += 7;
 
-    // Box breakdown section label
-    doc.setFontSize(7.5); doc.setTextColor(71, 85, 105); doc.setFont(undefined, 'bold');
-    doc.text('BOX BREAKDOWN BY QUANTITY', M, y + 0.5);
-    y += 4;
+    // ── Box groups line (N carton x Q pcs) ───────────────
+    const boxLine = boxGroups.length
+      ? boxGroups.map(function(g){ return g.count + ' carton x ' + g.qty.toLocaleString() + ' pcs'; }).join('   +   ')
+      : '—';
+    doc.setFontSize(7); doc.setTextColor(100,116,139); doc.setFont(undefined,'bold');
+    doc.text('BOXES:', M+2, y+3.5);
+    doc.setFontSize(8.5); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
+    const wrappedBox = doc.splitTextToSize(boxLine, CW - 22);
+    doc.text(wrappedBox, M+22, y+3.5);
+    y += Math.max(wrappedBox.length * 5, 5);
 
-    // Box detail table
-    doc.autoTable({
-      startY: y,
-      head: [['No. of Boxes', 'Pcs / Box', 'Subtotal (pcs)']],
-      body: boxGroups.length ? boxGroups : [['—', '—', '—']],
-      styles: { fontSize:8.5, cellPadding:3 },
-      headStyles: { fillColor:[21,128,61], textColor:255, fontStyle:'bold' },
-      columnStyles: { 0:{cellWidth:60,halign:'center'}, 1:{cellWidth:60,halign:'center'}, 2:{cellWidth:62,halign:'right'} },
-      margin: { left:M, right:M }, theme:'grid',
-    });
-    y = doc.lastAutoTable.finalY + 2;
+    // ── Totals line ───────────────────────────────────────
+    doc.setFontSize(7.5); doc.setTextColor(60,60,60); doc.setFont(undefined,'normal');
+    const expStr   = pickTotal > 0 ? pickTotal.toLocaleString() : '—';
+    const verifStr = boxTotal  > 0 ? boxTotal.toLocaleString()  : '—';
+    doc.text(
+      'Expected: ' + expStr + ' pcs   |   Verified: ' + verifStr + ' pcs   |   Total boxes: ' + (boxCount || '—'),
+      PAGE_W - M - 2, y+3, { align:'right' }
+    );
+    y += 6;
 
-    // Pallet footer summary
-    doc.autoTable({
-      startY: y,
-      head: [['Expected (pcs)', 'Verified (pcs)', 'Total Boxes', 'Status']],
-      body: [[
-        pickTotal > 0 ? pickTotal.toLocaleString() : '—',
-        boxTotal  > 0 ? boxTotal.toLocaleString()  : '—',
-        boxCount  || '—',
-        stLabel,
-      ]],
-      styles: { fontSize:8.5, cellPadding:3, fontStyle:'bold', halign:'center' },
-      headStyles: { fillColor:[15,41,66], textColor:255 },
-      bodyStyles: { fillColor:[248,250,252] },
-      margin: { left:M, right:M }, theme:'grid',
-    });
-    y = doc.lastAutoTable.finalY + 10;
+    // ── Divider ───────────────────────────────────────────
+    doc.setDrawColor(200,200,200);
+    doc.line(M, y, PAGE_W - M, y);
+    y += 5;
   });
 
-  // Consolidado General section
+  // ── Delivery Summary table ─────────────────────────────────────────
   if (y > 215) { doc.addPage(); y = 14; }
   const overallSt    = allOk && blocks.length ? 'ALL OK' : anyErr ? 'ERRORS FOUND' : 'PENDING';
   const overallColor = allOk && blocks.length ? [21,128,61] : anyErr ? [185,28,28] : [100,116,139];
 
-  doc.setFillColor(241, 245, 249); doc.setDrawColor(203, 213, 225);
-  doc.rect(M, y, CW, 8, 'FD');
-  doc.setTextColor(15,23,42); doc.setFontSize(10); doc.setFont(undefined,'bold');
-  doc.text('DELIVERY SUMMARY', M+3, y+5.5);
-  y += 10;
+  doc.setFillColor(241,245,249); doc.setDrawColor(203,213,225);
+  doc.rect(M, y, CW, 7, 'FD');
+  doc.setTextColor(15,23,42); doc.setFontSize(9); doc.setFont(undefined,'bold');
+  doc.text('DELIVERY SUMMARY', M+3, y+5);
+  y += 9;
 
   doc.autoTable({
     startY: y,
     head: [['Pallet', 'Type', 'Dims', 'Weight', 'Boxes', 'Exp.(pcs)', 'Verif.(pcs)', 'Status']],
     body: consolidado,
-    styles: { fontSize:8, cellPadding:2 },
+    styles: { fontSize:8, cellPadding:2.5 },
     headStyles: { fillColor:[15,41,66], textColor:255, fontStyle:'bold' },
     columnStyles: {
       0:{cellWidth:14,halign:'center'}, 1:{cellWidth:13,halign:'center'},
       2:{cellWidth:23},                 3:{cellWidth:17,halign:'center'},
-      4:{cellWidth:13,halign:'center'}, 5:{cellWidth:23,halign:'right'},
-      6:{cellWidth:23,halign:'right'},  7:{cellWidth:24,halign:'center'},
+      4:{cellWidth:13,halign:'center'}, 5:{cellWidth:24,halign:'right'},
+      6:{cellWidth:24,halign:'right'},  7:{cellWidth:24,halign:'center'},
     },
     didParseCell: function(data) {
       if (data.column.index === 7 && data.section === 'body') {
         const v = data.cell.raw;
         data.cell.styles.fontStyle = 'bold';
-        if (v === 'OK')         data.cell.styles.textColor = [21,128,61];
+        if (v === 'OK')            data.cell.styles.textColor = [21,128,61];
         else if (v === 'MISMATCH') data.cell.styles.textColor = [185,28,28];
-        else                    data.cell.styles.textColor = [100,116,139];
+        else                       data.cell.styles.textColor = [100,116,139];
       }
     },
     margin: { left:M, right:M }, theme:'grid',
   });
   y = doc.lastAutoTable.finalY + 4;
 
-  // Totals highlight box
-  doc.setFillColor(241, 245, 249); doc.setDrawColor(203, 213, 225);
+  // ── Grand totals box ───────────────────────────────────────────────
+  doc.setFillColor(241,245,249); doc.setDrawColor(203,213,225);
   doc.rect(M, y, CW, 16, 'FD');
   const totals = [
-    ['PALLETS',          String(blocks.length),               M+5],
-    ['TOTAL BOXES',      grandBoxCount.toLocaleString(),      M+42],
-    ['EXPECTED (PCS)',   grandPickTotal.toLocaleString(),     M+90],
-    ['VERIFIED (PCS)',   grandBoxTotal.toLocaleString(),      M+133],
+    ['PALLETS',         String(blocks.length),              M+5],
+    ['TOTAL BOXES',     grandBoxCount.toLocaleString(),     M+42],
+    ['EXPECTED (PCS)',  grandPickTotal.toLocaleString(),    M+90],
+    ['VERIFIED (PCS)',  grandBoxTotal.toLocaleString(),     M+133],
   ];
   totals.forEach(function([lbl, val, x]) {
     doc.setFontSize(7); doc.setTextColor(100,116,139); doc.setFont(undefined,'bold');
@@ -1506,7 +1534,6 @@ function doExportPDF() {
     doc.setFontSize(11); doc.setTextColor(15,23,42); doc.setFont(undefined,'bold');
     doc.text(val, x, y+13);
   });
-  // Estado general at the right
   const stX = PAGE_W - M - doc.getTextWidth(overallSt) - 5;
   doc.setFontSize(7); doc.setTextColor(100,116,139); doc.setFont(undefined,'bold');
   doc.text('OVERALL STATUS', stX, y+5);
@@ -1514,11 +1541,10 @@ function doExportPDF() {
   doc.text(overallSt, stX, y+13);
   y += 22;
 
-  // Signature section
+  // ── Signature ──────────────────────────────────────────────────────
   if (y > 258) { doc.addPage(); y = 14; }
   y += 8;
-  const sigW = 80;
-  const sigX = M;
+  const sigW = 80, sigX = M;
   const lineY = y + 14;
   doc.setDrawColor(51,65,85); doc.line(sigX, lineY, sigX + sigW, lineY);
   doc.setFontSize(8); doc.setTextColor(100,116,139); doc.setFont(undefined,'normal');
@@ -1526,7 +1552,7 @@ function doExportPDF() {
   doc.text('Nombre: ' + operator, sigX + sigW/2, lineY+10, { align:'center' });
   y += 32;
 
-  // Footer
+  // ── Footer ─────────────────────────────────────────────────────────
   doc.setFontSize(7); doc.setTextColor(148,163,184); doc.setFont(undefined,'normal');
   doc.text('Arrow WH Packing Checklist  -  Generated: ' + now + '  -  Microsoft Area Sevenum', PAGE_W/2, y, { align:'center' });
 
