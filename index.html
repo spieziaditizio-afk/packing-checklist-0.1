@@ -262,6 +262,11 @@ body{font-family:'DM Sans',sans-serif;background:#0d1117;min-height:100vh;font-s
 /* ── SCAN GLOW ANIMATIONS ── */
 @keyframes scan-glow{0%{box-shadow:0 0 0 0 rgba(16,185,129,.85);}60%{box-shadow:0 0 0 10px rgba(16,185,129,.08);}100%{box-shadow:0 0 0 0 rgba(16,185,129,0);}}
 .scan-flash-ok{animation:scan-glow .7s ease-out!important;border-color:#10b981!important;background:rgba(16,185,129,.1)!important;}
+@keyframes shake-input{0%,100%{transform:translateX(0)}18%{transform:translateX(-9px)}36%{transform:translateX(9px)}54%{transform:translateX(-6px)}72%{transform:translateX(6px)}90%{transform:translateX(-3px)}}
+.scan-wrong{animation:shake-input .45s ease!important;border-color:#ef4444!important;background:rgba(239,68,68,.15)!important;}
+/* ── SCAN ERROR TOAST ── */
+#scan-err-toast{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#dc2626;color:#fff;padding:24px 44px;border-radius:16px;font-size:24px;font-weight:800;z-index:9999;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.7);pointer-events:none;letter-spacing:.01em;line-height:1.4;}
+#scan-err-toast span{display:block;font-size:13px;font-weight:500;opacity:.9;margin-top:4px;letter-spacing:.05em;}
 
 /* Desktop only — no responsive breakpoints */
 
@@ -316,6 +321,8 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
 </head>
 <body>
 
+<div id="scan-err-toast">⚠ WRONG BARCODE<span>Scan again</span></div>
+
 <div class="top-bar">
   <div class="top-bar-inner">
     <div class="logo-icon">📦</div>
@@ -350,11 +357,8 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
               onkeydown="onKeyDown(event,this)" oninput="updateDeliverySummary()"/>
           </div>
         </div>
-        <div class="form-row-2" style="margin-top:8px;">
-          <div class="fg">
-            <label>Date</label>
-            <input class="fc" id="chk-date" type="date" style="color-scheme:dark;"/>
-          </div>
+        <input type="hidden" id="chk-date"/>
+        <div style="margin-top:8px;">
           <div class="fg">
             <label>Destination</label>
             <div class="pill-row">
@@ -851,12 +855,87 @@ function renumber(wrap, prefix) {
   });
 }
 
+/* ══ SCAN AUDIO & ERROR FEEDBACK ════════════════════════ */
+let _audioCtx = null;
+function _getACtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return _audioCtx;
+}
+function beepOk() {
+  try {
+    const ctx = _getACtx();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 880;
+    g.gain.setValueAtTime(0.22, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+    o.start(); o.stop(ctx.currentTime + 0.12);
+  } catch(e) {}
+}
+function beepError() {
+  try {
+    const ctx = _getACtx();
+    [0, 0.22].forEach(function(d) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sawtooth'; o.frequency.value = 160;
+      g.gain.setValueAtTime(0.45, ctx.currentTime + d);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + d + 0.18);
+      o.start(ctx.currentTime + d); o.stop(ctx.currentTime + d + 0.18);
+    });
+  } catch(e) {}
+}
+
+let _toastTimer = null;
+function triggerScanError(el) {
+  beepError();
+  el.classList.remove('scan-wrong');
+  void el.offsetWidth;
+  el.classList.add('scan-wrong');
+  const toast = document.getElementById('scan-err-toast');
+  toast.style.display = 'block';
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function() { toast.style.display = 'none'; }, 2500);
+  setTimeout(function() {
+    el.classList.remove('scan-wrong', 'scanned', 'scan-flash-ok', 'pn-err');
+    el.value = '';
+    el.style.borderColor = '';
+    el.dataset.scanned = '';
+    const tag = el.nextElementSibling;
+    if (tag && tag.classList.contains('scan-tag')) {
+      tag.textContent = 'MANUAL';
+      tag.className = 'scan-tag tag-manual';
+    }
+    el.focus();
+  }, 460);
+}
+
 /* ══ INPUT HANDLING ═════════════════════════════════════ */
 function onKeyDown(event, el) {
   if (event.key !== 'Enter') return;
   event.preventDefault();
-  // Mark as SCAN only if Enter arrived within 100ms of last keystroke (scanner behavior)
-  if (Date.now() - (el._lastInputTime || 0) < 100) markScanned(el);
+  const isScanned = Date.now() - (el._lastInputTime || 0) < 100;
+
+  // ── Wrong qty scan: non-numeric chars were typed (scanner hit wrong barcode) ──
+  if (el._wrongScan) {
+    delete el._wrongScan;
+    triggerScanError(el);
+    return;
+  }
+
+  // ── Wrong PN scan: scanned value ≠ delivery PN when delivery PN is set ──
+  if (isScanned) {
+    const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
+    const perboxRow = el.closest('.perbox-row');
+    const isPNField = el.id && el.id.startsWith('box-pn-') ||
+                      (perboxRow && el === perboxRow.querySelectorAll('input')[0]);
+    if (isPNField && delivPN && el.value.trim().toUpperCase() !== delivPN) {
+      triggerScanError(el);
+      return;
+    }
+  }
+
+  if (isScanned) markScanned(el);
 
   const block = el.closest('.pallet-block');
   const pid = block?.dataset.pid;
@@ -890,7 +969,7 @@ function onKeyDown(event, el) {
 function markScanned(el) {
   el.dataset.scanned = 'true';
   el.classList.add('scanned');
-  // Flash green glow on successful scan
+  beepOk();
   el.classList.remove('scan-flash-ok');
   void el.offsetWidth;
   el.classList.add('scan-flash-ok');
@@ -913,7 +992,8 @@ function autoAdvance(el) {
 function handleQtyInput(pid, el) {
   const raw = el.value;
   const cleaned = raw.replace(/[^0-9]/g, '');
-  if (cleaned !== raw) el.value = cleaned;
+  if (cleaned !== raw && raw.length > 0) el._wrongScan = true;
+  el.value = cleaned;
   updatePalletSummary(pid);
 }
 
@@ -1327,8 +1407,8 @@ function doExportPDF() {
   doc.setFillColor(248, 250, 252);
   doc.setDrawColor(226, 232, 240);
   doc.rect(M, 28, CW, 16, 'FD');
-  const metaCols = [['OPERATOR', operator], ['PART NUMBER', delivPN], ['DESTINATION', dest], ['DATE', dateStr]];
-  const cw4 = CW / 4;
+  const metaCols = [['OPERATOR', operator], ['PART NUMBER', delivPN], ['DESTINATION', dest]];
+  const cw4 = CW / 3;
   metaCols.forEach(function([lbl, val], i) {
     const x = M + cw4 * i + 4;
     doc.setFontSize(7); doc.setTextColor(100,116,139); doc.setFont(undefined,'bold');
