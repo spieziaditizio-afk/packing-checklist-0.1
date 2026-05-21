@@ -20,9 +20,6 @@ body{font-family:'DM Sans',sans-serif;background:#0d1117;min-height:100vh;font-s
 .logo-sub{color:rgba(255,255,255,.35);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
 .header-right{margin-left:auto;text-align:right;color:rgba(255,255,255,.3);font-size:11px;font-family:'DM Mono',monospace;}
 
-/* ── LAYOUT ── */
-#app{max-width:1200px;margin:0 auto;padding:20px 28px 60px;}
-
 /* ── CARDS ── */
 .card{background:#161b22;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3);margin-bottom:16px;overflow:hidden;border:1px solid #21262d;}
 .card-head{padding:12px 18px;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:10px;}
@@ -430,6 +427,13 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
 <div id="print-root" style="display:none;"></div>
 
 <script>
+/* ══ SECURITY — HTML escape ═════════════════════════════ */
+function esc(s) {
+  return String(s == null ? '—' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 /* ══ STATE ══════════════════════════════════════════════ */
 let palletCounter = 0;
 let activePid = null;
@@ -517,7 +521,7 @@ function removePallet(pid) {
     }
     tab.remove();
   }
-  document.querySelector(`.pallet-block[data-pid="${pid}"]`).remove();
+  document.querySelector(`.pallet-block[data-pid="${pid}"]`)?.remove();
   numberPallets();
   updateDeliverySummary();
 }
@@ -927,7 +931,7 @@ function onKeyDown(event, el) {
   if (isScanned) {
     const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
     const perboxRow = el.closest('.perbox-row');
-    const isPNField = el.id && el.id.startsWith('box-pn-') ||
+    const isPNField = (el.id && el.id.startsWith('box-pn-')) ||
                       (perboxRow && el === perboxRow.querySelectorAll('input')[0]);
     if (isPNField && delivPN && el.value.trim().toUpperCase() !== delivPN) {
       triggerScanError(el);
@@ -981,7 +985,10 @@ function markScanned(el) {
 }
 
 function autoAdvance(el) {
-  const all = [...document.querySelectorAll('.pallet-block input')];
+  const all = [...document.querySelectorAll('.pallet-block input')].filter(i => {
+    const block = i.closest('.pallet-block');
+    return block && block.style.display !== 'none';
+  });
   const idx = all.indexOf(el);
   if (idx >= 0 && idx < all.length - 1) {
     all[idx + 1].focus();
@@ -1215,7 +1222,7 @@ function buildPrintHTML() {
   const dateVal  = document.getElementById('chk-date').value;
   const dateStr  = dateVal ? new Date(dateVal+'T12:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
   const dest     = destination === 'europe' ? 'Europe (max 180 cm)' : 'Export (max 160 cm)';
-  const delivPN  = document.getElementById('delivery-pn')?.value || '—';
+  const delivPN  = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase() || '—';
   const now      = new Date().toLocaleString('en-GB');
 
   let html = `<div class="pr-page">
@@ -1225,15 +1232,15 @@ function buildPrintHTML() {
       <div class="pr-header-sub">Warehouse Packing Checklist &nbsp;&middot;&nbsp; Microsoft Area &nbsp;&middot;&nbsp; Sevenum NL</div>
     </div>
     <div class="pr-header-right">
-      <div class="pr-header-deliv">Delivery #${delivNum}</div>
-      <div class="pr-header-date">${dateStr}</div>
+      <div class="pr-header-deliv">Delivery #${esc(delivNum)}</div>
+      <div class="pr-header-date">${esc(dateStr)}</div>
     </div>
   </div>
   <div class="pr-meta-strip">
-    <div class="pr-meta-cell"><div class="pr-meta-lbl">Operator</div><div class="pr-meta-val">${operator}</div></div>
-    <div class="pr-meta-cell"><div class="pr-meta-lbl">Part Number</div><div class="pr-meta-val">${delivPN}</div></div>
-    <div class="pr-meta-cell"><div class="pr-meta-lbl">Destination</div><div class="pr-meta-val">${dest}</div></div>
-    <div class="pr-meta-cell"><div class="pr-meta-lbl">Generated</div><div class="pr-meta-val">${now}</div></div>
+    <div class="pr-meta-cell"><div class="pr-meta-lbl">Operator</div><div class="pr-meta-val">${esc(operator)}</div></div>
+    <div class="pr-meta-cell"><div class="pr-meta-lbl">Part Number</div><div class="pr-meta-val">${esc(delivPN)}</div></div>
+    <div class="pr-meta-cell"><div class="pr-meta-lbl">Destination</div><div class="pr-meta-val">${esc(dest)}</div></div>
+    <div class="pr-meta-cell"><div class="pr-meta-lbl">Generated</div><div class="pr-meta-val">${esc(now)}</div></div>
   </div>
   <div class="pr-content">`;
 
@@ -1250,49 +1257,78 @@ function buildPrintHTML() {
     const dims   = PTYPE[ptype] || '—';
     const weight = document.getElementById(`weight-${pid}`)?.value || '—';
     const height = document.getElementById(`height-${pid}`)?.value || '—';
-    const boxPN  = document.getElementById(`box-pn-${pid}`)?.value || '—';
 
     let pickTotal = 0;
     document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach(inp => {
       pickTotal += parseInt(inp?.value) || 0;
     });
 
-    const mode = getBoxMode(pid);
+    const mode   = getBoxMode(pid);
+    const pnMode = getPNMode(pid);
     let boxTotal = 0, boxCount = 0;
     const boxGroups = [];
+    let pnOk = null;
+    let boxPN = '—';
 
     if (mode === 'scan') {
-      const qtyMap = new Map();
-      document.querySelectorAll(`#box-rows-${pid} .box-row input`).forEach(inp => {
-        const qty = parseInt(inp?.value) || 0;
-        if (qty > 0) qtyMap.set(qty, (qtyMap.get(qty) || 0) + 1);
-      });
-      qtyMap.forEach((count, qty) => {
-        boxGroups.push({ count, qty, total: count * qty });
-        boxTotal += count * qty; boxCount += count;
-      });
+      if (pnMode === 'per-box') {
+        let allFilled = true, anyMismatch = false;
+        document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).forEach(row => {
+          const inputs = row.querySelectorAll('input');
+          const pn  = (inputs[0]?.value || '').trim().toUpperCase();
+          const qty = parseInt(inputs[1]?.value) || 0;
+          if (!pn) allFilled = false;
+          if (pn && delivPN !== '—' && pn !== delivPN) anyMismatch = true;
+          if (qty > 0) {
+            const existing = boxGroups.find(g => g.qty === qty);
+            if (existing) existing.count++;
+            else boxGroups.push({ count:1, qty, total:qty });
+            boxTotal += qty; boxCount++;
+          }
+        });
+        // Recalculate totals for grouped entries
+        boxGroups.forEach(g => { g.total = g.count * g.qty; });
+        boxPN = 'per box';
+        if (delivPN !== '—') {
+          if (anyMismatch) pnOk = false;
+          else if (allFilled && boxCount > 0) pnOk = true;
+        }
+      } else {
+        boxPN = (document.getElementById(`box-pn-${pid}`)?.value || '').trim().toUpperCase() || '—';
+        const qtyMap = new Map();
+        document.querySelectorAll(`#box-rows-${pid} .box-row input`).forEach(inp => {
+          const qty = parseInt(inp?.value) || 0;
+          if (qty > 0) qtyMap.set(qty, (qtyMap.get(qty) || 0) + 1);
+        });
+        qtyMap.forEach((count, qty) => {
+          boxGroups.push({ count, qty, total: count * qty });
+          boxTotal += count * qty; boxCount += count;
+        });
+        if (delivPN !== '—' && boxPN !== '—') pnOk = delivPN === boxPN;
+      }
     } else {
+      boxPN = (document.getElementById(`box-pn-${pid}`)?.value || '').trim().toUpperCase() || '—';
       document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(row => {
         const [a, c] = row.querySelectorAll('input');
         const count = parseInt(a?.value) || 0, qty = parseInt(c?.value) || 0;
         if (count > 0 || qty > 0) boxGroups.push({ count, qty, total: count * qty });
         boxTotal += count * qty; boxCount += count;
       });
+      if (delivPN !== '—' && boxPN !== '—') pnOk = delivPN === boxPN;
     }
 
     grandPickTotal += pickTotal; grandBoxTotal += boxTotal; grandBoxCount += boxCount;
-    const pnOk  = delivPN !== '—' && boxPN !== '—' && delivPN.trim().toUpperCase() === boxPN.trim().toUpperCase();
     const qtyOk = pickTotal > 0 && pickTotal === boxTotal;
-    const ready = pickTotal > 0 && boxTotal > 0 && delivPN !== '—' && boxPN !== '—';
-    const st    = ready ? ((pnOk && qtyOk) ? 'ok' : 'err') : 'pending';
+    const ready = pickTotal > 0 && boxTotal > 0;
+    const st    = ready ? ((pnOk !== false && qtyOk) ? 'ok' : 'err') : 'pending';
     const stLbl = st === 'ok' ? '✓ MATCH' : st === 'err' ? '✗ MISMATCH' : '⏳ PENDING';
     const stCls = st === 'ok' ? 'pr-match' : st === 'err' ? 'pr-mismatch' : 'pr-pending';
     if (st === 'err') anyErr = true;
     if (st !== 'ok')  allOk = false;
     consolidado.push({ palletIdx, ptype, dims, weight, boxCount, pickTotal, boxTotal, st, stLbl, stCls });
 
-    const pnLabel = pnOk ? 'PN OK ✓' : (delivPN !== '—' && boxPN !== '—' ? 'PN MISMATCH ✗' : 'Not verified');
-    const pnClass = pnOk ? 'pr-pn-ok' : (delivPN !== '—' && boxPN !== '—' ? 'pr-pn-err' : 'pr-pn-pending');
+    const pnLabel = pnOk === true ? 'PN OK ✓' : pnOk === false ? 'PN MISMATCH ✗' : 'Not verified';
+    const pnClass = pnOk === true ? 'pr-pn-ok' : pnOk === false ? 'pr-pn-err' : 'pr-pn-pending';
 
     const breakdownRows = boxGroups.length
       ? boxGroups.map(g =>
@@ -1302,11 +1338,11 @@ function buildPrintHTML() {
 
     html += `
     <div class="pr-pallet-hdr">
-      <span class="pr-pallet-hdr-title">PALLET ${palletIdx} &nbsp;&mdash;&nbsp; ${ptype} (${dims} cm) &nbsp;|&nbsp; ${weight} kg &nbsp;|&nbsp; ${height} cm</span>
+      <span class="pr-pallet-hdr-title">PALLET ${palletIdx} &nbsp;&mdash;&nbsp; ${esc(ptype)} (${esc(dims)} cm) &nbsp;|&nbsp; ${esc(weight)} kg &nbsp;|&nbsp; ${esc(height)} cm</span>
       <span class="pr-badge pr-badge-${st}">${stLbl}</span>
     </div>
     <div class="pr-pn-line">
-      <span>Pick PN: <b>${delivPN}</b> &nbsp;|&nbsp; Box PN: <b>${boxPN}</b></span>
+      <span>Pick PN: <b>${esc(delivPN)}</b> &nbsp;|&nbsp; Box PN: <b>${esc(boxPN)}</b></span>
       <span class="${pnClass}">${pnLabel}</span>
     </div>
     <div class="pr-breakdown-lbl">Box Breakdown by Quantity</div>
@@ -1331,7 +1367,7 @@ function buildPrintHTML() {
 
   const consolRows = consolidado.map(c => `
     <tr>
-      <td>P${c.palletIdx}</td><td>${c.ptype}</td><td>${c.dims} cm</td><td>${c.weight} kg</td>
+      <td>P${c.palletIdx}</td><td>${esc(c.ptype)}</td><td>${esc(c.dims)} cm</td><td>${esc(c.weight)} kg</td>
       <td>${c.boxCount || '—'}</td>
       <td>${c.pickTotal > 0 ? c.pickTotal.toLocaleString() : '—'}</td>
       <td>${c.boxTotal  > 0 ? c.boxTotal.toLocaleString()  : '—'}</td>
@@ -1356,11 +1392,11 @@ function buildPrintHTML() {
     <div class="pr-sig">
       <div class="pr-sig-box">
         <div class="pr-sig-lbl">Operator Signature</div>
-        <div class="pr-sig-name">${operator}</div>
+        <div class="pr-sig-name">${esc(operator)}</div>
       </div>
     </div>
   </div>
-  <div class="pr-footer">Arrow WH Packing Checklist &nbsp;&middot;&nbsp; Generated: ${now} &nbsp;&middot;&nbsp; Microsoft Area Sevenum</div>
+  <div class="pr-footer">Arrow WH Packing Checklist &nbsp;&middot;&nbsp; Generated: ${esc(now)} &nbsp;&middot;&nbsp; Microsoft Area Sevenum</div>
   </div>`;
 
   return html;
