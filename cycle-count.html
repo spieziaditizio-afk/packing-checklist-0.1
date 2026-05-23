@@ -118,6 +118,28 @@ html,body{margin:0;padding:0;background:#0d1117;color:#e6edf3;font-family:-apple
 .btn-help:active{background:#21262d;color:#e6edf3;}
 .topbar-right{display:flex;align-items:center;gap:6px;}
 
+/* ── Mode switcher (box-by-box / bulk) ─────────────── */
+.mode-switch{display:flex;background:#0d1117;border:1px solid #21262d;border-radius:10px;padding:4px;gap:4px;margin-bottom:10px;}
+.mode-btn{flex:1;background:transparent;border:none;color:#8b949e;padding:10px 8px;border-radius:7px;font-size:12px;font-weight:700;letter-spacing:.04em;cursor:pointer;line-height:1.3;display:flex;flex-direction:column;align-items:center;gap:3px;text-transform:uppercase;}
+.mode-btn .mode-ico{font-size:18px;line-height:1;}
+.mode-btn .mode-hint{font-size:9px;font-weight:500;color:#6e7681;letter-spacing:.04em;text-transform:none;margin-top:1px;}
+.mode-btn.active{background:#161b22;color:#e6edf3;box-shadow:0 0 0 1px #38bdf8 inset;}
+.mode-btn.active .mode-hint{color:#8b949e;}
+.mode-btn:active{background:#21262d;}
+
+/* ── Bulk mode: reference + groups ─────────────────── */
+.ref-banner{font-size:11px;color:#8b949e;background:#0d1117;border:1px dashed #30363d;border-radius:8px;padding:8px 10px;margin-bottom:10px;line-height:1.4;}
+.ref-banner b{color:#38bdf8;}
+.group-row{display:grid;grid-template-columns:1fr 18px 1fr 1fr 36px;gap:8px;align-items:center;background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:10px;margin-bottom:8px;}
+.group-row .grp-input{background:#161b22;border:1px solid #30363d;color:#e6edf3;border-radius:6px;padding:10px 8px;font-size:16px;font-family:'DM Mono',monospace;text-align:center;outline:none;width:100%;-webkit-appearance:none;-moz-appearance:textfield;appearance:textfield;}
+.group-row .grp-input::-webkit-outer-spin-button,.group-row .grp-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.group-row .grp-input:focus{border-color:#38bdf8;box-shadow:0 0 0 2px rgba(56,189,248,.15);}
+.group-row .grp-x{text-align:center;color:#8b949e;font-size:14px;}
+.group-row .grp-sub{font-family:'DM Mono',monospace;font-size:15px;font-weight:700;color:#34d399;text-align:right;padding-right:4px;}
+.group-row .grp-rm{background:transparent;border:none;color:#6e7681;font-size:18px;cursor:pointer;padding:6px;}
+.group-row .grp-rm:active{color:#f87171;}
+.group-row .grp-lbl{font-size:9px;color:#6e7681;letter-spacing:.08em;text-transform:uppercase;text-align:center;font-weight:700;margin-top:-2px;display:block;}
+
 /* ── Segregation card ──────────────────────────────── */
 .seg-body{display:flex;flex-direction:column;gap:4px;}
 .seg-row{display:grid;grid-template-columns:auto 14px auto 14px 1fr;align-items:center;gap:6px;padding:8px 10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:14px;}
@@ -230,14 +252,85 @@ html,body{margin:0;padding:0;background:#0d1117;color:#e6edf3;font-family:-apple
     </div>
   </div>
 
-  <!-- Boxes -->
+  <!-- Verification mode switch -->
+  <div class="card" id="mode-card" style="display:none;">
+    <div class="card-hdr">
+      <span class="card-title">Verification Mode</span>
+    </div>
+    <div class="mode-switch" role="tablist">
+      <button class="mode-btn active" id="mode-btn-box" role="tab" onclick="setVerificationMode('box-by-box')">
+        <span class="mode-ico">📦</span>
+        <span>Box-by-box</span>
+        <span class="mode-hint">scan every box</span>
+      </button>
+      <button class="mode-btn" id="mode-btn-bulk" role="tab" onclick="setVerificationMode('bulk')">
+        <span class="mode-ico">📋</span>
+        <span>Bulk</span>
+        <span class="mode-hint">factory-sealed, large pallet</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Boxes (box-by-box mode) -->
   <div class="card" id="boxes-card" style="display:none;">
     <div class="card-hdr">
-      <span class="card-title">Cajas</span>
-      <span class="card-badge" id="card-badge-boxes">0 cajas</span>
+      <span class="card-title">Boxes</span>
+      <span class="card-badge" id="card-badge-boxes">0 boxes</span>
     </div>
     <div class="boxes-wrap" id="boxes-wrap"></div>
-    <button class="btn btn-secondary" style="width:100%;margin-top:10px;min-height:44px;flex:1;" onclick="addBoxCard(true)">＋ Agregar caja manualmente</button>
+    <button class="btn btn-secondary" style="width:100%;margin-top:10px;min-height:44px;flex:1;" onclick="addBoxCard(true)">＋ Add box manually</button>
+  </div>
+
+  <!-- Reference box (bulk mode) -->
+  <div class="card" id="ref-card" style="display:none;">
+    <div class="card-hdr">
+      <span class="card-title">Reference Box</span>
+      <span class="card-badge" id="ref-status" style="background:rgba(148,163,184,.1);border-color:rgba(148,163,184,.25);color:#9ca3af;">Pending</span>
+    </div>
+    <div class="ref-banner">Scan <b>one box</b> to capture the reference PN, sample Qty and COO. Then declare how many boxes are in each quantity group below.</div>
+    <div class="field-grid">
+      <div class="fg">
+        <label>Part Number</label>
+        <div class="scan-row">
+          <input class="fc mono" type="text" id="ref-pn" data-field="pn" placeholder="Scan PN"
+            onkeydown="onKeyDown(event,this)" oninput="handleRefPNInput(this)"/>
+          <span class="scan-tag tag-wait">● SCAN</span>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Sample quantity (pcs per box)</label>
+        <div class="scan-row">
+          <input class="fc mono" type="text" inputmode="numeric" id="ref-qty" data-field="qty" placeholder="Scan qty"
+            onkeydown="onKeyDown(event,this)" oninput="handleRefQtyInput(this)"/>
+          <span class="scan-tag tag-wait">● SCAN</span>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Country of Origin (COO)</label>
+        <div class="scan-row">
+          <input class="fc mono" type="text" id="ref-coo" data-field="coo" placeholder="Scan COO (NL, CN…)"
+            onkeydown="onKeyDown(event,this)" oninput="handleRefCOOInput(this)"/>
+          <span class="scan-tag tag-wait">● SCAN</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quantity groups (bulk mode) -->
+  <div class="card" id="groups-card" style="display:none;">
+    <div class="card-hdr">
+      <span class="card-title">Quantity Groups</span>
+      <span class="card-badge" id="groups-badge" style="background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.25);color:#38bdf8;">0 boxes</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 18px 1fr 1fr 36px;gap:8px;margin-bottom:6px;padding:0 10px;">
+      <span class="grp-lbl">Boxes</span>
+      <span></span>
+      <span class="grp-lbl">Pcs each</span>
+      <span class="grp-lbl">Subtotal</span>
+      <span></span>
+    </div>
+    <div id="groups-wrap"></div>
+    <button class="btn btn-secondary" style="width:100%;margin-top:6px;min-height:44px;flex:1;" onclick="addGroupRow(true)">＋ Add group</button>
   </div>
 
   <!-- Segregation summary (live) -->
@@ -345,11 +438,11 @@ html,body{margin:0;padding:0;background:#0d1117;color:#e6edf3;font-family:-apple
       </li>
       <li class="splash-step">
         <span class="ss-num">2</span>
-        <span class="ss-text">For each box scan <span class="mono">PN</span> → <span class="mono">QTY</span> → <span class="mono">COO</span></span>
+        <span class="ss-text">Choose mode: <b>Box-by-box</b> or <b>Bulk</b> (large factory-sealed pallets)</span>
       </li>
       <li class="splash-step">
         <span class="ss-num">3</span>
-        <span class="ss-text">First box = reference; mismatches flag <b style="color:#f87171;">red</b></span>
+        <span class="ss-text">Scan <span class="mono">PN</span> → <span class="mono">QTY</span> → <span class="mono">COO</span>. Mismatches flag <b style="color:#f87171;">red</b></span>
       </li>
       <li class="splash-step">
         <span class="ss-num">4</span>
@@ -399,6 +492,8 @@ const WELCOME_SEEN_KEY='arrowCycleCountWelcomeSeenV1';
 const STATE_VERSION=1;
 const HISTORY_MAX=20;
 let boxCounter=0;
+let groupCounter=0;
+let currentMode='box-by-box'; // 'box-by-box' | 'bulk'
 let _restoring=false;
 let _saveTimer=null;
 
@@ -528,10 +623,60 @@ function onPalletIdConfirmed(){
   if(!v)return;
   document.getElementById('card-badge-pallet').textContent=v;
   document.getElementById('empty-state').style.display='none';
-  document.getElementById('boxes-card').style.display='';
-  if(document.querySelectorAll('.box-card').length===0){
-    addBoxCard(false); // auto-add first box
+  document.getElementById('mode-card').style.display='';
+  // Apply current mode (default: box-by-box)
+  applyVerificationMode(currentMode,/*autoSeed*/true);
+}
+
+function setVerificationMode(mode){
+  if(mode===currentMode)return;
+  // Check for existing data in current mode → confirm before clearing
+  const hasBoxes=document.querySelectorAll('.box-card').length>0&&
+    [...document.querySelectorAll('.box-card')].some(c=>{const d=getBoxData(c);return d.pn||d.qty||d.coo;});
+  const hasRef=(document.getElementById('ref-pn')?.value||
+                document.getElementById('ref-qty')?.value||
+                document.getElementById('ref-coo')?.value);
+  const hasGroups=[...document.querySelectorAll('.group-row')].some(r=>{
+    const ins=r.querySelectorAll('input');return ins[0]?.value||ins[1]?.value;
+  });
+  if((currentMode==='box-by-box'&&hasBoxes)||(currentMode==='bulk'&&(hasRef||hasGroups))){
+    if(!confirm('Switching mode will clear current data. Continue?'))return;
   }
+  currentMode=mode;
+  applyVerificationMode(mode,/*autoSeed*/true);
+  saveStateDebounced();
+}
+
+function applyVerificationMode(mode,autoSeed){
+  currentMode=mode;
+  // Toggle buttons
+  document.getElementById('mode-btn-box').classList.toggle('active',mode==='box-by-box');
+  document.getElementById('mode-btn-bulk').classList.toggle('active',mode==='bulk');
+  if(mode==='box-by-box'){
+    // Hide bulk UI, clear bulk data
+    document.getElementById('ref-card').style.display='none';
+    document.getElementById('groups-card').style.display='none';
+    document.getElementById('boxes-card').style.display='';
+    document.getElementById('groups-wrap').innerHTML='';
+    groupCounter=0;
+    if(autoSeed&&document.querySelectorAll('.box-card').length===0){
+      addBoxCard(false);
+    }
+  } else {
+    // Hide box-by-box UI, clear box data
+    document.getElementById('boxes-card').style.display='none';
+    document.getElementById('boxes-wrap').innerHTML='';
+    boxCounter=0;
+    document.getElementById('ref-card').style.display='';
+    document.getElementById('groups-card').style.display='';
+    if(autoSeed&&document.querySelectorAll('.group-row').length===0){
+      addGroupRow(false);
+    }
+    if(autoSeed&&!_restoring){
+      setTimeout(()=>{document.getElementById('ref-pn').focus();},80);
+    }
+  }
+  updateFooter();
 }
 
 function handlePNInput(el){
@@ -566,6 +711,115 @@ function handleCOOInput(el){
   const lettersOnly=raw.replace(/[^A-Za-z]/g,'').toUpperCase().slice(0,3);
   el.value=lettersOnly;
   validateBoxCard(el.closest('.box-card'));
+}
+
+/* ── BULK MODE: reference box + groups ────────────── */
+function handleRefPNInput(el){
+  if(el.dataset.scanned==='true')markTyped(el);
+  updateRefStatus();
+}
+function handleRefQtyInput(el){
+  if(el.dataset.scanned==='true')markTyped(el);
+  const raw=el.value;
+  const digitsOnly=raw.replace(/[^0-9]/g,'');
+  if((digitsOnly===''&&raw.length>0)||/\d[a-zA-Z]/.test(raw)){el._wrongScan=true;}
+  else{delete el._wrongScan;}
+  el.value=digitsOnly===''?'':String(parseInt(digitsOnly,10)||0);
+  // Pre-fill the first group qty if empty
+  const firstGroup=document.querySelector('.group-row');
+  if(firstGroup){
+    const qtyInp=firstGroup.querySelectorAll('input')[1];
+    if(qtyInp&&!qtyInp.value)qtyInp.value=el.value;
+    updateGroupRow(firstGroup);
+  }
+  updateRefStatus();
+}
+function handleRefCOOInput(el){
+  if(el.dataset.scanned==='true')markTyped(el);
+  const raw=el.value;
+  if(/\d/.test(raw)){el._wrongScan=true;}
+  else{delete el._wrongScan;}
+  el.value=raw.replace(/[^A-Za-z]/g,'').toUpperCase().slice(0,3);
+  updateRefStatus();
+}
+
+function getRefData(){
+  return {
+    pn:(document.getElementById('ref-pn')?.value||'').trim().toUpperCase(),
+    qty:parseInt(document.getElementById('ref-qty')?.value)||0,
+    coo:(document.getElementById('ref-coo')?.value||'').trim().toUpperCase()
+  };
+}
+
+function updateRefStatus(){
+  const r=getRefData();
+  const badge=document.getElementById('ref-status');
+  if(!badge)return;
+  if(r.pn&&r.qty>0&&r.coo){
+    badge.textContent='✓ Captured';
+    badge.style.background='rgba(16,185,129,.15)';
+    badge.style.borderColor='rgba(16,185,129,.25)';
+    badge.style.color='#34d399';
+  } else {
+    badge.textContent='Pending';
+    badge.style.background='rgba(148,163,184,.1)';
+    badge.style.borderColor='rgba(148,163,184,.25)';
+    badge.style.color='#9ca3af';
+  }
+  updateFooter();
+}
+
+function addGroupRow(focusIt){
+  groupCounter++;
+  const idx=groupCounter;
+  const wrap=document.getElementById('groups-wrap');
+  const row=document.createElement('div');
+  row.className='group-row';
+  row.dataset.idx=idx;
+  // Pre-fill qty from reference if available
+  const refQty=getRefData().qty;
+  row.innerHTML=`
+    <input class="grp-input grp-count" type="number" inputmode="numeric" min="1" placeholder="0" oninput="updateGroupRow(this.closest('.group-row'))"/>
+    <span class="grp-x">×</span>
+    <input class="grp-input grp-qty" type="number" inputmode="numeric" min="1" placeholder="${refQty||'qty'}" value="${refQty>0?refQty:''}" oninput="updateGroupRow(this.closest('.group-row'))"/>
+    <span class="grp-sub" data-sub>0</span>
+    <button class="grp-rm" onclick="removeGroupRow(this)" title="Remove group">✕</button>
+  `;
+  wrap.appendChild(row);
+  if(focusIt){setTimeout(()=>{row.querySelector('input').focus();},50);}
+  updateFooter();
+  saveStateDebounced();
+}
+
+function removeGroupRow(btn){
+  const row=btn.closest('.group-row');
+  if(!row)return;
+  if(document.querySelectorAll('.group-row').length===1){
+    // Don't remove the last row; just clear it
+    row.querySelectorAll('input').forEach(i=>i.value='');
+    updateGroupRow(row);
+    return;
+  }
+  row.remove();
+  updateFooter();
+  saveStateDebounced();
+}
+
+function updateGroupRow(row){
+  if(!row)return;
+  const [countInp,qtyInp]=row.querySelectorAll('input');
+  const count=parseInt(countInp?.value)||0;
+  const qty=parseInt(qtyInp?.value)||0;
+  const sub=row.querySelector('[data-sub]');
+  if(sub)sub.textContent=(count*qty).toLocaleString();
+  updateFooter();
+}
+
+function getGroupsData(){
+  return [...document.querySelectorAll('.group-row')].map(r=>{
+    const [c,q]=r.querySelectorAll('input');
+    return {count:parseInt(c?.value)||0,qty:parseInt(q?.value)||0};
+  }).filter(g=>g.count>0&&g.qty>0);
 }
 
 /* ── BOX CARDS ─────────────────────────────────────── */
@@ -732,6 +986,31 @@ function onBoxCompleted(idx){
 
 /* ── FOOTER / SUMMARY ──────────────────────────────── */
 function updateFooter(){
+  const stEl=document.getElementById('ft-status');
+  const btn=document.getElementById('btn-close-pallet');
+  if(currentMode==='bulk'){
+    const ref=getRefData();
+    const groups=getGroupsData();
+    const totalBoxes=groups.reduce((s,g)=>s+g.count,0);
+    const totalPcs=groups.reduce((s,g)=>s+g.count*g.qty,0);
+    document.getElementById('ft-boxes').textContent=totalBoxes;
+    document.getElementById('ft-pcs').textContent=totalPcs.toLocaleString();
+    const grpBadge=document.getElementById('groups-badge');
+    if(grpBadge)grpBadge.textContent=`${totalBoxes} ${totalBoxes===1?'box':'boxes'}`;
+    const refOk=ref.pn&&ref.qty>0&&ref.coo;
+    if(!refOk&&totalBoxes===0){
+      stEl.textContent='— Pending';stEl.className='ft-val pending';btn.disabled=true;
+    } else if(!refOk){
+      stEl.textContent='● Need reference';stEl.className='ft-val pending';btn.disabled=true;
+    } else if(totalBoxes===0){
+      stEl.textContent='● Need groups';stEl.className='ft-val pending';btn.disabled=true;
+    } else {
+      stEl.textContent='✓ OK';stEl.className='ft-val ok';btn.disabled=false;
+    }
+    updateSegregationCardFromGroups(groups);
+    return;
+  }
+  // Box-by-box mode
   const cards=[...document.querySelectorAll('.box-card')];
   let totalPcs=0,filled=0,errCount=0;
   cards.forEach(c=>{
@@ -743,11 +1022,9 @@ function updateFooter(){
   document.getElementById('ft-boxes').textContent=cards.length;
   document.getElementById('ft-pcs').textContent=totalPcs.toLocaleString();
   document.getElementById('card-badge-boxes').textContent=
-    `${cards.length} ${cards.length===1?'caja':'cajas'}`;
-  const stEl=document.getElementById('ft-status');
-  const btn=document.getElementById('btn-close-pallet');
+    `${cards.length} ${cards.length===1?'box':'boxes'}`;
   if(filled===0){
-    stEl.textContent='— Pendiente';stEl.className='ft-val pending';
+    stEl.textContent='— Pending';stEl.className='ft-val pending';
     btn.disabled=true;
   } else if(errCount>0){
     stEl.textContent='✗ MISMATCH';stEl.className='ft-val err';
@@ -756,10 +1033,33 @@ function updateFooter(){
     stEl.textContent='✓ OK';stEl.className='ft-val ok';
     btn.disabled=false;
   } else {
-    stEl.textContent='● En progreso';stEl.className='ft-val pending';
+    stEl.textContent='● In progress';stEl.className='ft-val pending';
     btn.disabled=false;
   }
   updateSegregationCard(cards);
+}
+
+function updateSegregationCardFromGroups(groups){
+  const wrap=document.getElementById('segregation-card');
+  if(!wrap)return;
+  if(groups.length===0){wrap.style.display='none';return;}
+  wrap.style.display='';
+  // Merge groups with same qty (in case operator created multiple rows of same qty)
+  const merged={};
+  groups.forEach(g=>{merged[g.qty]=(merged[g.qty]||0)+g.count;});
+  const final=Object.keys(merged).map(q=>({qty:parseInt(q,10),count:merged[q],subtotal:parseInt(q,10)*merged[q]})).sort((a,b)=>b.qty-a.qty);
+  const totalBoxes=final.reduce((s,g)=>s+g.count,0);
+  const totalPcs=final.reduce((s,g)=>s+g.subtotal,0);
+  document.getElementById('seg-body').innerHTML=final.map(g=>`
+    <div class="seg-row">
+      <span class="seg-count mono">${g.count}</span>
+      <span class="seg-x">×</span>
+      <span class="seg-qty mono">${g.qty.toLocaleString()} pcs</span>
+      <span class="seg-eq">=</span>
+      <span class="seg-sub mono">${g.subtotal.toLocaleString()}</span>
+    </div>`).join('');
+  document.getElementById('seg-total').textContent=
+    `${totalBoxes} ${totalBoxes===1?'box':'boxes'} · ${totalPcs.toLocaleString()} pcs`;
 }
 
 /* ── SEGREGATION (group boxes by qty) ──────────────── */
@@ -825,10 +1125,13 @@ function serializeState(){
   const state={
     v:STATE_VERSION,
     savedAt:new Date().toISOString(),
+    mode:currentMode,
     operator:document.getElementById('operator').value||'',
     palletId:palletIdEl.value||'',
     palletIdTag:tagStateOf(palletIdEl),
-    boxes:[]
+    boxes:[],
+    reference:null,
+    groups:[]
   };
   document.querySelectorAll('.box-card').forEach(c=>{
     const d=getBoxData(c);
@@ -837,6 +1140,20 @@ function serializeState(){
       qty:d.qtyEl.value,qtyTag:tagStateOf(d.qtyEl),
       coo:d.cooEl.value,cooTag:tagStateOf(d.cooEl)
     });
+  });
+  const refPN=document.getElementById('ref-pn');
+  const refQty=document.getElementById('ref-qty');
+  const refCOO=document.getElementById('ref-coo');
+  if(refPN&&refQty&&refCOO){
+    state.reference={
+      pn:refPN.value,pnTag:tagStateOf(refPN),
+      qty:refQty.value,qtyTag:tagStateOf(refQty),
+      coo:refCOO.value,cooTag:tagStateOf(refCOO)
+    };
+  }
+  document.querySelectorAll('.group-row').forEach(r=>{
+    const [c,q]=r.querySelectorAll('input');
+    state.groups.push({count:c?.value||'',qty:q?.value||''});
   });
   return state;
 }
@@ -887,24 +1204,53 @@ function applySessionToDOM(s){
     const pidEl=document.getElementById('pallet-id');
     pidEl.value=s.palletId||'';
     applyTagState(pidEl,s.palletIdTag||'wait');
-    // Clear any existing box cards
+    // Clear any existing data
     document.getElementById('boxes-wrap').innerHTML='';
+    document.getElementById('groups-wrap').innerHTML='';
     boxCounter=0;
+    groupCounter=0;
     if(s.palletId){
       document.getElementById('empty-state').style.display='none';
-      document.getElementById('boxes-card').style.display='';
+      document.getElementById('mode-card').style.display='';
       document.getElementById('card-badge-pallet').textContent=s.palletId;
     }
-    (s.boxes||[]).forEach(b=>{
-      addBoxCard(false);
-      const card=document.querySelector(`.box-card[data-idx="${boxCounter}"]`);
-      const [pnEl,qtyEl,cooEl]=card.querySelectorAll('input');
-      pnEl.value=b.pn||'';applyTagState(pnEl,b.pnTag||'wait');
-      qtyEl.value=b.qty||'';applyTagState(qtyEl,b.qtyTag||'wait');
-      cooEl.value=b.coo||'';applyTagState(cooEl,b.cooTag||'wait');
-    });
-    // Re-validate all
-    document.querySelectorAll('.box-card').forEach(c=>validateBoxCard(c));
+    // Apply mode WITHOUT auto-seed (we'll restore data)
+    applyVerificationMode(s.mode||'box-by-box',/*autoSeed*/false);
+    if((s.mode||'box-by-box')==='bulk'){
+      // Restore reference box
+      const ref=s.reference||{};
+      const refPN=document.getElementById('ref-pn');
+      const refQty=document.getElementById('ref-qty');
+      const refCOO=document.getElementById('ref-coo');
+      if(refPN){refPN.value=ref.pn||'';applyTagState(refPN,ref.pnTag||'wait');}
+      if(refQty){refQty.value=ref.qty||'';applyTagState(refQty,ref.qtyTag||'wait');}
+      if(refCOO){refCOO.value=ref.coo||'';applyTagState(refCOO,ref.cooTag||'wait');}
+      // Restore groups
+      (s.groups||[]).forEach(g=>{
+        addGroupRow(false);
+        const row=document.querySelector(`.group-row[data-idx="${groupCounter}"]`);
+        if(row){
+          const [c,q]=row.querySelectorAll('input');
+          if(c)c.value=g.count||'';
+          if(q)q.value=g.qty||'';
+          updateGroupRow(row);
+        }
+      });
+      if(document.querySelectorAll('.group-row').length===0)addGroupRow(false);
+      updateRefStatus();
+    } else {
+      // Restore boxes (box-by-box)
+      (s.boxes||[]).forEach(b=>{
+        addBoxCard(false);
+        const card=document.querySelector(`.box-card[data-idx="${boxCounter}"]`);
+        const [pnEl,qtyEl,cooEl]=card.querySelectorAll('input');
+        pnEl.value=b.pn||'';applyTagState(pnEl,b.pnTag||'wait');
+        qtyEl.value=b.qty||'';applyTagState(qtyEl,b.qtyTag||'wait');
+        cooEl.value=b.coo||'';applyTagState(cooEl,b.cooTag||'wait');
+      });
+      // Re-validate all
+      document.querySelectorAll('.box-card').forEach(c=>validateBoxCard(c));
+    }
     updateFooter();
   } finally {
     _restoring=false;
@@ -936,10 +1282,23 @@ function resetUI(){
     pidEl.value='';
     applyTagState(pidEl,'wait');
     document.getElementById('boxes-wrap').innerHTML='';
+    document.getElementById('groups-wrap').innerHTML='';
     boxCounter=0;
+    groupCounter=0;
+    // Reset reference fields
+    ['ref-pn','ref-qty','ref-coo'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){el.value='';applyTagState(el,'wait');}
+    });
+    currentMode='box-by-box';
+    document.getElementById('mode-btn-box').classList.add('active');
+    document.getElementById('mode-btn-bulk').classList.remove('active');
     document.getElementById('empty-state').style.display='';
+    document.getElementById('mode-card').style.display='none';
     document.getElementById('boxes-card').style.display='none';
-    document.getElementById('card-badge-pallet').textContent='Esperando…';
+    document.getElementById('ref-card').style.display='none';
+    document.getElementById('groups-card').style.display='none';
+    document.getElementById('card-badge-pallet').textContent='Waiting…';
     updateFooter();
     pidEl.focus();
   } finally {
@@ -1005,13 +1364,22 @@ function openHistoryDetail(i){
   </div>
   <div style="margin-top:12px;font-size:11px;color:#8b949e;letter-spacing:.06em;text-transform:uppercase;font-weight:700;">Detalle por caja</div>
   <div style="max-height:240px;overflow-y:auto;margin-top:6px;font-family:'DM Mono',monospace;font-size:11px;background:#0d1117;border-radius:6px;padding:8px;">`;
-  body+=h.boxes.map((b,bi)=>{
-    const stCol=b.status==='ok'?'#34d399':'#f87171';
-    return `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted #21262d;">
-      <span>B${bi+1} ${esc(b.pn)} ${esc(b.coo)}</span>
-      <span><span style="color:${stCol};">${b.status==='ok'?'✓':'✗'}</span> ${b.qty}</span>
-    </div>`;
-  }).join('');
+  if(h.mode==='bulk'){
+    const groups=entrySegregation(h);
+    body+=`<div style="color:#38bdf8;font-weight:700;margin-bottom:4px;">BULK mode (sampled)</div>`;
+    body+=groups.map((g,gi)=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted #21262d;">
+      <span>Group ${gi+1}: ${g.count} × ${g.qty.toLocaleString()} pcs</span>
+      <span style="color:#34d399;font-weight:700;">${g.subtotal.toLocaleString()}</span>
+    </div>`).join('');
+  } else {
+    body+=h.boxes.map((b,bi)=>{
+      const stCol=b.status==='ok'?'#34d399':'#f87171';
+      return `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted #21262d;">
+        <span>B${bi+1} ${esc(b.pn)} ${esc(b.coo)}</span>
+        <span><span style="color:${stCol};">${b.status==='ok'?'✓':'✗'}</span> ${b.qty}</span>
+      </div>`;
+    }).join('');
+  }
   body+='</div>';
   document.getElementById('hd-body').innerHTML=body;
   document.getElementById('hd-reprint').onclick=()=>{reprintHistory(h);};
@@ -1053,6 +1421,27 @@ function welcomeSeen(){
 
 /* ── CLOSE PALLET & PRINT ──────────────────────────── */
 function buildEntryFromCurrent(){
+  const base={
+    ts:new Date().toISOString(),
+    operator:document.getElementById('operator').value||'',
+    palletId:document.getElementById('pallet-id').value||'',
+    mode:currentMode
+  };
+  if(currentMode==='bulk'){
+    const ref=getRefData();
+    const groups=getGroupsData();
+    const totalBoxes=groups.reduce((s,g)=>s+g.count,0);
+    const totalPcs=groups.reduce((s,g)=>s+g.count*g.qty,0);
+    return {...base,
+      pn:ref.pn,coo:ref.coo,
+      totalPcs:totalPcs,boxCount:totalBoxes,
+      status:'ok', // bulk has no per-box mismatch concept
+      reference:ref,
+      groups:groups,
+      boxes:[] // empty for bulk
+    };
+  }
+  // box-by-box
   const cards=[...document.querySelectorAll('.box-card')];
   let totalPcs=0,errCount=0;
   const boxes=cards.map(c=>{
@@ -1063,27 +1452,33 @@ function buildEntryFromCurrent(){
     return {pn:d.pn,qty:d.qty,coo:d.coo,status:isErr?'err':'ok'};
   });
   const ref=boxes[0]||{};
-  return {
-    ts:new Date().toISOString(),
-    operator:document.getElementById('operator').value||'',
-    palletId:document.getElementById('pallet-id').value||'',
-    pn:ref.pn||'',
-    coo:ref.coo||'',
-    totalPcs:totalPcs,
-    boxCount:boxes.length,
+  return {...base,
+    pn:ref.pn||'',coo:ref.coo||'',
+    totalPcs:totalPcs,boxCount:boxes.length,
     status:errCount>0?'mismatch':'ok',
     boxes:boxes
   };
 }
 
 function closePalletAndPrint(){
-  const cards=[...document.querySelectorAll('.box-card')];
-  if(cards.length===0){showToast('⚠ Agrega al menos una caja');return;}
-  const filled=cards.filter(c=>{const d=getBoxData(c);return d.pn&&d.qty>0&&d.coo;});
-  if(filled.length===0){showToast('⚠ Ninguna caja tiene los 3 campos llenos');return;}
-  const errCount=cards.filter(c=>c.classList.contains('err')).length;
-  let msg=`¿Cerrar pallet con ${filled.length} ${filled.length===1?'caja':'cajas'}?`;
-  if(errCount>0)msg+=`\n\n⚠ Hay ${errCount} ${errCount===1?'caja':'cajas'} con mismatch — se imprimirá con status MISMATCH.`;
+  let msg='';
+  if(currentMode==='bulk'){
+    const ref=getRefData();
+    const groups=getGroupsData();
+    if(!ref.pn||ref.qty<=0||!ref.coo){showToast('⚠ Scan the reference box first');return;}
+    if(groups.length===0){showToast('⚠ Add at least one quantity group');return;}
+    const totalBoxes=groups.reduce((s,g)=>s+g.count,0);
+    const totalPcs=groups.reduce((s,g)=>s+g.count*g.qty,0);
+    msg=`Close pallet with ${totalBoxes} boxes (${totalPcs.toLocaleString()} pcs)?`;
+  } else {
+    const cards=[...document.querySelectorAll('.box-card')];
+    if(cards.length===0){showToast('⚠ Add at least one box');return;}
+    const filled=cards.filter(c=>{const d=getBoxData(c);return d.pn&&d.qty>0&&d.coo;});
+    if(filled.length===0){showToast('⚠ No box has all 3 fields filled');return;}
+    const errCount=cards.filter(c=>c.classList.contains('err')).length;
+    msg=`Close pallet with ${filled.length} ${filled.length===1?'box':'boxes'}?`;
+    if(errCount>0)msg+=`\n\n⚠ ${errCount} ${errCount===1?'box has':'boxes have'} mismatch — will print with MISMATCH status.`;
+  }
   if(!confirm(msg))return;
   const entry=buildEntryFromCurrent();
   pushHistory(entry);
@@ -1101,18 +1496,30 @@ function buildAndPrint(entry){
   setTimeout(()=>{window.print();},100);
 }
 
+function entrySegregation(entry){
+  // Unified segregation across modes: returns [{qty,count,subtotal}] sorted desc
+  if(entry.mode==='bulk'){
+    const merged={};
+    (entry.groups||[]).forEach(g=>{merged[g.qty]=(merged[g.qty]||0)+g.count;});
+    return Object.keys(merged).map(q=>({qty:parseInt(q,10),count:merged[q],subtotal:parseInt(q,10)*merged[q]})).sort((a,b)=>b.qty-a.qty);
+  }
+  return buildSegregation(entry.boxes||[]);
+}
+
 function tryRenderQR(entry){
   if(typeof qrcode==='undefined')return; // lib not loaded → fallback to text only
   try{
-    // Compact payload: per-box qty array allows full reconstruction of segregation
+    // Compact groups payload [[qty,count],...] reconstructs segregation in either mode
+    const groups=entrySegregation(entry).map(g=>[g.qty,g.count]);
     const payload=JSON.stringify({
       v:1,
       plt:entry.palletId,
       pn:entry.pn,
       coo:entry.coo,
       st:entry.status,
+      m:entry.mode==='bulk'?'B':'S',
       ts:entry.ts,
-      boxes:(entry.boxes||[]).map(b=>b.qty)
+      g:groups
     });
     // Use level L (low error correction) to allow more data; auto type version (0)
     const qr=qrcode(0,'L');
@@ -1136,7 +1543,7 @@ function fmtDate(iso){
 function buildLabelHTML(e){
   const statusClass=e.status==='ok'?'pr-status-ok':'pr-status-err';
   const statusText=e.status==='ok'?'✓ OK':'✗ MISMATCH';
-  const groups=buildSegregation(e.boxes||[]);
+  const groups=entrySegregation(e);
   const segRows=groups.map(g=>`
     <tr>
       <td class="pr-seg-count">${g.count}</td>
@@ -1146,52 +1553,78 @@ function buildLabelHTML(e){
       <td class="pr-seg-sub">${g.subtotal.toLocaleString()}</td>
     </tr>`).join('');
   const segHTML=groups.length>0?`
-    <div class="pr-seg-title">SEGREGACIÓN</div>
+    <div class="pr-seg-title">SEGREGATION</div>
     <table class="pr-seg-tbl">${segRows}
-      <tr class="pr-seg-total"><td colspan="2">TOTAL</td><td colspan="2">${e.boxCount} cajas</td><td>${e.totalPcs.toLocaleString()}</td></tr>
+      <tr class="pr-seg-total"><td colspan="2">TOTAL</td><td colspan="2">${e.boxCount} boxes</td><td>${e.totalPcs.toLocaleString()}</td></tr>
     </table>`:'';
+  const modeBadge=e.mode==='bulk'?'<div class="pr-kv"><span class="k">Mode</span><span class="v">BULK (sampled)</span></div>':'';
   return `<div class="pr-page">
     <div class="pr-h">ARROW · CYCLE COUNT<span class="pr-sub">Sevenum NL · Microsoft Area</span></div>
-    <div class="pr-plt">${esc(e.palletId||'(sin ID)')}</div>
+    <div class="pr-plt">${esc(e.palletId||'(no ID)')}</div>
     <div class="pr-kv"><span class="k">PN</span><span class="v">${esc(e.pn||'—')}</span></div>
     <div class="pr-kv"><span class="k">COO</span><span class="v">${esc(e.coo||'—')}</span></div>
+    ${modeBadge}
     <div class="${statusClass}">${statusText}</div>
     ${segHTML}
     <div class="pr-qr" id="pr-qr-target"></div>
-    <div class="pr-kv"><span class="k">Operario</span><span class="v">${esc(e.operator||'—')}</span></div>
-    <div class="pr-kv"><span class="k">Fecha</span><span class="v">${fmtDate(e.ts)}</span></div>
-    <div class="pr-foot">Conserve esta etiqueta — sirve para identificar el contenido del pallet al hacer pick</div>
+    <div class="pr-kv"><span class="k">Operator</span><span class="v">${esc(e.operator||'—')}</span></div>
+    <div class="pr-kv"><span class="k">Date</span><span class="v">${fmtDate(e.ts)}</span></div>
+    <div class="pr-foot">Keep this label — identifies the pallet contents for picking</div>
   </div>`;
 }
 
 function buildReceiptHTML(e){
   const statusClass=e.status==='ok'?'pr-status-ok':'pr-status-err';
   const statusText=e.status==='ok'?'✓ OK':'✗ MISMATCH';
-  let rows=e.boxes.map((b,i)=>{
-    const ok=b.status==='ok';
-    return `<tr>
-      <td>B${i+1}</td>
-      <td>${esc(b.pn||'—')}</td>
-      <td style="text-align:right;">${b.qty}</td>
-      <td>${esc(b.coo||'—')}</td>
-      <td class="${ok?'':'err'}" style="text-align:center;">${ok?'✓':'✗'}</td>
-    </tr>`;
-  }).join('');
-  return `<div class="pr-page">
-    <div class="pr-h">ARROW · CYCLE COUNT — DETALLE<span class="pr-sub">Sevenum NL · Microsoft Area</span></div>
-    <div class="pr-plt">${esc(e.palletId||'(sin ID)')}</div>
-    <div class="pr-kv"><span class="k">PN ref</span><span class="v">${esc(e.pn||'—')}</span></div>
-    <div class="pr-kv"><span class="k">COO ref</span><span class="v">${esc(e.coo||'—')}</span></div>
-    <div class="${statusClass}">${statusText}</div>
+  let body;
+  if(e.mode==='bulk'){
+    const groups=entrySegregation(e);
+    const rows=groups.map((g,i)=>`<tr>
+      <td>G${i+1}</td>
+      <td style="text-align:right;">${g.count}</td>
+      <td style="text-align:center;">×</td>
+      <td style="text-align:right;">${g.qty.toLocaleString()}</td>
+      <td style="text-align:right;font-weight:800;">${g.subtotal.toLocaleString()}</td>
+    </tr>`).join('');
+    body=`<div style="font-size:8pt;text-align:center;padding:2mm 0;color:#444;">Verification mode: <b>BULK</b> — 1 reference box scanned + manual quantity groups</div>
     <table class="pr-tbl">
+      <thead><tr><th>#</th><th style="text-align:right;">Boxes</th><th></th><th style="text-align:right;">Pcs each</th><th style="text-align:right;">Subtotal</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr>
+        <td colspan="2" style="font-weight:800;">TOTAL</td>
+        <td style="text-align:center;font-weight:800;">${e.boxCount} bx</td>
+        <td></td>
+        <td style="text-align:right;font-weight:800;">${e.totalPcs.toLocaleString()}</td>
+      </tr></tfoot>
+    </table>`;
+  } else {
+    const rows=e.boxes.map((b,i)=>{
+      const ok=b.status==='ok';
+      return `<tr>
+        <td>B${i+1}</td>
+        <td>${esc(b.pn||'—')}</td>
+        <td style="text-align:right;">${b.qty}</td>
+        <td>${esc(b.coo||'—')}</td>
+        <td class="${ok?'':'err'}" style="text-align:center;">${ok?'✓':'✗'}</td>
+      </tr>`;
+    }).join('');
+    body=`<table class="pr-tbl">
       <thead><tr><th>#</th><th>PN</th><th style="text-align:right;">QTY</th><th>COO</th><th>OK</th></tr></thead>
       <tbody>${rows}</tbody>
       <tfoot><tr><td colspan="2" style="font-weight:800;">TOTAL</td><td style="text-align:right;font-weight:800;">${e.totalPcs.toLocaleString()}</td><td colspan="2"></td></tr></tfoot>
-    </table>
+    </table>`;
+  }
+  return `<div class="pr-page">
+    <div class="pr-h">ARROW · CYCLE COUNT — DETAIL<span class="pr-sub">Sevenum NL · Microsoft Area</span></div>
+    <div class="pr-plt">${esc(e.palletId||'(no ID)')}</div>
+    <div class="pr-kv"><span class="k">PN ref</span><span class="v">${esc(e.pn||'—')}</span></div>
+    <div class="pr-kv"><span class="k">COO ref</span><span class="v">${esc(e.coo||'—')}</span></div>
+    <div class="${statusClass}">${statusText}</div>
+    ${body}
     <div class="pr-sig">
-      <div class="pr-line">Firma operario: ${esc(e.operator||'—')}</div>
+      <div class="pr-line">Operator signature: ${esc(e.operator||'—')}</div>
     </div>
-    <div class="pr-foot">${fmtDate(e.ts)} · ${e.boxCount} cajas · Cycle Count Arrow</div>
+    <div class="pr-foot">${fmtDate(e.ts)} · ${e.boxCount} boxes · Cycle Count Arrow</div>
   </div>`;
 }
 
