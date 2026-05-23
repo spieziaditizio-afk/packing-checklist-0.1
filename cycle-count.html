@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <meta name="theme-color" content="#0d1117"/>
-<title>Arrow Cycle Count</title>
+<title>Arrow Cycle Count Check List</title>
 <!-- QR generator (offline-safe: try CDN, fallback to text-only label) -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <style>
@@ -225,10 +225,10 @@ html,body{margin:0;padding:0;background:#0d1117;color:#e6edf3;font-family:-apple
 <body>
 <div id="app">
   <div class="topbar">
-    <h1>Arrow Cycle Count<span class="sub">Sevenum NL · Microsoft Area</span></h1>
+    <h1>Cycle Count Check List<span class="sub">Sevenum NL · Microsoft Area</span></h1>
     <div class="topbar-right">
-      <button class="btn-help" onclick="openWelcome()" title="Guía rápida">?</button>
-      <button class="btn-history" onclick="openHistory()">⌚ Historial</button>
+      <button class="btn-help" onclick="openWelcome()" title="Quick guide">?</button>
+      <button class="btn-history" onclick="openHistory()">⌚ History</button>
     </div>
   </div>
 
@@ -236,16 +236,16 @@ html,body{margin:0;padding:0;background:#0d1117;color:#e6edf3;font-family:-apple
   <div class="card">
     <div class="card-hdr">
       <span class="card-title">Pallet</span>
-      <span class="card-badge" id="card-badge-pallet">Esperando…</span>
+      <span class="card-badge" id="card-badge-pallet">Waiting…</span>
     </div>
     <div class="fg">
-      <label>Operario</label>
-      <input class="fc" id="operator" type="text" placeholder="Tu nombre" oninput="onOperatorInput()"/>
+      <label>Operator</label>
+      <input class="fc" id="operator" type="text" placeholder="Your name" oninput="onOperatorInput()"/>
     </div>
     <div class="fg">
-      <label>Pallet License Plate</label>
+      <label>Pallet License Plate (LPN)</label>
       <div class="scan-row">
-        <input class="fc mono" id="pallet-id" type="text" placeholder="Escanea el pallet"
+        <input class="fc mono" id="pallet-id" type="text" placeholder="Scan pallet"
           onkeydown="onKeyDown(event,this)" oninput="onPalletIdInput(this)"/>
         <span class="scan-tag tag-wait" id="pallet-id-tag">● SCAN</span>
       </div>
@@ -336,7 +336,7 @@ html,body{margin:0;padding:0;background:#0d1117;color:#e6edf3;font-family:-apple
   <!-- Segregation summary (live) -->
   <div class="card" id="segregation-card" style="display:none;">
     <div class="card-hdr">
-      <span class="card-title">Segregación por cantidad</span>
+      <span class="card-title">Segregation by quantity</span>
       <span class="card-badge" id="seg-total" style="background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.25);color:#38bdf8;">0 cajas</span>
     </div>
     <div id="seg-body" class="seg-body"></div>
@@ -344,10 +344,10 @@ html,body{margin:0;padding:0;background:#0d1117;color:#e6edf3;font-family:-apple
 
   <div class="empty" id="empty-state">
     <div class="empty-icon">📦</div>
-    <div>Escanea el pallet license plate para empezar.</div>
+    <div>Scan the pallet license plate to start.</div>
   </div>
 
-  <div id="save-indicator">Auto-guardado activo</div>
+  <div id="save-indicator">Auto-save active</div>
 </div>
 
 <!-- Footer -->
@@ -355,7 +355,7 @@ html,body{margin:0;padding:0;background:#0d1117;color:#e6edf3;font-family:-apple
   <div class="footer-inner">
     <div class="footer-totals">
       <div class="ft-item">
-        <span class="ft-lbl">Cajas</span>
+        <span class="ft-lbl">Boxes</span>
         <span class="ft-val mono" id="ft-boxes">0</span>
       </div>
       <div class="ft-item">
@@ -364,12 +364,12 @@ html,body{margin:0;padding:0;background:#0d1117;color:#e6edf3;font-family:-apple
       </div>
       <div class="ft-item ft-status">
         <span class="ft-lbl">Status</span>
-        <span class="ft-val pending" id="ft-status">— Pendiente</span>
+        <span class="ft-val pending" id="ft-status">— Pending</span>
       </div>
     </div>
     <div class="footer-btns">
-      <button class="btn btn-primary" id="btn-close-pallet" onclick="closePalletAndPrint()" disabled>🖨 Imprimir y cerrar</button>
-      <button class="btn btn-secondary" onclick="discardPallet()" title="Descartar pallet actual">✕</button>
+      <button class="btn btn-primary" id="btn-close-pallet" onclick="closePalletAndPrint()" disabled>🖨 Print & close</button>
+      <button class="btn btn-secondary" onclick="discardPallet()" title="Discard current pallet">✕</button>
     </div>
   </div>
 </div>
@@ -380,11 +380,11 @@ html,body{margin:0;padding:0;background:#0d1117;color:#e6edf3;font-family:-apple
 <!-- Resume modal -->
 <div class="modal-backdrop" id="resume-modal">
   <div class="modal">
-    <h2 class="modal-title">Reanudar conteo</h2>
-    <p class="modal-text" id="resume-text">Hay un pallet en progreso. ¿Quieres continuar donde lo dejaste?</p>
+    <h2 class="modal-title">Resume count</h2>
+    <p class="modal-text" id="resume-text">There's a pallet in progress. Continue where you left off?</p>
     <div class="modal-btns">
-      <button class="btn btn-secondary" onclick="discardResume()">Descartar</button>
-      <button class="btn btn-primary" onclick="resumeSession()">Reanudar</button>
+      <button class="btn btn-secondary" onclick="discardResume()">Discard</button>
+      <button class="btn btn-primary" onclick="resumeSession()">Resume</button>
     </div>
   </div>
 </div>
@@ -392,10 +392,10 @@ html,body{margin:0;padding:0;background:#0d1117;color:#e6edf3;font-family:-apple
 <!-- History modal -->
 <div class="modal-backdrop" id="history-modal">
   <div class="modal" style="max-width:640px;">
-    <h2 class="modal-title">Historial (últimos 20)</h2>
+    <h2 class="modal-title">History (last 20)</h2>
     <div id="history-list"></div>
     <div class="modal-btns" style="margin-top:12px;">
-      <button class="btn btn-secondary" onclick="closeHistory()">Cerrar</button>
+      <button class="btn btn-secondary" onclick="closeHistory()">Close</button>
     </div>
   </div>
 </div>
@@ -425,8 +425,8 @@ html,body{margin:0;padding:0;background:#0d1117;color:#e6edf3;font-family:-apple
         </svg>
       </div>
       <h1 class="splash-logo">ARROW</h1>
-      <span class="splash-subtitle">Cycle Count</span>
-      <span class="splash-tag">Sevenum NL · Microsoft Area</span>
+      <span class="splash-subtitle">Cycle Count Check List</span>
+      <span class="splash-tag">Sevenum NL · Microsoft Area · Pre-WMS verification</span>
     </div>
 
     <div class="splash-divider"></div>
@@ -464,11 +464,11 @@ html,body{margin:0;padding:0;background:#0d1117;color:#e6edf3;font-family:-apple
 <!-- History detail modal -->
 <div class="modal-backdrop" id="history-detail-modal">
   <div class="modal">
-    <h2 class="modal-title" id="hd-title">Detalle</h2>
+    <h2 class="modal-title" id="hd-title">Detail</h2>
     <div id="hd-body"></div>
     <div class="modal-btns" style="margin-top:12px;">
-      <button class="btn btn-secondary" onclick="closeHistoryDetail()">Volver</button>
-      <button class="btn btn-primary" id="hd-reprint">🖨 Reimprimir</button>
+      <button class="btn btn-secondary" onclick="closeHistoryDetail()">Back</button>
+      <button class="btn btn-primary" id="hd-reprint">🖨 Reprint</button>
     </div>
   </div>
 </div>
@@ -584,13 +584,13 @@ function onKeyDown(ev,el){
   }
   // Pallet ID must not be empty
   if(el.id==='pallet-id'&&!el.value.trim()){
-    triggerScanError(el,'⚠ Escanea el pallet license plate');
+    triggerScanError(el,'⚠ Scan the pallet license plate');
     return;
   }
   // COO must be 2-3 letters
   if(el.dataset.field==='coo'){
     const v=el.value.trim();
-    if(v.length<2||v.length>3){triggerScanError(el,'⚠ COO inválido (2-3 letras)');return;}
+    if(v.length<2||v.length>3){triggerScanError(el,'⚠ Invalid COO (must be 2-3 letters)');return;}
   }
   if(scanned)markScanned(el);
   else if(el.value.trim())markTyped(el);
@@ -811,7 +811,7 @@ function updateGroupRow(row){
   const count=parseInt(countInp?.value)||0;
   const qty=parseInt(qtyInp?.value)||0;
   const sub=row.querySelector('[data-sub]');
-  if(sub)sub.textContent=(count*qty).toLocaleString();
+  if(sub)sub.textContent=(count*qty).toLocaleString('en-GB');
   updateFooter();
 }
 
@@ -833,8 +833,8 @@ function addBoxCard(focusIt){
   card.innerHTML=`
     <div class="box-card-hdr">
       <span class="box-num">CAJA ${idx}</span>
-      <span class="box-status pending" id="box-status-${idx}">— Pendiente</span>
-      <button class="box-rm" onclick="removeBoxCard(${idx})" title="Borrar caja">✕</button>
+      <span class="box-status pending" id="box-status-${idx}">— Pending</span>
+      <button class="box-rm" onclick="removeBoxCard(${idx})" title="Remove box">✕</button>
     </div>
     <div class="field-grid">
       <div class="fg">
@@ -846,7 +846,7 @@ function addBoxCard(focusIt){
         </div>
       </div>
       <div class="fg">
-        <label>Cantidad de piezas</label>
+        <label>Quantity (pcs)</label>
         <div class="scan-row">
           <input class="fc mono" type="text" inputmode="numeric" data-field="qty" placeholder="Scan qty"
             onkeydown="onKeyDown(event,this)" oninput="handleQtyInput(this)"/>
@@ -882,7 +882,7 @@ function addBoxCard(focusIt){
 function removeBoxCard(idx){
   const card=document.querySelector(`.box-card[data-idx="${idx}"]`);
   if(!card)return;
-  if(!confirm('¿Borrar esta caja?'))return;
+  if(!confirm('Remove this box?'))return;
   card.remove();
   // Re-validate all remaining cards (the first card defines the reference)
   document.querySelectorAll('.box-card').forEach(c=>validateBoxCard(c));
@@ -928,7 +928,7 @@ function validateBoxCard(card){
   const filled=data.pn&&data.qty>0&&data.coo;
   if(!filled){
     card.classList.remove('ok','err');
-    if(statusEl){statusEl.textContent='— Pendiente';statusEl.className='box-status pending';}
+    if(statusEl){statusEl.textContent='— Pending';statusEl.className='box-status pending';}
     updateFooter();
     return;
   }
@@ -937,7 +937,7 @@ function validateBoxCard(card){
   if(idx===0){
     card.classList.remove('err');
     card.classList.add('ok');
-    if(statusEl){statusEl.textContent='✓ Referencia';statusEl.className='box-status ok';}
+    if(statusEl){statusEl.textContent='✓ Reference';statusEl.className='box-status ok';}
     // Re-validate all subsequent boxes against the new reference
     cards.slice(1).forEach(c=>validateBoxCard(c));
     updateFooter();
@@ -948,7 +948,7 @@ function validateBoxCard(card){
   const ref=getBoxData(cards[0]);
   if(!ref.pn||!ref.coo){
     card.classList.remove('ok','err');
-    if(statusEl){statusEl.textContent='— Pendiente';statusEl.className='box-status pending';}
+    if(statusEl){statusEl.textContent='— Pending';statusEl.className='box-status pending';}
     updateFooter();
     return;
   }
@@ -994,7 +994,7 @@ function updateFooter(){
     const totalBoxes=groups.reduce((s,g)=>s+g.count,0);
     const totalPcs=groups.reduce((s,g)=>s+g.count*g.qty,0);
     document.getElementById('ft-boxes').textContent=totalBoxes;
-    document.getElementById('ft-pcs').textContent=totalPcs.toLocaleString();
+    document.getElementById('ft-pcs').textContent=totalPcs.toLocaleString('en-GB');
     const grpBadge=document.getElementById('groups-badge');
     if(grpBadge)grpBadge.textContent=`${totalBoxes} ${totalBoxes===1?'box':'boxes'}`;
     const refOk=ref.pn&&ref.qty>0&&ref.coo;
@@ -1020,7 +1020,7 @@ function updateFooter(){
     if(c.classList.contains('err'))errCount++;
   });
   document.getElementById('ft-boxes').textContent=cards.length;
-  document.getElementById('ft-pcs').textContent=totalPcs.toLocaleString();
+  document.getElementById('ft-pcs').textContent=totalPcs.toLocaleString('en-GB');
   document.getElementById('card-badge-boxes').textContent=
     `${cards.length} ${cards.length===1?'box':'boxes'}`;
   if(filled===0){
@@ -1054,12 +1054,12 @@ function updateSegregationCardFromGroups(groups){
     <div class="seg-row">
       <span class="seg-count mono">${g.count}</span>
       <span class="seg-x">×</span>
-      <span class="seg-qty mono">${g.qty.toLocaleString()} pcs</span>
+      <span class="seg-qty mono">${g.qty.toLocaleString('en-GB')} pcs</span>
       <span class="seg-eq">=</span>
-      <span class="seg-sub mono">${g.subtotal.toLocaleString()}</span>
+      <span class="seg-sub mono">${g.subtotal.toLocaleString('en-GB')}</span>
     </div>`).join('');
   document.getElementById('seg-total').textContent=
-    `${totalBoxes} ${totalBoxes===1?'box':'boxes'} · ${totalPcs.toLocaleString()} pcs`;
+    `${totalBoxes} ${totalBoxes===1?'box':'boxes'} · ${totalPcs.toLocaleString('en-GB')} pcs`;
 }
 
 /* ── SEGREGATION (group boxes by qty) ──────────────── */
@@ -1085,13 +1085,13 @@ function updateSegregationCard(cards){
     <div class="seg-row">
       <span class="seg-count mono">${g.count}</span>
       <span class="seg-x">×</span>
-      <span class="seg-qty mono">${g.qty.toLocaleString()} pcs</span>
+      <span class="seg-qty mono">${g.qty.toLocaleString('en-GB')} pcs</span>
       <span class="seg-eq">=</span>
-      <span class="seg-sub mono">${g.subtotal.toLocaleString()}</span>
+      <span class="seg-sub mono">${g.subtotal.toLocaleString('en-GB')}</span>
     </div>`).join('');
   document.getElementById('seg-body').innerHTML=rows;
   document.getElementById('seg-total').textContent=
-    `${totalBoxes} ${totalBoxes===1?'caja':'cajas'} · ${totalPcs.toLocaleString()} pcs`;
+    `${totalBoxes} ${totalBoxes===1?'caja':'cajas'} · ${totalPcs.toLocaleString('en-GB')} pcs`;
 }
 
 /* ── PERSISTENCE ───────────────────────────────────── */
@@ -1171,13 +1171,13 @@ function saveState(){
       const t=new Date();
       const hh=String(t.getHours()).padStart(2,'0');
       const mm=String(t.getMinutes()).padStart(2,'0');
-      ind.textContent=`Guardado ${hh}:${mm}`;
+      ind.textContent=`Saved ${hh}:${mm}`;
     } else if(ind){
-      ind.textContent='Auto-guardado activo';
+      ind.textContent='Auto-save active';
     }
   }catch(e){
     const ind=document.getElementById('save-indicator');
-    if(ind)ind.textContent='⚠ Sin espacio';
+    if(ind)ind.textContent='⚠ Storage full';
   }
 }
 
@@ -1269,7 +1269,7 @@ function discardResume(){
 }
 
 function discardPallet(){
-  if(!confirm('¿Descartar el conteo del pallet actual? Se borrará todo lo escaneado.'))return;
+  if(!confirm('Discard current pallet count? All scanned data will be lost.'))return;
   localStorage.removeItem(SESSION_KEY);
   resetUI();
 }
@@ -1321,11 +1321,11 @@ function openHistory(){
   const hist=loadHistory();
   const list=document.getElementById('history-list');
   if(hist.length===0){
-    list.innerHTML='<div class="empty"><div class="empty-icon">📭</div>Sin pallets contados todavía.</div>';
+    list.innerHTML='<div class="empty"><div class="empty-icon">📭</div>No pallets counted yet.</div>';
   } else {
     list.innerHTML=hist.map((h,i)=>{
       const t=new Date(h.ts);
-      const dt=t.toLocaleDateString('es-ES',{day:'2-digit',month:'short'})+' '+
+      const dt=t.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+
                String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
       return `<div class="hist-item" onclick="openHistoryDetail(${i})">
         <div class="hist-item-hdr">
@@ -1335,7 +1335,7 @@ function openHistory(){
         <div class="hist-meta">
           <span class="mono">${esc(h.pn||'—')}</span>
           <span>${h.boxCount} cajas</span>
-          <span class="mono">${h.totalPcs.toLocaleString()} pcs</span>
+          <span class="mono">${h.totalPcs.toLocaleString('en-GB')} pcs</span>
           <span>${h.coo||'—'}</span>
           <span>${dt}</span>
         </div>
@@ -1350,26 +1350,26 @@ function openHistoryDetail(i){
   const hist=loadHistory();
   const h=hist[i];
   if(!h)return;
-  document.getElementById('hd-title').textContent=`Pallet ${h.palletId||'(sin ID)'}`;
+  document.getElementById('hd-title').textContent=`Pallet ${h.palletId||'(no ID)'}`;
   const t=new Date(h.ts);
-  const dt=t.toLocaleString('es-ES');
+  const dt=t.toLocaleString('en-GB');
   let body=`<div style="font-size:13px;color:#c9d1d9;line-height:1.7;">
-    <div><b>Fecha:</b> ${esc(dt)}</div>
-    <div><b>Operario:</b> ${esc(h.operator||'—')}</div>
+    <div><b>Date:</b> ${esc(dt)}</div>
+    <div><b>Operator:</b> ${esc(h.operator||'—')}</div>
     <div><b>PN:</b> <span class="mono">${esc(h.pn||'—')}</span></div>
     <div><b>COO:</b> ${esc(h.coo||'—')}</div>
-    <div><b>Cajas:</b> ${h.boxCount}</div>
-    <div><b>Total pcs:</b> <span class="mono">${h.totalPcs.toLocaleString()}</span></div>
+    <div><b>Boxes:</b> ${h.boxCount}</div>
+    <div><b>Total pcs:</b> <span class="mono">${h.totalPcs.toLocaleString('en-GB')}</span></div>
     <div><b>Status:</b> <span style="color:${h.status==='ok'?'#34d399':'#f87171'};font-weight:700;">${h.status==='ok'?'✓ OK':'✗ MISMATCH'}</span></div>
   </div>
-  <div style="margin-top:12px;font-size:11px;color:#8b949e;letter-spacing:.06em;text-transform:uppercase;font-weight:700;">Detalle por caja</div>
+  <div style="margin-top:12px;font-size:11px;color:#8b949e;letter-spacing:.06em;text-transform:uppercase;font-weight:700;">Per-box detail</div>
   <div style="max-height:240px;overflow-y:auto;margin-top:6px;font-family:'DM Mono',monospace;font-size:11px;background:#0d1117;border-radius:6px;padding:8px;">`;
   if(h.mode==='bulk'){
     const groups=entrySegregation(h);
     body+=`<div style="color:#38bdf8;font-weight:700;margin-bottom:4px;">BULK mode (sampled)</div>`;
     body+=groups.map((g,gi)=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted #21262d;">
-      <span>Group ${gi+1}: ${g.count} × ${g.qty.toLocaleString()} pcs</span>
-      <span style="color:#34d399;font-weight:700;">${g.subtotal.toLocaleString()}</span>
+      <span>Group ${gi+1}: ${g.count} × ${g.qty.toLocaleString('en-GB')} pcs</span>
+      <span style="color:#34d399;font-weight:700;">${g.subtotal.toLocaleString('en-GB')}</span>
     </div>`).join('');
   } else {
     body+=h.boxes.map((b,bi)=>{
@@ -1469,7 +1469,7 @@ function closePalletAndPrint(){
     if(groups.length===0){showToast('⚠ Add at least one quantity group');return;}
     const totalBoxes=groups.reduce((s,g)=>s+g.count,0);
     const totalPcs=groups.reduce((s,g)=>s+g.count*g.qty,0);
-    msg=`Close pallet with ${totalBoxes} boxes (${totalPcs.toLocaleString()} pcs)?`;
+    msg=`Close pallet with ${totalBoxes} boxes (${totalPcs.toLocaleString('en-GB')} pcs)?`;
   } else {
     const cards=[...document.querySelectorAll('.box-card')];
     if(cards.length===0){showToast('⚠ Add at least one box');return;}
@@ -1548,18 +1548,18 @@ function buildLabelHTML(e){
     <tr>
       <td class="pr-seg-count">${g.count}</td>
       <td class="pr-seg-x">×</td>
-      <td class="pr-seg-qty">${g.qty.toLocaleString()} pcs</td>
+      <td class="pr-seg-qty">${g.qty.toLocaleString('en-GB')} pcs</td>
       <td class="pr-seg-eq">=</td>
-      <td class="pr-seg-sub">${g.subtotal.toLocaleString()}</td>
+      <td class="pr-seg-sub">${g.subtotal.toLocaleString('en-GB')}</td>
     </tr>`).join('');
   const segHTML=groups.length>0?`
     <div class="pr-seg-title">SEGREGATION</div>
     <table class="pr-seg-tbl">${segRows}
-      <tr class="pr-seg-total"><td colspan="2">TOTAL</td><td colspan="2">${e.boxCount} boxes</td><td>${e.totalPcs.toLocaleString()}</td></tr>
+      <tr class="pr-seg-total"><td colspan="2">TOTAL</td><td colspan="2">${e.boxCount} boxes</td><td>${e.totalPcs.toLocaleString('en-GB')}</td></tr>
     </table>`:'';
   const modeBadge=e.mode==='bulk'?'<div class="pr-kv"><span class="k">Mode</span><span class="v">BULK (sampled)</span></div>':'';
   return `<div class="pr-page">
-    <div class="pr-h">ARROW · CYCLE COUNT<span class="pr-sub">Sevenum NL · Microsoft Area</span></div>
+    <div class="pr-h">ARROW · CYCLE COUNT CHECK LIST<span class="pr-sub">Sevenum NL · Microsoft Area</span></div>
     <div class="pr-plt">${esc(e.palletId||'(no ID)')}</div>
     <div class="pr-kv"><span class="k">PN</span><span class="v">${esc(e.pn||'—')}</span></div>
     <div class="pr-kv"><span class="k">COO</span><span class="v">${esc(e.coo||'—')}</span></div>
@@ -1583,8 +1583,8 @@ function buildReceiptHTML(e){
       <td>G${i+1}</td>
       <td style="text-align:right;">${g.count}</td>
       <td style="text-align:center;">×</td>
-      <td style="text-align:right;">${g.qty.toLocaleString()}</td>
-      <td style="text-align:right;font-weight:800;">${g.subtotal.toLocaleString()}</td>
+      <td style="text-align:right;">${g.qty.toLocaleString('en-GB')}</td>
+      <td style="text-align:right;font-weight:800;">${g.subtotal.toLocaleString('en-GB')}</td>
     </tr>`).join('');
     body=`<div style="font-size:8pt;text-align:center;padding:2mm 0;color:#444;">Verification mode: <b>BULK</b> — 1 reference box scanned + manual quantity groups</div>
     <table class="pr-tbl">
@@ -1594,7 +1594,7 @@ function buildReceiptHTML(e){
         <td colspan="2" style="font-weight:800;">TOTAL</td>
         <td style="text-align:center;font-weight:800;">${e.boxCount} bx</td>
         <td></td>
-        <td style="text-align:right;font-weight:800;">${e.totalPcs.toLocaleString()}</td>
+        <td style="text-align:right;font-weight:800;">${e.totalPcs.toLocaleString('en-GB')}</td>
       </tr></tfoot>
     </table>`;
   } else {
@@ -1611,11 +1611,11 @@ function buildReceiptHTML(e){
     body=`<table class="pr-tbl">
       <thead><tr><th>#</th><th>PN</th><th style="text-align:right;">QTY</th><th>COO</th><th>OK</th></tr></thead>
       <tbody>${rows}</tbody>
-      <tfoot><tr><td colspan="2" style="font-weight:800;">TOTAL</td><td style="text-align:right;font-weight:800;">${e.totalPcs.toLocaleString()}</td><td colspan="2"></td></tr></tfoot>
+      <tfoot><tr><td colspan="2" style="font-weight:800;">TOTAL</td><td style="text-align:right;font-weight:800;">${e.totalPcs.toLocaleString('en-GB')}</td><td colspan="2"></td></tr></tfoot>
     </table>`;
   }
   return `<div class="pr-page">
-    <div class="pr-h">ARROW · CYCLE COUNT — DETAIL<span class="pr-sub">Sevenum NL · Microsoft Area</span></div>
+    <div class="pr-h">ARROW · DETAIL RECEIPT<span class="pr-sub">Cycle Count Check List · Sevenum NL</span></div>
     <div class="pr-plt">${esc(e.palletId||'(no ID)')}</div>
     <div class="pr-kv"><span class="k">PN ref</span><span class="v">${esc(e.pn||'—')}</span></div>
     <div class="pr-kv"><span class="k">COO ref</span><span class="v">${esc(e.coo||'—')}</span></div>
@@ -1634,7 +1634,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const hasSession=s&&(s.palletId||(s.boxes&&s.boxes.length>0));
   if(hasSession){
     document.getElementById('resume-text').textContent=
-      `Hay un pallet en progreso: ${s.palletId||'(sin ID)'} — ${(s.boxes||[]).length} cajas. ¿Continuar?`;
+      `Pallet in progress: ${s.palletId||'(no ID)'} — ${(s.boxes||[]).length} boxes. Continue?`;
     document.getElementById('resume-modal').classList.add('show');
   } else if(s&&s.operator){
     // Just restore operator name

@@ -125,3 +125,42 @@ Una vez dismissed por primera vez (flag arrowCycleCountWelcomeSeenV1 en localSto
 Para probar la primera apertura otra vez:
 
 En la consola del browser: localStorage.removeItem('arrowCycleCountWelcomeSeenV1') → recargar
+
+##Modo BULK añadido
+Selector de modo (aparece al confirmar el pallet ID):
+
+
+[📦 Box-by-box]   [📋 Bulk]
+ scan every box   factory-sealed, large pallet
+Default = Box-by-box. Click en Bulk → confirmación si hay datos → cambia UI.
+
+UI Bulk mode:
+
+Reference Box — escaneas UNA sola caja: PN + Qty (sample) + COO. Badge "Pending" → "✓ Captured".
+Quantity Groups — tabla con filas [boxes] × [pcs each] = subtotal. La primera fila pre-rellena el qty con el de la referencia automáticamente. Tap + Add group para mezclas.
+Ejemplo real:
+
+
+Reference Box: PN=VT9A123, Qty=25, COO=NL ✓
+Quantity Groups:
+  [ 60 ] × [ 25 ] pcs = 1,500    ✕
+  [  8 ] × [ 50 ] pcs =   400    ✕
+  + Add group
+
+Footer: 68 boxes / 1,900 pcs / ✓ OK
+Persistencia: el state ahora incluye mode, reference{pn,qty,coo+tags} y groups[{count,qty}]. Si se reinicia el handheld a mitad de pallet, recupera todo (modo + ref + grupos).
+
+Print:
+
+Sticky label: muestra Mode: BULK (sampled) + tabla de segregación idéntica a box-by-box (los grupos van directos).
+Thermal receipt: en bulk muestra "Verification mode: BULK — 1 reference box scanned + manual quantity groups" + tabla de grupos numerados G1, G2, etc.
+QR: payload compacto unificado g: [[qty,count],...] + flag m:'B' o m:'S'. Funciona para reconstruir segregación en ambos modos.
+Historial: detalle muestra "BULK mode (sampled)" + lista de grupos. Reimprimir funciona en ambos modos.
+
+Splash actualizado: paso 2 ahora menciona el modo: "Choose mode: Box-by-box or Bulk (large factory-sealed pallets)".
+
+Cuándo usar cada modo:
+
+Box-by-box: pallets chicos (<20 cajas), o cuando hay sospecha de mezcla, o auditoría.
+Bulk: pallets 60-88+ con barcodes pequeños/juntos, factory-sealed. Total: ~30 segundos por pallet (1 scan completo + 1 conteo manual) vs ~5-10 minutos en box-by-box.
+
