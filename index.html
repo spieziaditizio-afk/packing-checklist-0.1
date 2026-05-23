@@ -96,8 +96,9 @@ body{font-family:'DM Sans',sans-serif;background:#0d1117;min-height:100vh;font-s
 .qty-rows-wrap .scan-row{margin-bottom:0;}
 .scan-row-num{font-size:12px;font-weight:600;color:#6e7681;width:40px;flex-shrink:0;font-family:'DM Mono',monospace;}
 .scan-tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px;flex-shrink:0;white-space:nowrap;}
-.tag-scan{background:rgba(56,189,248,.15);color:#38bdf8;}
-.tag-manual{background:rgba(245,158,11,.15);color:#f59e0b;}
+.tag-scan{background:rgba(16,185,129,.15);color:#34d399;}
+.tag-typed{background:rgba(245,158,11,.15);color:#f59e0b;}
+.tag-wait{background:rgba(148,163,184,.1);color:#6e7681;animation:pulse 1.8s ease-in-out infinite;}
 .btn-rm-row{width:26px;height:26px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#6e7681;background:#21262d;border:1px solid #30363d;border-radius:6px;cursor:pointer;transition:all .12s;font-family:'DM Sans',sans-serif;}
 .btn-rm-row:hover{background:rgba(239,68,68,.15);color:#f87171;border-color:rgba(239,68,68,.3);}
 
@@ -196,6 +197,9 @@ body{font-family:'DM Sans',sans-serif;background:#0d1117;min-height:100vh;font-s
   .pr-pn-ok{color:#15803d!important;font-weight:bold;}
   .pr-pn-err{color:#dc2626!important;font-weight:bold;}
   .pr-pn-pending{color:#94a3b8!important;}
+
+  /* Pick labels breakdown line */
+  .pr-pick-labels-line{font-size:8px;color:#334155!important;padding:3px 10px;background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;}
 
   /* Breakdown label */
   .pr-breakdown-lbl{font-size:7.5px;font-weight:bold;color:#475569!important;text-transform:uppercase;letter-spacing:.05em;padding:4px 10px 2px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;}
@@ -369,7 +373,7 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
           <div class="scan-row" style="margin-bottom:0;">
             <input class="fc mono" id="delivery-pn" type="text" placeholder="Scan PN from pick label"
               onkeydown="onKeyDown(event,this)" oninput="onDeliveryPNInput()"/>
-            <span class="scan-tag tag-manual" id="delivery-pn-tag">MANUAL</span>
+            <span class="scan-tag tag-wait" id="delivery-pn-tag">● SCAN</span>
           </div>
         </div>
       </div>
@@ -404,7 +408,23 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
           <button class="btn btn-blue" style="flex:1;justify-content:center;padding:9px 12px;font-size:13px;" onclick="doExportPDF()">⬇ PDF</button>
           <button class="btn btn-ghost-blue" style="flex:1;justify-content:center;padding:9px 12px;font-size:13px;" onclick="doPrint()">🖨 Print</button>
         </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <button class="btn btn-ghost-blue" style="flex:1;justify-content:center;padding:8px 10px;font-size:12px;" onclick="doExportJSON()">⬇ JSON</button>
+          <button class="btn btn-ghost-blue" style="flex:1;justify-content:center;padding:8px 10px;font-size:12px;" onclick="doExportCSV()">⬇ CSV</button>
+        </div>
         <div style="font-size:11px;color:#6e7681;text-align:center;line-height:1.4;">Complete all pallets before exporting.</div>
+      </div>
+    </div>
+
+    <!-- SESSION -->
+    <div class="sb-card">
+      <div class="sb-card-hdr">
+        <div class="card-icon icon-blue">💾</div>
+        <span class="sb-card-title">Sesión</span>
+      </div>
+      <div class="sb-card-body">
+        <div id="save-indicator" style="font-size:11px;color:#6e7681;text-align:center;margin-bottom:8px;letter-spacing:.04em;">Auto-guardado activo</div>
+        <button class="btn btn-ghost-blue" style="width:100%;justify-content:center;padding:8px 10px;font-size:12px;" onclick="resetChecklist()">＋ Nuevo checklist</button>
       </div>
     </div>
 
@@ -447,12 +467,16 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('hdr-date').textContent =
     now.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
   document.getElementById('chk-date').value = now.toISOString().slice(0,10);
-  addPallet();
+  const restored = loadState();
+  if (!restored || document.querySelectorAll('.pallet-block').length === 0) addPallet();
 });
 
-// Track last input time on every input to distinguish scanner vs keyboard
+// Track last input time on every input to distinguish scanner vs keyboard + auto-save
 document.addEventListener('input', e => {
-  if (e.target.tagName === 'INPUT') e.target._lastInputTime = Date.now();
+  if (e.target.tagName === 'INPUT') {
+    e.target._lastInputTime = Date.now();
+    saveStateDebounced();
+  }
 }, true);
 
 /* ══ DESTINATION ════════════════════════════════════════ */
@@ -464,6 +488,7 @@ function setDestination(val) {
     else p.classList.remove('sel-purple');
   });
   document.querySelectorAll('.pallet-block').forEach(b => updateHeightWarning(b.dataset.pid));
+  saveStateDebounced();
 }
 
 /* ══ ADD PALLET ═════════════════════════════════════════ */
@@ -485,6 +510,7 @@ function addPallet() {
   numberPallets();
   switchTab(pid);
   updateDeliverySummary();
+  saveStateDebounced();
 }
 
 function addPalletTab(pid) {
@@ -524,6 +550,7 @@ function removePallet(pid) {
   document.querySelector(`.pallet-block[data-pid="${pid}"]`)?.remove();
   numberPallets();
   updateDeliverySummary();
+  saveStateDebounced();
 }
 
 function numberPallets() {
@@ -598,7 +625,7 @@ function buildPalletHTML(pid) {
         <div class="scan-row" style="margin-bottom:0;">
           <input class="fc mono" id="box-pn-${pid}" type="text" placeholder="Scan PN from first box"
             onkeydown="onKeyDown(event,this)" oninput="onBoxPNInput(${pid},this)"/>
-          <span class="scan-tag tag-manual" id="box-pn-tag-${pid}">MANUAL</span>
+          <span class="scan-tag tag-wait" id="box-pn-tag-${pid}">● SCAN</span>
         </div>
       </div>
     </div>
@@ -659,6 +686,10 @@ function buildPalletHTML(pid) {
       <span class="val-val" id="v-pn-check-${pid}">—</span>
     </div>
     <div class="val-cell">
+      <span class="val-lbl">Pick Labels</span>
+      <span class="val-val" id="v-pick-labels-${pid}" style="font-size:12px;line-height:1.5;">—</span>
+    </div>
+    <div class="val-cell">
       <span class="val-lbl">Expected (pcs)</span>
       <span class="val-val" id="v-pick-total-${pid}">—</span>
     </div>
@@ -680,6 +711,7 @@ function selectPType(pid, type) {
   document.querySelectorAll(`#ptype-pills-${pid} .ptype-pill`).forEach(p =>
     p.classList.toggle('selected', p.dataset.type === type)
   );
+  saveStateDebounced();
 }
 function getPType(pid) {
   const sel = document.querySelector(`#ptype-pills-${pid} .ptype-pill.selected`);
@@ -718,6 +750,7 @@ function setBoxMode(pid, mode) {
   const pnWrap = document.getElementById(`box-pn-wrap-${pid}`);
   if (pnWrap) pnWrap.style.display = (mode === 'scan' && getPNMode(pid) === 'per-box') ? 'none' : '';
   updatePalletSummary(pid);
+  saveStateDebounced();
 }
 function getBoxMode(pid) {
   const btns = document.querySelectorAll(`#mode-sw-${pid} .mode-btn`);
@@ -734,6 +767,7 @@ function setPNMode(pid, mode) {
   const pnWrap = document.getElementById(`box-pn-wrap-${pid}`);
   if (pnWrap) pnWrap.style.display = mode === 'per-box' ? 'none' : '';
   updatePalletSummary(pid);
+  saveStateDebounced();
 }
 function getPNMode(pid) {
   const btns = document.querySelectorAll(`#pn-sw-${pid} .mode-btn`);
@@ -750,10 +784,10 @@ function addPerBoxRow(pid) {
     <span class="scan-row-num">B${n}</span>
     <input class="fc mono" type="text" placeholder="Scan PN"
       onkeydown="onKeyDown(event,this)" oninput="onPerBoxPNInput(${pid},this)"/>
-    <span class="scan-tag tag-manual">MANUAL</span>
+    <span class="scan-tag tag-wait">● SCAN</span>
     <input class="fc mono" type="text" placeholder="Qty"
       onkeydown="onKeyDown(event,this)" oninput="handleQtyInput(${pid},this)"/>
-    <span class="scan-tag tag-manual">MANUAL</span>
+    <span class="scan-tag tag-wait">● SCAN</span>
     <button class="btn-rm-row" onclick="removePerBoxRow(${pid},this)">✕</button>
   `;
   wrap.appendChild(div);
@@ -764,8 +798,10 @@ function removePerBoxRow(pid, btn) {
   btn.closest('.perbox-row').remove();
   renumber(document.getElementById(`perbox-rows-${pid}`), 'B');
   updatePalletSummary(pid);
+  saveStateDebounced();
 }
 function onPerBoxPNInput(pid, el) {
+  if (el.dataset.scanned === 'true') markTyped(el);
   const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
   const boxPN = el.value.trim().toUpperCase();
   if (delivPN && boxPN) {
@@ -789,7 +825,7 @@ function addPickRow(pid) {
     <span class="scan-row-num">PL ${n}</span>
     <input class="fc mono" type="text" placeholder="Qty" style="max-width:110px;"
       onkeydown="onKeyDown(event,this)" oninput="handleQtyInput(${pid},this)"/>
-    <span class="scan-tag tag-manual">MANUAL</span>
+    <span class="scan-tag tag-wait">● SCAN</span>
     <button class="btn-rm-row" onclick="removePickRow(${pid},this)">✕</button>
   `;
   wrap.appendChild(div);
@@ -799,6 +835,7 @@ function removePickRow(pid, btn) {
   btn.closest('.pick-row').remove();
   renumber(document.getElementById(`pick-rows-${pid}`), 'PL ');
   updatePalletSummary(pid);
+  saveStateDebounced();
 }
 
 /* ══ BOX ROWS ═══════════════════════════════════════════ */
@@ -811,7 +848,7 @@ function addBoxRow(pid) {
     <span class="scan-row-num">B${n}</span>
     <input class="fc mono" type="text" placeholder="Qty" style="max-width:110px;"
       onkeydown="onKeyDown(event,this)" oninput="handleQtyInput(${pid},this)"/>
-    <span class="scan-tag tag-manual">MANUAL</span>
+    <span class="scan-tag tag-wait">● SCAN</span>
     <button class="btn-rm-row" onclick="removeBoxRow(${pid},this)">✕</button>
   `;
   wrap.appendChild(div);
@@ -822,6 +859,7 @@ function removeBoxRow(pid, btn) {
   btn.closest('.box-row').remove();
   renumber(document.getElementById(`box-rows-${pid}`), 'B');
   updatePalletSummary(pid);
+  saveStateDebounced();
 }
 
 /* ══ GROUP ROWS (VISUAL) ════════════════════════════════ */
@@ -842,6 +880,7 @@ function addGroupRow(pid) {
 function removeGroupRow(pid, btn) {
   btn.closest('.group-row').remove();
   updatePalletSummary(pid);
+  saveStateDebounced();
 }
 function updateGroup(pid, inp) {
   const row = inp.closest('.group-row');
@@ -907,10 +946,12 @@ function triggerScanError(el) {
     el.dataset.scanned = '';
     const tag = el.nextElementSibling;
     if (tag && tag.classList.contains('scan-tag')) {
-      tag.textContent = 'MANUAL';
-      tag.className = 'scan-tag tag-manual';
+      tag.textContent = '● SCAN';
+      tag.className = 'scan-tag tag-wait';
+      tag.style.animation = '';
     }
     el.focus();
+    saveStateDebounced();
   }, 460);
 }
 
@@ -918,7 +959,7 @@ function triggerScanError(el) {
 function onKeyDown(event, el) {
   if (event.key !== 'Enter') return;
   event.preventDefault();
-  const isScanned = Date.now() - (el._lastInputTime || 0) < 100;
+  const isScanned = Date.now() - (el._lastInputTime || 0) < 50;
 
   // ── Wrong qty scan: non-numeric chars were typed (scanner hit wrong barcode) ──
   if (el._wrongScan) {
@@ -940,6 +981,7 @@ function onKeyDown(event, el) {
   }
 
   if (isScanned) markScanned(el);
+  else if (el.value.trim()) markTyped(el);
 
   const block = el.closest('.pallet-block');
   const pid = block?.dataset.pid;
@@ -979,9 +1021,275 @@ function markScanned(el) {
   el.classList.add('scan-flash-ok');
   const tag = el.nextElementSibling;
   if (tag && tag.classList.contains('scan-tag')) {
-    tag.textContent = 'SCAN';
+    tag.textContent = '✓ SCANNED';
     tag.className = 'scan-tag tag-scan';
+    tag.style.animation = 'none';
   }
+  saveStateDebounced();
+}
+function markTyped(el) {
+  el.dataset.scanned = '';
+  el.classList.remove('scanned', 'scan-flash-ok');
+  const tag = el.nextElementSibling;
+  if (tag && tag.classList.contains('scan-tag')) {
+    tag.textContent = '✎ TYPED';
+    tag.className = 'scan-tag tag-typed';
+    tag.style.animation = 'none';
+  }
+}
+function resetTag(el) {
+  el.dataset.scanned = '';
+  const tag = el.nextElementSibling;
+  if (tag && tag.classList.contains('scan-tag')) {
+    tag.textContent = '● SCAN';
+    tag.className = 'scan-tag tag-wait';
+    tag.style.animation = '';
+  }
+}
+
+/* ══ PERSISTENCE (localStorage) ═════════════════════════ */
+const STORAGE_KEY = 'arrowPackingV1';
+const STORAGE_VERSION = 1;
+let _saveTimer = null;
+let _restoring = false;
+
+function tagStateOf(el) {
+  if (!el) return 'wait';
+  if (el.dataset && el.dataset.scanned === 'true') return 'scanned';
+  const tag = el.nextElementSibling;
+  if (tag && tag.classList.contains('tag-typed')) return 'typed';
+  return 'wait';
+}
+
+function applyTagState(el, state) {
+  if (!el) return;
+  if (state === 'scanned') {
+    el.dataset.scanned = 'true';
+    el.classList.add('scanned');
+    const tag = el.nextElementSibling;
+    if (tag && tag.classList.contains('scan-tag')) {
+      tag.textContent = '✓ SCANNED';
+      tag.className = 'scan-tag tag-scan';
+      tag.style.animation = 'none';
+    }
+  } else if (state === 'typed') {
+    el.dataset.scanned = '';
+    el.classList.remove('scanned', 'scan-flash-ok');
+    const tag = el.nextElementSibling;
+    if (tag && tag.classList.contains('scan-tag')) {
+      tag.textContent = '✎ TYPED';
+      tag.className = 'scan-tag tag-typed';
+      tag.style.animation = 'none';
+    }
+  } else {
+    el.dataset.scanned = '';
+    el.classList.remove('scanned', 'scan-flash-ok');
+    const tag = el.nextElementSibling;
+    if (tag && tag.classList.contains('scan-tag')) {
+      tag.textContent = '● SCAN';
+      tag.className = 'scan-tag tag-wait';
+      tag.style.animation = '';
+    }
+  }
+}
+
+function serializeState() {
+  const delivPNEl = document.getElementById('delivery-pn');
+  const state = {
+    v: STORAGE_VERSION,
+    savedAt: new Date().toISOString(),
+    delivery: {
+      operator: document.getElementById('operator')?.value || '',
+      deliveryNum: document.getElementById('delivery-num')?.value || '',
+      destination: destination,
+      pn: delivPNEl?.value || '',
+      pnTag: tagStateOf(delivPNEl)
+    },
+    pallets: []
+  };
+  document.querySelectorAll('.pallet-block').forEach(b => {
+    const pid = b.dataset.pid;
+    const pnMode = getPNMode(pid);
+    const boxMode = getBoxMode(pid);
+    const boxPNEl = document.getElementById(`box-pn-${pid}`);
+    const p = {
+      type: getPType(pid),
+      weight: document.getElementById(`weight-${pid}`)?.value || '',
+      height: document.getElementById(`height-${pid}`)?.value || '',
+      pnMode: pnMode,
+      boxMode: boxMode,
+      boxPn: boxPNEl?.value || '',
+      boxPnTag: tagStateOf(boxPNEl),
+      pickLabels: [],
+      boxes: [],
+      groups: [],
+      perBoxRows: []
+    };
+    document.querySelectorAll(`#pick-rows-${pid} .pick-row`).forEach(row => {
+      const inp = row.querySelector('input');
+      p.pickLabels.push({ qty: inp?.value || '', tag: tagStateOf(inp) });
+    });
+    document.querySelectorAll(`#box-rows-${pid} .box-row`).forEach(row => {
+      const inp = row.querySelector('input');
+      p.boxes.push({ qty: inp?.value || '', tag: tagStateOf(inp) });
+    });
+    document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(row => {
+      const [a, c] = row.querySelectorAll('input');
+      p.groups.push({ count: a?.value || '', qty: c?.value || '' });
+    });
+    document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).forEach(row => {
+      const [pnInp, qtyInp] = row.querySelectorAll('input');
+      p.perBoxRows.push({
+        pn: pnInp?.value || '',
+        qty: qtyInp?.value || '',
+        pnTag: tagStateOf(pnInp),
+        qtyTag: tagStateOf(qtyInp)
+      });
+    });
+    state.pallets.push(p);
+  });
+  return state;
+}
+
+function restoreState(state) {
+  if (!state || state.v !== STORAGE_VERSION) return false;
+  _restoring = true;
+  try {
+    // Clear existing pallets and tabs
+    document.querySelectorAll('.pallet-block').forEach(b => b.remove());
+    document.querySelectorAll('.pallet-tab').forEach(t => t.remove());
+    palletCounter = 0;
+    activePid = null;
+
+    // Delivery
+    if (state.delivery) {
+      const opEl = document.getElementById('operator');
+      const dnEl = document.getElementById('delivery-num');
+      const dpnEl = document.getElementById('delivery-pn');
+      if (opEl) opEl.value = state.delivery.operator || '';
+      if (dnEl) dnEl.value = state.delivery.deliveryNum || '';
+      if (dpnEl) {
+        dpnEl.value = state.delivery.pn || '';
+        applyTagState(dpnEl, state.delivery.pnTag || 'wait');
+      }
+      if (state.delivery.destination) setDestination(state.delivery.destination);
+    }
+
+    // Pallets
+    (state.pallets || []).forEach((p, idx) => {
+      addPallet();
+      const pid = palletCounter;
+      // Clear default rows added by addPallet
+      document.querySelectorAll(`#pick-rows-${pid} .pick-row`).forEach(r => r.remove());
+      document.querySelectorAll(`#box-rows-${pid} .box-row`).forEach(r => r.remove());
+      document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(r => r.remove());
+      document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).forEach(r => r.remove());
+
+      if (p.type) selectPType(pid, p.type);
+      const wEl = document.getElementById(`weight-${pid}`);
+      const hEl = document.getElementById(`height-${pid}`);
+      if (wEl) wEl.value = p.weight || '';
+      if (hEl) hEl.value = p.height || '';
+      if (p.boxMode) setBoxMode(pid, p.boxMode);
+      if (p.pnMode) setPNMode(pid, p.pnMode);
+
+      const boxPNEl = document.getElementById(`box-pn-${pid}`);
+      if (boxPNEl) {
+        boxPNEl.value = p.boxPn || '';
+        applyTagState(boxPNEl, p.boxPnTag || 'wait');
+      }
+
+      (p.pickLabels || []).forEach(pl => {
+        addPickRow(pid);
+        const rows = document.querySelectorAll(`#pick-rows-${pid} .pick-row`);
+        const inp = rows[rows.length - 1]?.querySelector('input');
+        if (inp) { inp.value = pl.qty || ''; applyTagState(inp, pl.tag || 'wait'); }
+      });
+      if (!p.pickLabels || p.pickLabels.length === 0) addPickRow(pid);
+
+      (p.boxes || []).forEach(bx => {
+        addBoxRow(pid);
+        const rows = document.querySelectorAll(`#box-rows-${pid} .box-row`);
+        const inp = rows[rows.length - 1]?.querySelector('input');
+        if (inp) { inp.value = bx.qty || ''; applyTagState(inp, bx.tag || 'wait'); }
+      });
+      if (!p.boxes || p.boxes.length === 0) addBoxRow(pid);
+
+      (p.groups || []).forEach(g => {
+        addGroupRow(pid);
+        const rows = document.querySelectorAll(`#group-rows-${pid} .group-row`);
+        const [a, c] = rows[rows.length - 1]?.querySelectorAll('input') || [];
+        if (a) a.value = g.count || '';
+        if (c) c.value = g.qty || '';
+        if (a) updateGroup(pid, a);
+      });
+      if (!p.groups || p.groups.length === 0) addGroupRow(pid);
+
+      (p.perBoxRows || []).forEach(pb => {
+        addPerBoxRow(pid);
+        const rows = document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`);
+        const [pnInp, qtyInp] = rows[rows.length - 1]?.querySelectorAll('input') || [];
+        if (pnInp) { pnInp.value = pb.pn || ''; applyTagState(pnInp, pb.pnTag || 'wait'); }
+        if (qtyInp) { qtyInp.value = pb.qty || ''; applyTagState(qtyInp, pb.qtyTag || 'wait'); }
+      });
+      if (!p.perBoxRows || p.perBoxRows.length === 0) addPerBoxRow(pid);
+
+      updateHeightWarning(pid);
+      updatePalletSummary(pid);
+    });
+
+    // Re-validate PN cross-checks
+    onDeliveryPNInput();
+    if (state.pallets && state.pallets.length > 0) switchTab(1);
+    updateDeliverySummary();
+    return true;
+  } finally {
+    _restoring = false;
+  }
+}
+
+function saveState() {
+  if (_restoring) return;
+  try {
+    const json = JSON.stringify(serializeState());
+    localStorage.setItem(STORAGE_KEY, json);
+    const ind = document.getElementById('save-indicator');
+    if (ind) {
+      const t = new Date();
+      const hh = String(t.getHours()).padStart(2, '0');
+      const mm = String(t.getMinutes()).padStart(2, '0');
+      ind.textContent = `Guardado ${hh}:${mm}`;
+      ind.style.opacity = '1';
+    }
+  } catch (e) {
+    if (e && e.name === 'QuotaExceededError') {
+      const ind = document.getElementById('save-indicator');
+      if (ind) { ind.textContent = '⚠ Sin espacio'; ind.style.opacity = '1'; }
+    }
+  }
+}
+
+function saveStateDebounced() {
+  if (_restoring) return;
+  if (_saveTimer) clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveState, 400);
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const state = JSON.parse(raw);
+    return restoreState(state);
+  } catch (e) {
+    return false;
+  }
+}
+
+function resetChecklist() {
+  if (!confirm('¿Empezar un checklist nuevo? Se borrarán todos los datos actuales.')) return;
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  location.reload();
 }
 
 function autoAdvance(el) {
@@ -997,15 +1305,24 @@ function autoAdvance(el) {
 }
 
 function handleQtyInput(pid, el) {
+  if (el.dataset.scanned === 'true') markTyped(el);
   const raw = el.value;
-  const cleaned = raw.replace(/[^0-9]/g, '');
-  if (cleaned !== raw && raw.length > 0) el._wrongScan = true;
-  el.value = cleaned;
+  const digitsOnly = raw.replace(/[^0-9]/g, '');
+  // Error if: no digits at all (country code "NL") OR letter appears AFTER a digit (PO format e.g. "VT9A00000...")
+  if ((digitsOnly === '' && raw.length > 0) || /\d[a-zA-Z]/.test(raw)) {
+    el._wrongScan = true;
+  } else {
+    delete el._wrongScan;
+  }
+  // Strip non-digits and leading zeros (e.g., Zebra sends "00250" → "250", "A00250" → "250")
+  el.value = digitsOnly === '' ? '' : String(parseInt(digitsOnly, 10) || 0);
   updatePalletSummary(pid);
 }
 
 function onDeliveryPNInput() {
-  const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
+  const elDPN = document.getElementById('delivery-pn');
+  if (elDPN && elDPN.dataset.scanned === 'true') markTyped(elDPN);
+  const delivPN = (elDPN?.value || '').trim().toUpperCase();
   document.querySelectorAll('.pallet-block').forEach(b => {
     const pid = b.dataset.pid;
     // Re-validate per-box PN fields if in per-box mode
@@ -1028,6 +1345,7 @@ function onDeliveryPNInput() {
 }
 
 function onBoxPNInput(pid, el) {
+  if (el.dataset.scanned === 'true') markTyped(el);
   const pickPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
   const boxPN = el.value.trim().toUpperCase();
   if (pickPN && boxPN) {
@@ -1045,10 +1363,18 @@ function onBoxPNInput(pid, el) {
 function updatePalletSummary(pid) {
   // Pick
   let pickTotal = 0;
-  document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach(i => {
-    pickTotal += parseInt(i.value) || 0;
+  const pickInputs = [...document.querySelectorAll(`#pick-rows-${pid} .pick-row input`)];
+  const pickLabelParts = [];
+  pickInputs.forEach((inp, i) => {
+    const qty = parseInt(inp.value) || 0;
+    pickTotal += qty;
+    if (qty > 0) pickLabelParts.push(`PL${i + 1}: ${qty.toLocaleString()}`);
   });
-  document.getElementById(`pick-badge-${pid}`).textContent = `${pickTotal.toLocaleString()} pcs expected`;
+  const plCount = pickLabelParts.length;
+  document.getElementById(`pick-badge-${pid}`).textContent =
+    `${pickTotal.toLocaleString()} pcs expected${plCount > 1 ? ` · ${plCount} PL` : ''}`;
+  const labelsEl = document.getElementById(`v-pick-labels-${pid}`);
+  if (labelsEl) labelsEl.textContent = pickLabelParts.length > 0 ? pickLabelParts.join(' · ') : '—';
 
   // Box
   const mode = getBoxMode(pid);
@@ -1259,8 +1585,11 @@ function buildPrintHTML() {
     const height = document.getElementById(`height-${pid}`)?.value || '—';
 
     let pickTotal = 0;
-    document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach(inp => {
-      pickTotal += parseInt(inp?.value) || 0;
+    const pickLabelEntries = [];
+    document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach((inp, i) => {
+      const qty = parseInt(inp?.value) || 0;
+      pickTotal += qty;
+      if (qty > 0) pickLabelEntries.push({ n: i + 1, qty });
     });
 
     const mode   = getBoxMode(pid);
@@ -1336,6 +1665,10 @@ function buildPrintHTML() {
         ).join('')
       : `<tr><td colspan="3" style="color:#94a3b8;font-style:italic;text-align:center;">No data entered</td></tr>`;
 
+    const pickLabelStr = pickLabelEntries.length > 1
+      ? pickLabelEntries.map(e => `PL ${e.n}: ${e.qty.toLocaleString()} pcs`).join(' &nbsp;+&nbsp; ')
+      : '';
+
     html += `
     <div class="pr-pallet-hdr">
       <span class="pr-pallet-hdr-title">PALLET ${palletIdx} &nbsp;&mdash;&nbsp; ${esc(ptype)} (${esc(dims)} cm) &nbsp;|&nbsp; ${esc(weight)} kg &nbsp;|&nbsp; ${esc(height)} cm</span>
@@ -1345,6 +1678,7 @@ function buildPrintHTML() {
       <span>Pick PN: <b>${esc(delivPN)}</b> &nbsp;|&nbsp; Box PN: <b>${esc(boxPN)}</b></span>
       <span class="${pnClass}">${pnLabel}</span>
     </div>
+    ${pickLabelStr ? `<div class="pr-pick-labels-line">Pick Labels: ${pickLabelStr} &nbsp;|&nbsp; Total: <b>${pickTotal.toLocaleString()} pcs</b></div>` : ''}
     <div class="pr-breakdown-lbl">Box Breakdown by Quantity</div>
     <table class="pr-table pr-breakdown-tbl">
       <tr><th>No. of Boxes</th><th>Pcs / Box</th><th>Subtotal (pcs)</th></tr>
@@ -1673,6 +2007,201 @@ function doExportPDF() {
   doc.text('Arrow WH Packing Checklist  -  Generated: ' + now + '  -  Microsoft Area Sevenum', PAGE_W/2, y, { align:'center' });
 
   doc.save('packing-' + delivNum + '-' + new Date().toISOString().slice(0,10) + '.pdf');
+}
+
+/* ══ DATA EXPORT (JSON / CSV) ═══════════════════════════ */
+function buildExportData() {
+  const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
+  const data = {
+    exportedAt: new Date().toISOString(),
+    delivery: {
+      operator: document.getElementById('operator')?.value || '',
+      deliveryNum: document.getElementById('delivery-num')?.value || '',
+      partNumber: delivPN,
+      destination: destination,
+      heightLimit: HEIGHT_LIMITS[destination]
+    },
+    pallets: [],
+    summary: { totalPallets: 0, totalBoxes: 0, totalExpected: 0, totalVerified: 0, overallStatus: 'pending' }
+  };
+
+  let allMatch = true, anyMismatch = false, anyData = false;
+
+  const blocks = document.querySelectorAll('.pallet-block');
+  blocks.forEach((b, idx) => {
+    const pid = b.dataset.pid;
+    const type = getPType(pid);
+    const pnMode = getPNMode(pid);
+    const boxMode = getBoxMode(pid);
+    const weight = parseFloat(document.getElementById(`weight-${pid}`)?.value) || 0;
+    const height = parseFloat(document.getElementById(`height-${pid}`)?.value) || 0;
+    const limit = HEIGHT_LIMITS[destination];
+
+    const pallet = {
+      id: idx + 1,
+      type: type || null,
+      dimensions: type ? PTYPE[type] : null,
+      weight: weight || null,
+      height: height || null,
+      pnMode: pnMode,
+      boxMode: boxMode,
+      status: 'pending',
+      pickLabels: [],
+      boxes: [],
+      totals: { expected: 0, verified: 0, boxCount: 0, pnMatch: null, qtyMatch: null, heightOk: height ? height <= limit : null }
+    };
+
+    // Pick labels
+    let pickTotal = 0;
+    document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach((inp, i) => {
+      const q = parseInt(inp.value) || 0;
+      pickTotal += q;
+      if (q > 0) pallet.pickLabels.push({ label: `PL${i + 1}`, qty: q });
+    });
+    pallet.totals.expected = pickTotal;
+
+    // Boxes by mode
+    let boxTotal = 0, boxCount = 0;
+    if (boxMode === 'scan' && pnMode === 'per-box') {
+      document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).forEach((row, i) => {
+        const [pnInp, qtyInp] = row.querySelectorAll('input');
+        const pn = (pnInp?.value || '').trim().toUpperCase();
+        const q = parseInt(qtyInp?.value) || 0;
+        const src = tagStateOf(qtyInp);
+        boxTotal += q;
+        boxCount += 1;
+        pallet.boxes.push({ id: `B${i + 1}`, partNumber: pn, qty: q, source: src === 'wait' ? 'pending' : src });
+      });
+    } else if (boxMode === 'scan') {
+      const sharedPN = (document.getElementById(`box-pn-${pid}`)?.value || '').trim().toUpperCase();
+      document.querySelectorAll(`#box-rows-${pid} .box-row`).forEach((row, i) => {
+        const inp = row.querySelector('input');
+        const q = parseInt(inp?.value) || 0;
+        const src = tagStateOf(inp);
+        boxTotal += q;
+        boxCount += 1;
+        pallet.boxes.push({ id: `B${i + 1}`, partNumber: sharedPN, qty: q, source: src === 'wait' ? 'pending' : src });
+      });
+    } else { // visual
+      const sharedPN = (document.getElementById(`box-pn-${pid}`)?.value || '').trim().toUpperCase();
+      let cursor = 1;
+      document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(row => {
+        const [a, c] = row.querySelectorAll('input');
+        const count = parseInt(a?.value) || 0;
+        const q = parseInt(c?.value) || 0;
+        for (let i = 0; i < count; i++) {
+          pallet.boxes.push({ id: `B${cursor}`, partNumber: sharedPN, qty: q, source: 'visual' });
+          cursor++;
+        }
+        boxTotal += count * q;
+        boxCount += count;
+      });
+    }
+    pallet.totals.verified = boxTotal;
+    pallet.totals.boxCount = boxCount;
+
+    // PN match
+    let pnOk = null;
+    if (delivPN) {
+      if (boxMode === 'scan' && pnMode === 'per-box') {
+        const rows = pallet.boxes.filter(x => x.partNumber);
+        if (rows.length > 0) {
+          const allFilled = pallet.boxes.every(x => x.partNumber);
+          const anyMis = rows.some(x => x.partNumber !== delivPN);
+          if (anyMis) pnOk = false;
+          else if (allFilled) pnOk = true;
+        }
+      } else {
+        const sharedPN = (document.getElementById(`box-pn-${pid}`)?.value || '').trim().toUpperCase();
+        if (sharedPN) pnOk = sharedPN === delivPN;
+      }
+    }
+    pallet.totals.pnMatch = pnOk;
+    pallet.totals.qtyMatch = (pickTotal > 0 && boxTotal > 0) ? pickTotal === boxTotal : null;
+
+    // Status
+    if (pickTotal > 0 && boxTotal > 0 && delivPN) {
+      if (pnOk === true && pickTotal === boxTotal) pallet.status = 'ok';
+      else pallet.status = 'mismatch';
+    } else if (pickTotal > 0 || boxTotal > 0) {
+      pallet.status = 'pending';
+    }
+
+    data.pallets.push(pallet);
+
+    // Summary aggregation
+    data.summary.totalBoxes += boxCount;
+    data.summary.totalExpected += pickTotal;
+    data.summary.totalVerified += boxTotal;
+    if (pickTotal > 0 || boxTotal > 0) anyData = true;
+    if (pallet.status !== 'ok') allMatch = false;
+    if (pallet.status === 'mismatch') anyMismatch = true;
+  });
+
+  data.summary.totalPallets = blocks.length;
+  if (blocks.length && allMatch && anyData) data.summary.overallStatus = 'ok';
+  else if (anyMismatch) data.summary.overallStatus = 'mismatch';
+  else data.summary.overallStatus = 'pending';
+
+  return data;
+}
+
+function _downloadBlob(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function _exportFilename(ext) {
+  const delivNum = (document.getElementById('delivery-num')?.value || 'checklist').replace(/[^\w-]/g, '_');
+  const t = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const stamp = `${t.getFullYear()}${pad(t.getMonth() + 1)}${pad(t.getDate())}-${pad(t.getHours())}${pad(t.getMinutes())}`;
+  return `packing-${delivNum}-${stamp}.${ext}`;
+}
+
+function doExportJSON() {
+  const data = buildExportData();
+  _downloadBlob(JSON.stringify(data, null, 2), _exportFilename('json'), 'application/json');
+}
+
+function _csvEscape(v) {
+  if (v == null) return '';
+  const s = String(v);
+  if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+function doExportCSV() {
+  const data = buildExportData();
+  const headers = ['delivery_num','part_number','operator','destination','pallet_id','pallet_type','pallet_dimensions','pallet_weight_kg','pallet_height_cm','pallet_status','box_id','box_pn','box_qty','source'];
+  const rows = [headers.join(',')];
+  data.pallets.forEach(p => {
+    if (p.boxes.length === 0) {
+      rows.push([
+        data.delivery.deliveryNum, data.delivery.partNumber, data.delivery.operator, data.delivery.destination,
+        p.id, p.type || '', p.dimensions || '', p.weight || '', p.height || '', p.status,
+        '', '', '', ''
+      ].map(_csvEscape).join(','));
+      return;
+    }
+    p.boxes.forEach(bx => {
+      rows.push([
+        data.delivery.deliveryNum, data.delivery.partNumber, data.delivery.operator, data.delivery.destination,
+        p.id, p.type || '', p.dimensions || '', p.weight || '', p.height || '', p.status,
+        bx.id, bx.partNumber || '', bx.qty, bx.source
+      ].map(_csvEscape).join(','));
+    });
+  });
+  // UTF-8 BOM for Excel compatibility
+  const csv = '﻿' + rows.join('\r\n');
+  _downloadBlob(csv, _exportFilename('csv'), 'text/csv;charset=utf-8');
 }
 </script>
 </body>
