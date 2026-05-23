@@ -1,0 +1,127 @@
+Resumen de la app
+Flujo del operario:
+
+Abre cycle-count.html en Chrome del TC → vista limpia con campo Operario y Pallet ID.
+Si había sesión sin terminar → modal "Reanudar pallet PLT-XXX?" con [Reanudar] / [Descartar].
+Escribe operario, escanea pallet license plate → Enter → aparece automáticamente Caja 1 con foco en PN.
+Por caja: PN → Qty → COO. Cada Enter avanza al siguiente campo. Al confirmar COO se crea Caja N+1 automáticamente.
+Mismatch (PN o COO distinto a Caja 1): tarjeta borde rojo + badge ✗ MISMATCH, beep error, sigue contando sin bloquear.
+Footer sticky muestra Cajas / Total pcs / Status (✓ OK · ✗ MISMATCH · ● En progreso).
+Botón "🖨 Imprimir y cerrar" → confirm → imprime etiqueta resumen + recibo térmico (a la impresora ZQ vía diálogo nativo de Android Print) → guarda en historial → resetea para nuevo pallet.
+Validaciones reusando lógica del packing:
+
+Qty: strip non-digits + leading zeros (A00250 → 250). Detecta PO (/\d[a-zA-Z]/) → error.
+COO: solo alfa 2-3 chars uppercase. Detecta dígitos → error (probable scan accidental de qty).
+PN: alfanumérico libre, comparación case-insensitive contra Caja 1.
+Tags ✓ SCANNED (verde) / ✎ TYPED (ámbar) / ● SCAN (gris pulsando), reset a TYPED al editar SCANNED.
+Persistencia:
+
+Auto-save debounced 400ms (clave arrowCycleCountSessionV1).
+Historial FIFO 20 pallets (clave arrowCycleCountHistoryV1). Botón "⌚ Historial" muestra lista + detalle + reimprimir.
+Claves distintas del packing → ambas apps coexisten.
+Print:
+
+Etiqueta: 76mm × ~120mm, con Pallet ID grande, PN/COO/cajas/total, status badge, QR (codifica {plt,pn,qty,coo,n,st,ts} para re-escaneo), operario y fecha.
+Recibo: 76mm × largo dinámico, tabla monoespaciada B# / PN / QTY / COO / ✓✗, firma operario.
+QR vía CDN qrcode-generator@1.4.4; si falla la red, la etiqueta sale sin QR pero todo lo demás funciona.
+Para probar en campo:
+
+Confirmar que la ZQ está pareada por Bluetooth en el TC y que está instalada la app "Zebra Print Service" del Play Store → debería aparecer al elegir "Imprimir" en Chrome.
+Si no imprime, mandarme el modelo exacto de ZQ y ajustamos formato/protocolo.
+
+2##
+unciona correctamente: 10×250 + 5×100 + 3×50 = 18 cajas / 3150 pcs, ordenado de mayor a menor cantidad.
+
+Resumen de los cambios en cycle-count.html:
+
+1. Tarjeta de segregación en vivo (en la app)
+Mientras escaneas, aparece una tarjeta Segregación por cantidad que agrupa las cajas en tiempo real:
+
+
+ 10 × 250 pcs = 2,500
+  5 × 100 pcs =   500
+  3 ×  50 pcs =   150
+                     ─────
+        18 cajas · 3,150 pcs
+2. Etiqueta autoadhesiva (buildLabelHTML)
+La tabla de segregación es ahora el bloque principal de la etiqueta — debajo del status badge y antes del QR. Cada fila: count × qty pcs = subtotal, ordenada de mayor a menor cantidad. Fila TOTAL al final con doble borde. Esto es lo que el picker lee al pararse frente al pallet: ya sabe cuántas cajas necesita para X piezas.
+
+3. QR ampliado con detalle por caja
+El payload ahora incluye boxes: [250,250,250,...,100,100,50,...] — array compacto con la qty de cada caja. Quien escanee el QR puede reconstruir la segregación exacta. Cambié el nivel de error correction de M→L para acomodar más datos sin agrandar el módulo.
+
+4. Recibo (no cambia)
+Sigue mostrando el detalle caja-por-caja con tabla B# / PN / QTY / COO / ✓✗, ideal para archivo y auditoría.
+
+Para probar: abre cycle-count.html, escanea un pallet con cajas de cantidades mixtas (ej: 250, 250, 100, 100, 50), verifica que la tarjeta "Segregación" aparece y muestra 2×250 + 2×100 + 1×50. Al cerrar e imprimir, la etiqueta debe verse con esa tabla bien grande para que sea legible al picker desde el pasillo.
+Todo OK. Resumen del cambio en cycle-count.html:
+
+Portada / guía rápida que aparece solo en la primera apertura (después se recuerda en localStorage). Contenido:
+
+
+🏷️ Arrow Cycle Count — Guía rápida
+─────────────────────────────────────
+Verifica el contenido de un pallet caja por caja:
+mismo PN, mismo COO, y registra la cantidad…
+
+  1  IDENTIFICA
+     Escribe tu nombre y escanea el pallet license plate.
+
+  2  ESCANEA CADA CAJA
+     PN → Cantidad → COO. Auto-pasa a la próxima caja.
+
+  3  DETECTA DIFERENCIAS  (paso rojo)
+     La primera caja es la referencia. Diferente PN/COO
+     → tarjeta roja + beep. El conteo continúa.
+
+  4  REVISA LA SEGREGACIÓN
+     Mira el bloque "Segregación por cantidad"
+     ej: 10 × 250 = 2,500 · 5 × 100 = 500
+
+  5  IMPRIME Y CIERRA  (paso verde)
+     Etiqueta autoadhesiva (QR + segregación)
+     + recibo térmico con detalle caja-por-caja.
+
+💾 Auto-guardado · ⌚ Historial · Tags: ● SCAN ✓ SCANNED ✎ TYPED
+
+           [ Entendido, empezar ]
+Comportamiento:
+
+Aparece automáticamente solo si NO hay sesión activa para reanudar y NO se ha visto antes (arrowCycleCountWelcomeSeenV1 en localStorage).
+Al tocar "Entendido, empezar" → marca el flag, cierra el modal, pone el foco en Operario (o pallet ID si ya hay operario guardado).
+Botón "?" en el topbar para reabrirla en cualquier momento (sin afectar la sesión activa).
+En desktop/dev: para volver a probar la primera apertura, ejecuta en consola localStorage.removeItem('arrowCycleCountWelcomeSeenV1') y recarga.
+De modal a splash full-screen ("grip card"):
+
+El antiguo <div class="modal-backdrop" id="welcome-modal"> se reemplazó por un <section id="welcome-splash"> full-viewport (position:fixed; inset:0).
+Al mostrarse, la app y el footer quedan invisibles (visibility:hidden) — el operario solo ve la portada, no la app detrás.
+Contenido lean en inglés:
+
+
+       [📦 pallet+boxes SVG]
+
+           ARROW
+        CYCLE COUNT
+   Sevenum NL · Microsoft Area
+   ──────────────────────────
+   ① Enter operator & scan pallet license plate
+   ② For each box scan PN → QTY → COO
+   ③ First box = reference; mismatches flag red
+   ④ Live segregation by quantity is shown as you scan
+   ⑤ Print sticky label + thermal receipt; pallet saved to history
+
+         [ START COUNTING → ]
+
+   Auto-saved · 20-pallet history · Tap ? anytime to reopen
+Branding:
+
+SVG inline de un pallet con 5 cajas apiladas (2 arriba + 3 medio), color cyan #38bdf8 con drop-shadow suave.
+"ARROW" en 30px/peso 900/letter-spacing 0.18em — estilo tipográfico fuerte.
+Subtítulo "Cycle Count" en cyan.
+Comportamiento:
+
+Primera vez → splash aparece automáticamente (cuando no hay sesión activa para reanudar). No tiene botón X — solo el botón verde "START COUNTING".
+Botón ? en el topbar → reabre el splash en cualquier momento. En modo "reopened" aparece un botón ✕ arriba-derecha para cerrar sin necesidad de tocar el botón grande.
+Una vez dismissed por primera vez (flag arrowCycleCountWelcomeSeenV1 en localStorage), no vuelve a aparecer automáticamente.
+Para probar la primera apertura otra vez:
+
+En la consola del browser: localStorage.removeItem('arrowCycleCountWelcomeSeenV1') → recargar

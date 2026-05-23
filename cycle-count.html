@@ -91,6 +91,33 @@ html,body{margin:0;padding:0;background:#0d1117;color:#e6edf3;font-family:-apple
 /* ── Save indicator ────────────────────────────────── */
 #save-indicator{font-size:10px;color:#6e7681;text-align:center;margin-top:6px;letter-spacing:.06em;}
 
+/* ── Welcome splash (full-screen grip card) ────────── */
+#welcome-splash{position:fixed;inset:0;background:#0d1117;z-index:9999;display:none;flex-direction:column;padding:24px 20px;overflow-y:auto;}
+#welcome-splash.show{display:flex;}
+.splash-inner{max-width:480px;margin:0 auto;width:100%;flex:1;display:flex;flex-direction:column;justify-content:center;padding:12px 0;}
+.splash-brand{text-align:center;margin-bottom:18px;}
+.splash-icon{display:inline-flex;width:74px;height:74px;color:#38bdf8;margin-bottom:10px;filter:drop-shadow(0 4px 12px rgba(56,189,248,.25));}
+.splash-logo{font-size:30px;font-weight:900;letter-spacing:.18em;color:#e6edf3;line-height:1;margin:0;}
+.splash-subtitle{display:block;font-size:13px;font-weight:700;color:#38bdf8;letter-spacing:.14em;text-transform:uppercase;margin-top:6px;}
+.splash-tag{display:block;font-size:10px;color:#6e7681;letter-spacing:.1em;margin-top:8px;text-transform:uppercase;}
+.splash-divider{height:1px;background:linear-gradient(90deg,transparent,#30363d,transparent);margin:18px 0 16px;}
+.splash-steps{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;}
+.splash-step{display:flex;align-items:center;gap:12px;font-size:14px;color:#e6edf3;line-height:1.4;}
+.splash-step .ss-num{flex:0 0 30px;width:30px;height:30px;border-radius:50%;background:#161b22;border:1px solid #30363d;color:#38bdf8;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:'DM Mono',monospace;font-size:13px;}
+.splash-step .ss-text{flex:1;}
+.splash-step .ss-text b{color:#fff;font-weight:700;}
+.splash-step .ss-text .mono{font-family:'DM Mono',monospace;background:#161b22;color:#38bdf8;padding:1px 5px;border-radius:3px;font-size:12px;border:1px solid #21262d;}
+.splash-cta{margin-top:24px;text-align:center;}
+.btn-splash{background:#16a34a;color:#fff;border:none;padding:16px 38px;border-radius:10px;font-size:15px;font-weight:800;letter-spacing:.08em;cursor:pointer;min-height:54px;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-transform:uppercase;}
+.btn-splash:active{background:#15803d;transform:scale(.98);}
+.splash-footer{text-align:center;font-size:10px;color:#6e7681;letter-spacing:.08em;margin-top:14px;text-transform:uppercase;}
+.btn-splash-close{position:absolute;top:14px;right:16px;background:transparent;border:1px solid #30363d;color:#8b949e;width:34px;height:34px;border-radius:8px;font-size:16px;cursor:pointer;line-height:1;display:none;align-items:center;justify-content:center;}
+#welcome-splash.reopened .btn-splash-close{display:flex;}
+
+.btn-help{background:transparent;border:1px solid #30363d;color:#8b949e;padding:8px 10px;border-radius:8px;font-size:14px;cursor:pointer;line-height:1;margin-right:6px;font-weight:700;min-width:34px;}
+.btn-help:active{background:#21262d;color:#e6edf3;}
+.topbar-right{display:flex;align-items:center;gap:6px;}
+
 /* ── Segregation card ──────────────────────────────── */
 .seg-body{display:flex;flex-direction:column;gap:4px;}
 .seg-row{display:grid;grid-template-columns:auto 14px auto 14px 1fr;align-items:center;gap:6px;padding:8px 10px;background:#0d1117;border:1px solid #21262d;border-radius:6px;font-size:14px;}
@@ -177,7 +204,10 @@ html,body{margin:0;padding:0;background:#0d1117;color:#e6edf3;font-family:-apple
 <div id="app">
   <div class="topbar">
     <h1>Arrow Cycle Count<span class="sub">Sevenum NL · Microsoft Area</span></h1>
-    <button class="btn-history" onclick="openHistory()">⌚ Historial</button>
+    <div class="topbar-right">
+      <button class="btn-help" onclick="openWelcome()" title="Guía rápida">?</button>
+      <button class="btn-history" onclick="openHistory()">⌚ Historial</button>
+    </div>
   </div>
 
   <!-- Pallet identification -->
@@ -277,6 +307,67 @@ html,body{margin:0;padding:0;background:#0d1117;color:#e6edf3;font-family:-apple
   </div>
 </div>
 
+<!-- Welcome splash (full-screen grip card, shown first time only) -->
+<section id="welcome-splash" aria-label="Quick start guide">
+  <button class="btn-splash-close" onclick="dismissWelcome()" title="Close">✕</button>
+  <div class="splash-inner">
+    <div class="splash-brand">
+      <div class="splash-icon" aria-hidden="true">
+        <svg width="74" height="74" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+          <!-- top boxes -->
+          <rect x="15" y="6" width="14" height="14" rx="1.2"/>
+          <rect x="35" y="6" width="14" height="14" rx="1.2"/>
+          <!-- middle boxes -->
+          <rect x="6" y="22" width="14" height="14" rx="1.2"/>
+          <rect x="25" y="22" width="14" height="14" rx="1.2"/>
+          <rect x="44" y="22" width="14" height="14" rx="1.2"/>
+          <!-- pallet base -->
+          <rect x="3" y="40" width="58" height="6" rx="1"/>
+          <!-- legs -->
+          <line x1="9" y1="46" x2="9" y2="56"/>
+          <line x1="32" y1="46" x2="32" y2="56"/>
+          <line x1="55" y1="46" x2="55" y2="56"/>
+          <!-- bottom rail -->
+          <line x1="3" y1="56" x2="61" y2="56"/>
+        </svg>
+      </div>
+      <h1 class="splash-logo">ARROW</h1>
+      <span class="splash-subtitle">Cycle Count</span>
+      <span class="splash-tag">Sevenum NL · Microsoft Area</span>
+    </div>
+
+    <div class="splash-divider"></div>
+
+    <ol class="splash-steps">
+      <li class="splash-step">
+        <span class="ss-num">1</span>
+        <span class="ss-text">Enter operator & scan <b>pallet license plate</b></span>
+      </li>
+      <li class="splash-step">
+        <span class="ss-num">2</span>
+        <span class="ss-text">For each box scan <span class="mono">PN</span> → <span class="mono">QTY</span> → <span class="mono">COO</span></span>
+      </li>
+      <li class="splash-step">
+        <span class="ss-num">3</span>
+        <span class="ss-text">First box = reference; mismatches flag <b style="color:#f87171;">red</b></span>
+      </li>
+      <li class="splash-step">
+        <span class="ss-num">4</span>
+        <span class="ss-text">Live <b>segregation</b> by quantity is shown as you scan</span>
+      </li>
+      <li class="splash-step">
+        <span class="ss-num">5</span>
+        <span class="ss-text">Print <b>sticky label</b> + thermal receipt; pallet saved to history</span>
+      </li>
+    </ol>
+
+    <div class="splash-cta">
+      <button class="btn-splash" onclick="dismissWelcome()">Start counting →</button>
+    </div>
+    <div class="splash-footer">Auto-saved · 20-pallet history · Tap ? anytime to reopen</div>
+  </div>
+</section>
+
 <!-- History detail modal -->
 <div class="modal-backdrop" id="history-detail-modal">
   <div class="modal">
@@ -304,6 +395,7 @@ function esc(s){return String(s==null?'—':s).replace(/&/g,'&amp;').replace(/</
 /* ── STATE ─────────────────────────────────────────── */
 const SESSION_KEY='arrowCycleCountSessionV1';
 const HISTORY_KEY='arrowCycleCountHistoryV1';
+const WELCOME_SEEN_KEY='arrowCycleCountWelcomeSeenV1';
 const STATE_VERSION=1;
 const HISTORY_MAX=20;
 let boxCounter=0;
@@ -933,6 +1025,32 @@ function reprintHistory(h){
 
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 
+/* ── WELCOME SPLASH (grip card) ────────────────────── */
+function openWelcome(){
+  const splash=document.getElementById('welcome-splash');
+  splash.classList.add('show');
+  // If reopened via ? button (welcome already seen), show the close (X) button too
+  if(welcomeSeen())splash.classList.add('reopened');
+  // Hide app + footer behind the splash for a true full-screen experience
+  document.getElementById('app').style.visibility='hidden';
+  document.querySelector('.footer').style.visibility='hidden';
+  window.scrollTo(0,0);
+}
+function dismissWelcome(){
+  try{localStorage.setItem(WELCOME_SEEN_KEY,'1');}catch(e){}
+  const splash=document.getElementById('welcome-splash');
+  splash.classList.remove('show','reopened');
+  document.getElementById('app').style.visibility='';
+  document.querySelector('.footer').style.visibility='';
+  // After dismissing, put focus on operator field if empty, otherwise on pallet-id
+  const opEl=document.getElementById('operator');
+  const pidEl=document.getElementById('pallet-id');
+  setTimeout(()=>{(opEl.value.trim()?pidEl:opEl).focus();},120);
+}
+function welcomeSeen(){
+  try{return localStorage.getItem(WELCOME_SEEN_KEY)==='1';}catch(e){return false;}
+}
+
 /* ── CLOSE PALLET & PRINT ──────────────────────────── */
 function buildEntryFromCurrent(){
   const cards=[...document.querySelectorAll('.box-card')];
@@ -1080,13 +1198,18 @@ function buildReceiptHTML(e){
 /* ── INIT ──────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded',()=>{
   const s=loadSession();
-  if(s&&(s.palletId||(s.boxes&&s.boxes.length>0))){
+  const hasSession=s&&(s.palletId||(s.boxes&&s.boxes.length>0));
+  if(hasSession){
     document.getElementById('resume-text').textContent=
       `Hay un pallet en progreso: ${s.palletId||'(sin ID)'} — ${(s.boxes||[]).length} cajas. ¿Continuar?`;
     document.getElementById('resume-modal').classList.add('show');
   } else if(s&&s.operator){
     // Just restore operator name
     document.getElementById('operator').value=s.operator;
+  }
+  // Show welcome guide on first ever launch (only if no active session to resume)
+  if(!hasSession&&!welcomeSeen()){
+    openWelcome();
   }
   updateFooter();
 });
