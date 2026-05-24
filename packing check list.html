@@ -1,0 +1,2208 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1280"/>
+<title>Packing Checklist — Arrow Electronics</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#0d1117;min-height:100vh;font-size:15px;color:#e6edf3;}
+.mono{font-family:'DM Mono',monospace;}
+
+/* ── HEADER ── */
+.top-bar{background:linear-gradient(135deg,#010409 0%,#0d1117 60%,#161b22 100%);padding:14px 28px 0;box-shadow:0 2px 16px rgba(0,0,0,.6),0 1px 0 rgba(56,189,248,.12);}
+.top-bar-inner{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+.logo-icon{width:42px;height:42px;background:rgba(56,189,248,.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid rgba(56,189,248,.25);flex-shrink:0;}
+.logo-title{color:#e6edf3;font-size:17px;font-weight:600;line-height:1.2;}
+.logo-sub{color:rgba(255,255,255,.35);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
+.header-right{margin-left:auto;text-align:right;color:rgba(255,255,255,.3);font-size:11px;font-family:'DM Mono',monospace;}
+
+/* ── CARDS ── */
+.card{background:#161b22;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3);margin-bottom:16px;overflow:hidden;border:1px solid #21262d;}
+.card-head{padding:12px 18px;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:10px;}
+.card-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.icon-blue{background:rgba(56,189,248,.15);color:#38bdf8;}
+.icon-green{background:rgba(16,185,129,.15);color:#10b981;}
+.icon-orange{background:rgba(245,158,11,.15);color:#f59e0b;}
+.card-title{font-size:13px;font-weight:600;color:#e6edf3;}
+.card-body{padding:18px;}
+
+/* ── FORMS ── */
+.form-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.fg{display:flex;flex-direction:column;gap:6px;}
+.fg label{font-size:11px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.06em;}
+.fc{padding:10px 14px;font-size:15px;font-family:'DM Sans',sans-serif;color:#e6edf3;background:#0d1117;border:1.5px solid #30363d;border-radius:9px;width:100%;transition:all .15s;outline:none;}
+.fc:focus{border-color:#38bdf8;background:#161b22;box-shadow:0 0 0 3px rgba(56,189,248,.15);}
+.fc::placeholder{color:#6e7681;}
+.fc.mono{font-family:'DM Mono',monospace;font-size:16px;letter-spacing:.02em;}
+.fc.scanned{border-color:#10b981!important;background:rgba(16,185,129,.08)!important;color:#34d399;}
+.fc.pn-err{border-color:#ef4444!important;background:rgba(239,68,68,.08)!important;}
+
+/* ── PILLS ── */
+.pill-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+.pill{padding:7px 14px;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;color:#8b949e;background:#21262d;border:1.5px solid #30363d;border-radius:20px;cursor:pointer;transition:all .15s;}
+.pill:hover{border-color:#38bdf8;color:#38bdf8;background:rgba(56,189,248,.08);}
+.pill.selected{background:#1d6fa4;color:#e6edf3;border-color:#38bdf8;}
+.pill.sel-purple{background:#4c1d95;color:#e9d5ff;border-color:#7c3aed;}
+
+/* ── PALLET TYPE PILLS ── */
+.ptype-row{display:flex;gap:5px;flex-wrap:wrap;}
+.ptype-pill{padding:6px 11px;font-size:12px;font-weight:700;font-family:'DM Mono',monospace;color:#8b949e;background:#21262d;border:2px solid #30363d;border-radius:8px;cursor:pointer;transition:all .15s;line-height:1.3;text-align:center;}
+.ptype-pill:hover{border-color:#38bdf8;color:#38bdf8;background:rgba(56,189,248,.08);}
+.ptype-pill.selected{background:#0c2a3a;color:#38bdf8;border-color:#38bdf8;}
+.ptype-size{font-size:9px;font-weight:400;opacity:.65;display:block;}
+
+/* ── PALLET BLOCK ── */
+.pallet-block{background:#161b22;border:1.5px solid #30363d;border-radius:12px;margin-bottom:16px;overflow:hidden;transition:border-color .25s;}
+.pallet-block.ok{border-color:#10b981;}
+.pallet-block.err{border-color:#ef4444;}
+
+.pallet-hdr{padding:10px 16px;background:linear-gradient(90deg,#010409 0%,#0d1117 100%);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid rgba(56,189,248,.08);}
+.pallet-num{color:#e6edf3;font-size:13px;font-weight:600;}
+.pallet-hdr-right{display:flex;align-items:center;gap:8px;}
+
+.mode-sw{display:flex;background:rgba(255,255,255,.06);border-radius:7px;padding:2px;border:1px solid rgba(255,255,255,.1);}
+.mode-btn{padding:3px 11px;font-size:11px;font-weight:600;font-family:'DM Sans',sans-serif;color:rgba(255,255,255,.4);background:transparent;border:none;border-radius:5px;cursor:pointer;transition:all .15s;}
+.mode-btn.active{background:#1c2433;color:#38bdf8;box-shadow:0 1px 3px rgba(0,0,0,.5);}
+
+.btn-rm-pallet{padding:4px 10px;font-size:11px;font-weight:600;font-family:'DM Sans',sans-serif;color:#f87171;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:6px;cursor:pointer;transition:all .12s;}
+.btn-rm-pallet:hover{background:rgba(239,68,68,.25);}
+
+/* ── PALLET META ROW ── */
+.pallet-meta-row{display:grid;grid-template-columns:auto 180px 180px 1fr;gap:18px;align-items:start;padding:16px 18px;background:#1c2433;border-bottom:1px solid #21262d;}
+.meta-label{font-size:11px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.height-warn{font-size:11px;color:#f87171;font-weight:600;margin-top:4px;display:none;}
+.height-warn.show{display:block;}
+
+/* ── PICK / BOX SECTIONS ── */
+.psec-hdr{padding:9px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.psec-hdr.picks{background:rgba(56,189,248,.05);border-top:1px solid rgba(56,189,248,.12);}
+.psec-hdr.boxes{background:rgba(16,185,129,.05);border-top:1px solid rgba(16,185,129,.12);}
+.psec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
+.psec-hdr.picks .psec-title{color:#38bdf8;}
+.psec-hdr.boxes .psec-title{color:#10b981;}
+.psec-badge{font-size:12px;font-family:'DM Mono',monospace;font-weight:600;padding:3px 10px;border-radius:20px;}
+.badge-blue{background:rgba(56,189,248,.15);color:#38bdf8;}
+.badge-green{background:rgba(16,185,129,.15);color:#10b981;}
+.psec-body{padding:12px 16px 14px;}
+
+/* ── SCAN ROWS ── */
+.scan-row{display:flex;gap:9px;align-items:center;margin-bottom:8px;}
+.qty-rows-wrap{display:flex;flex-wrap:wrap;gap:6px 10px;margin-bottom:4px;}
+.qty-rows-wrap .scan-row{margin-bottom:0;}
+.scan-row-num{font-size:12px;font-weight:600;color:#6e7681;width:40px;flex-shrink:0;font-family:'DM Mono',monospace;}
+.scan-tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px;flex-shrink:0;white-space:nowrap;}
+.tag-scan{background:rgba(16,185,129,.15);color:#34d399;}
+.tag-typed{background:rgba(245,158,11,.15);color:#f59e0b;}
+.tag-wait{background:rgba(148,163,184,.1);color:#6e7681;animation:pulse 1.8s ease-in-out infinite;}
+.btn-rm-row{width:26px;height:26px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#6e7681;background:#21262d;border:1px solid #30363d;border-radius:6px;cursor:pointer;transition:all .12s;font-family:'DM Sans',sans-serif;}
+.btn-rm-row:hover{background:rgba(239,68,68,.15);color:#f87171;border-color:rgba(239,68,68,.3);}
+
+/* ── VISUAL GROUP ROWS ── */
+.visual-group-row{display:grid;grid-template-columns:120px 20px 140px 1fr 26px;gap:10px;align-items:center;margin-bottom:9px;}
+
+/* ── PER-BOX PN ROWS ── */
+.perbox-row{display:grid;grid-template-columns:36px 1fr auto 90px auto 26px;gap:7px;align-items:center;margin-bottom:7px;}
+.perbox-col-hdr{display:grid;grid-template-columns:36px 1fr auto 90px auto 26px;gap:7px;align-items:center;margin-bottom:5px;font-size:10px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.05em;}
+.pn-sw-wrap{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.x-sign{font-size:16px;font-weight:600;color:#6e7681;text-align:center;}
+.group-result{font-size:14px;font-family:'DM Mono',monospace;color:#10b981;font-weight:500;}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;border:none;border-radius:9px;cursor:pointer;transition:all .12s;white-space:nowrap;}
+.btn:active{transform:scale(.98);}
+.btn-blue{background:#1d6fa4;color:#e6edf3;box-shadow:0 1px 0 rgba(0,0,0,.4);}
+.btn-blue:hover{background:#1a5f8f;}
+.btn-green{background:#059669;color:#fff;box-shadow:0 1px 0 rgba(0,0,0,.4);}
+.btn-green:hover{background:#047857;}
+.btn-purple{background:#5b21b6;color:#e9d5ff;box-shadow:0 1px 0 rgba(0,0,0,.4);}
+.btn-purple:hover{background:#4c1d95;}
+.btn-ghost-blue{color:#38bdf8;background:rgba(56,189,248,.08);border:1.5px solid rgba(56,189,248,.25);}
+.btn-ghost-blue:hover{background:rgba(56,189,248,.15);}
+.btn-ghost-green{color:#10b981;background:rgba(16,185,129,.08);border:1.5px solid rgba(16,185,129,.25);}
+.btn-ghost-green:hover{background:rgba(16,185,129,.15);}
+.btn-sm{padding:6px 14px;font-size:13px;}
+
+/* ── VALIDATION STRIP ── */
+.val-strip{padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border-top:2px solid #30363d;transition:all .2s;}
+.val-strip.pending{background:#161b22;border-top-color:#30363d;}
+.val-strip.match{background:rgba(16,185,129,.06);border-top-color:#10b981;}
+.val-strip.mismatch{background:rgba(239,68,68,.06);border-top-color:#ef4444;}
+.val-cell{display:flex;flex-direction:column;gap:3px;}
+.val-lbl{font-size:10px;font-weight:700;color:#6e7681;text-transform:uppercase;letter-spacing:.06em;}
+.val-val{font-size:14px;font-family:'DM Mono',monospace;font-weight:600;color:#e6edf3;}
+.val-badge{font-size:14px;font-weight:700;padding:6px 18px;border-radius:20px;letter-spacing:.02em;}
+.val-badge.pending{background:#21262d;color:#8b949e;}
+.val-badge.match{background:rgba(16,185,129,.2);color:#34d399;}
+.val-badge.mismatch{background:rgba(239,68,68,.2);color:#f87171;animation:blink .8s ease-in-out 3;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── SUMMARY BAR ── */
+.summary-bar{background:linear-gradient(135deg,#010409 0%,#0d1117 100%);border:1px solid #30363d;border-radius:12px;padding:14px 20px;display:flex;gap:28px;flex-wrap:wrap;}
+.s-item{display:flex;flex-direction:column;gap:3px;}
+.s-lbl{font-size:10px;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em;}
+.s-val{font-size:22px;font-weight:600;color:#e6edf3;font-family:'DM Mono',monospace;line-height:1;}
+.s-val.ok{color:#34d399;}
+.s-val.err{color:#f87171;}
+
+/* ── BANNERS ── */
+.scan-banner{display:flex;align-items:center;gap:10px;background:rgba(16,185,129,.07);border:1.5px solid rgba(16,185,129,.22);border-radius:10px;padding:9px 14px;margin-bottom:14px;}
+.scan-dot{width:8px;height:8px;border-radius:50%;background:#10b981;flex-shrink:0;animation:pulse 1.8s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.scan-text{font-size:12px;color:#34d399;font-weight:500;}
+.info-banner{padding:8px 12px;background:rgba(56,189,248,.07);border:1.5px solid rgba(56,189,248,.18);border-radius:9px;font-size:12px;color:#7dd3fc;font-weight:500;margin-bottom:10px;}
+.warn-banner{padding:8px 12px;background:rgba(245,158,11,.07);border:1.5px solid rgba(245,158,11,.22);border-radius:9px;font-size:12px;color:#fbbf24;font-weight:500;}
+
+/* ── PRINT ── */
+@media print{
+  body>*:not(#print-root){display:none!important;}
+  #print-root{display:block!important;font-family:Arial,sans-serif;font-size:10px;color:#111;}
+  .pr-page{page-break-after:always;padding:0 0 16px;}
+  .pr-page:last-child{page-break-after:auto;}
+
+  /* Header banner */
+  .pr-header{background:#0a1f36!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:9px 18px;display:flex;justify-content:space-between;align-items:center;}
+  .pr-header-title{font-size:13px;font-weight:bold;color:#fff!important;}
+  .pr-header-sub{font-size:8px;color:rgba(255,255,255,.7)!important;margin-top:2px;}
+  .pr-header-right{text-align:right;}
+  .pr-header-deliv{font-size:12px;font-weight:bold;color:#fff!important;}
+  .pr-header-date{font-size:8px;color:rgba(255,255,255,.7)!important;margin-top:2px;}
+
+  /* Metadata strip */
+  .pr-meta-strip{display:grid!important;grid-template-columns:1fr 1fr 1fr 1fr;background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-bottom:1px solid #e2e8f0;padding:0;margin-bottom:10px;}
+  .pr-meta-cell{padding:5px 10px;border-right:1px solid #e2e8f0;}
+  .pr-meta-cell:last-child{border-right:none;}
+  .pr-meta-lbl{font-size:7px;font-weight:bold;color:#64748b!important;text-transform:uppercase;letter-spacing:.05em;}
+  .pr-meta-val{font-size:9px;color:#0f172a!important;margin-top:1px;font-weight:500;}
+
+  /* Content wrapper */
+  .pr-content{padding:0 18px;}
+
+  /* Pallet header bar */
+  .pr-pallet-hdr{background:#0f2942!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:5px 10px;display:flex;justify-content:space-between;align-items:center;margin-top:10px;border-radius:3px 3px 0 0;}
+  .pr-pallet-hdr-title{font-size:9px;font-weight:bold;color:#fff!important;}
+
+  /* Status badges */
+  .pr-badge{font-size:8px;font-weight:bold;padding:2px 7px;border-radius:8px;}
+  .pr-badge-ok{background:#dcfce7!important;color:#15803d!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .pr-badge-err{background:#fee2e2!important;color:#dc2626!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .pr-badge-pending{background:#f1f5f9!important;color:#64748b!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+
+  /* PN verification line */
+  .pr-pn-line{font-size:8.5px;color:#475569!important;padding:3px 10px;background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;display:flex;justify-content:space-between;}
+  .pr-pn-ok{color:#15803d!important;font-weight:bold;}
+  .pr-pn-err{color:#dc2626!important;font-weight:bold;}
+  .pr-pn-pending{color:#94a3b8!important;}
+
+  /* Pick labels breakdown line */
+  .pr-pick-labels-line{font-size:8px;color:#334155!important;padding:3px 10px;background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;}
+
+  /* Breakdown label */
+  .pr-breakdown-lbl{font-size:7.5px;font-weight:bold;color:#475569!important;text-transform:uppercase;letter-spacing:.05em;padding:4px 10px 2px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;}
+
+  /* Tables base */
+  .pr-table{width:100%;border-collapse:collapse;}
+  .pr-table th,.pr-table td{padding:4px 8px;border:1px solid #e2e8f0;font-size:9px;}
+  .pr-table th{font-weight:bold;}
+
+  /* Breakdown table — green header, centered */
+  .pr-breakdown-tbl th{background:#15803d!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;text-align:center;border-color:#15803d;}
+  .pr-breakdown-tbl td{text-align:center;color:#0f172a!important;}
+
+  /* Pallet summary row — navy header */
+  .pr-summary-tbl{margin-top:2px;}
+  .pr-summary-tbl th{background:#0f2942!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;text-align:center;border-color:#0f2942;font-size:8px;}
+  .pr-summary-tbl td{background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-weight:bold;text-align:center;font-size:10px;}
+
+  /* Consolidado section */
+  .pr-consolidado-hdr{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:1px solid #cbd5e1;padding:5px 10px;font-size:10px;font-weight:bold;color:#0a1f36!important;margin-top:12px;}
+  .pr-consol-tbl th{background:#0f2942!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;text-align:center;border-color:#0f2942;font-size:8px;padding:3px 6px;}
+  .pr-consol-tbl td{text-align:center;font-size:8.5px;padding:3px 6px;border:1px solid #e2e8f0;}
+
+  /* Totals highlight box */
+  .pr-totals-box{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:1px solid #cbd5e1;border-top:none;padding:8px 10px;display:grid!important;grid-template-columns:repeat(5,1fr);}
+  .pr-total-cell{text-align:center;padding:0 4px;}
+  .pr-total-lbl{font-size:7px;font-weight:bold;color:#64748b!important;text-transform:uppercase;letter-spacing:.04em;}
+  .pr-total-val{font-size:13px;font-weight:bold;color:#0f172a!important;margin-top:2px;}
+  .pr-total-val.ok{color:#15803d!important;}
+  .pr-total-val.err{color:#dc2626!important;}
+
+  /* Signatures */
+  .pr-sig{display:block!important;margin-top:16px;padding:0 18px;max-width:220px;}
+  .pr-sig-box{border-top:1.5px solid #334155;padding-top:4px;}
+  .pr-sig-lbl{font-size:7.5px;font-weight:bold;color:#64748b!important;text-transform:uppercase;letter-spacing:.05em;}
+  .pr-sig-name{font-size:9px;color:#0f172a!important;margin-top:3px;}
+
+  /* Status colors */
+  .pr-match{color:#15803d!important;font-weight:bold;}
+  .pr-mismatch{color:#dc2626!important;font-weight:bold;}
+  .pr-pending{color:#64748b!important;}
+
+  /* Footer */
+  .pr-footer{margin-top:10px;font-size:7.5px;color:#94a3b8!important;border-top:1px solid #e2e8f0;padding:4px 18px 0;text-align:center;}
+}
+
+/* ── KPI CARDS ── */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:16px;}
+.kpi-card{background:#1c2433;border:1.5px solid #30363d;border-radius:12px;padding:14px 16px;text-align:center;transition:all .2s;}
+.kpi-card-val{font-size:26px;font-weight:700;font-family:'DM Mono',monospace;color:#e6edf3;line-height:1.1;}
+.kpi-card-lbl{font-size:10px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.07em;margin-top:5px;}
+.kpi-card.k-ok{border-color:#10b981;background:rgba(16,185,129,.08);}.kpi-card.k-ok .kpi-card-val{color:#34d399;}
+.kpi-card.k-err{border-color:#ef4444;background:rgba(239,68,68,.08);}.kpi-card.k-err .kpi-card-val{color:#f87171;}
+
+/* ── PALLET HEADER STATUS BADGE ── */
+.hdr-status-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;letter-spacing:.03em;}
+.hdr-status-badge.hdr-ok{background:rgba(16,185,129,.2);color:#34d399;}
+.hdr-status-badge.hdr-err{background:rgba(239,68,68,.2);color:#f87171;animation:blink .8s ease-in-out 2;}
+.hdr-status-badge.hdr-pending{background:rgba(255,255,255,.08);color:rgba(255,255,255,.45);font-weight:500;}
+
+/* ── SCAN GLOW ANIMATIONS ── */
+@keyframes scan-glow{0%{box-shadow:0 0 0 0 rgba(16,185,129,.85);}60%{box-shadow:0 0 0 10px rgba(16,185,129,.08);}100%{box-shadow:0 0 0 0 rgba(16,185,129,0);}}
+.scan-flash-ok{animation:scan-glow .7s ease-out!important;border-color:#10b981!important;background:rgba(16,185,129,.1)!important;}
+@keyframes shake-input{0%,100%{transform:translateX(0)}18%{transform:translateX(-9px)}36%{transform:translateX(9px)}54%{transform:translateX(-6px)}72%{transform:translateX(6px)}90%{transform:translateX(-3px)}}
+.scan-wrong{animation:shake-input .45s ease!important;border-color:#ef4444!important;background:rgba(239,68,68,.15)!important;}
+/* ── SCAN ERROR TOAST ── */
+#scan-err-toast{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#dc2626;color:#fff;padding:24px 44px;border-radius:16px;font-size:24px;font-weight:800;z-index:9999;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.7);pointer-events:none;letter-spacing:.01em;line-height:1.4;}
+#scan-err-toast span{display:block;font-size:13px;font-weight:500;opacity:.9;margin-top:4px;letter-spacing:.05em;}
+
+/* Desktop only — no responsive breakpoints */
+
+/* ── VIEWPORT LAYOUT ── */
+html{height:100%;overflow:hidden;}
+body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
+.top-bar{flex-shrink:0;}
+
+/* ── APP SHELL ── */
+#app-layout{display:flex;flex:1;overflow:hidden;min-height:0;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:290px;flex-shrink:0;background:#0d1117;border-right:1px solid #21262d;display:flex;flex-direction:column;overflow-y:auto;padding:12px;gap:10px;}
+.sb-card{background:#161b22;border:1px solid #21262d;border-radius:11px;overflow:hidden;flex-shrink:0;}
+.sb-card-hdr{padding:10px 14px;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:8px;}
+.sb-card-title{font-size:12px;font-weight:700;color:#e6edf3;}
+.sb-card-body{padding:12px 14px;}
+
+/* ── SIDEBAR COMPACT FORMS ── */
+.sidebar .form-row-2{gap:8px;margin-bottom:8px;}
+.sidebar .fg{gap:4px;margin-bottom:0;}
+.sidebar .fc{padding:7px 10px;font-size:13px;}
+.sidebar label{font-size:10px;}
+.sidebar .pill-row{gap:5px;}
+.sidebar .pill{font-size:11px;padding:6px 8px;text-align:center;line-height:1.3;}
+.sidebar .scan-row{gap:6px;}
+
+/* ── LIVE SUMMARY ROWS ── */
+.sum-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid #21262d;}
+.sum-row:last-of-type{border-bottom:none;}
+.sum-lbl{font-size:10px;color:#8b949e;}
+.sum-val{font-size:18px;font-weight:700;color:#e6edf3;letter-spacing:-.02em;font-family:'DM Mono',monospace;}
+#sb-status-box{margin-top:8px;padding:9px 12px;border-radius:8px;background:transparent;border:1px solid #30363d;display:flex;align-items:center;justify-content:space-between;transition:all .3s;}
+
+/* ── MAIN PALLET AREA ── */
+#app{flex:1;display:flex;flex-direction:column;overflow:hidden;max-width:none;margin:0;padding:0;}
+.scan-banner{margin:12px 24px 0;flex-shrink:0;}
+
+/* ── PALLET TABS ── */
+#pallet-tabs{display:flex;align-items:center;gap:3px;padding:10px 24px 0;border-bottom:1px solid #21262d;background:#0d1117;flex-shrink:0;overflow-x:auto;}
+#pallets-wrap{flex:1;overflow-y:auto;padding:20px 24px 40px;}
+.pallet-tab{display:flex;align-items:center;gap:7px;padding:7px 14px;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;color:#6e7681;background:#161b22;border:1.5px solid #21262d;border-radius:8px 8px 0 0;cursor:pointer;transition:all .15s;white-space:nowrap;position:relative;bottom:-1px;}
+.pallet-tab:hover{color:#e6edf3;border-color:#30363d;}
+.pallet-tab.active{color:#38bdf8;background:#0d1117;border-color:#30363d;border-bottom-color:#0d1117;}
+.tab-badge{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.07);color:#6e7681;font-size:10px;font-weight:700;font-family:'DM Mono',monospace;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.pallet-tab.active .tab-badge{background:rgba(56,189,248,.2);color:#38bdf8;}
+.pallet-tab.tab-ok{border-color:rgba(16,185,129,.4);}.pallet-tab.tab-ok.active{border-bottom-color:#0d1117;}.pallet-tab.tab-ok .tab-badge{background:rgba(16,185,129,.15);color:#34d399;}
+.pallet-tab.tab-err{border-color:rgba(239,68,68,.4);}.pallet-tab.tab-err.active{border-bottom-color:#0d1117;}.pallet-tab.tab-err .tab-badge{background:rgba(239,68,68,.15);color:#f87171;}
+.tab-add-btn{padding:5px 12px;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;color:#38bdf8;background:transparent;border:1.5px dashed rgba(56,189,248,.3);border-radius:7px;cursor:pointer;transition:all .15s;margin-left:6px;white-space:nowrap;position:relative;bottom:-1px;}
+.tab-add-btn:hover{background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.6);}
+</style>
+</head>
+<body>
+
+<div id="scan-err-toast">⚠ WRONG BARCODE<span>Scan again</span></div>
+
+<div class="top-bar">
+  <div class="top-bar-inner">
+    <div class="logo-icon">📦</div>
+    <div>
+      <div class="logo-title">Arrow Electronics</div>
+      <div class="logo-sub">Packing Checklist · Microsoft Area · Sevenum</div>
+    </div>
+    <div class="header-right" id="hdr-date"></div>
+  </div>
+</div>
+
+<div id="app-layout">
+
+  <!-- ── LEFT SIDEBAR ── -->
+  <aside class="sidebar">
+
+    <!-- DELIVERY INFORMATION -->
+    <div class="sb-card">
+      <div class="sb-card-hdr">
+        <div class="card-icon icon-blue">📋</div>
+        <span class="sb-card-title">Delivery Information</span>
+      </div>
+      <div class="sb-card-body">
+        <div class="form-row-2">
+          <div class="fg">
+            <label>Operator</label>
+            <input class="fc" id="operator" type="text" placeholder="Your name" oninput="updateDeliverySummary()"/>
+          </div>
+          <div class="fg">
+            <label>Delivery No.</label>
+            <input class="fc mono" id="delivery-num" type="text" placeholder="e.g. 45000…"
+              onkeydown="onKeyDown(event,this)" oninput="updateDeliverySummary()"/>
+          </div>
+        </div>
+        <input type="hidden" id="chk-date"/>
+        <div style="margin-top:8px;">
+          <div class="fg">
+            <label>Destination</label>
+            <div class="pill-row">
+              <button class="pill selected dest-pill" style="flex:1;" data-val="europe" onclick="setDestination('europe')">Europe<br/><span style="font-size:9px;font-weight:400;opacity:.65;">180 cm</span></button>
+              <button class="pill dest-pill" style="flex:1;" data-val="export" onclick="setDestination('export')">Export<br/><span style="font-size:9px;font-weight:400;opacity:.65;">160 cm</span></button>
+            </div>
+          </div>
+        </div>
+        <div class="fg" style="margin-top:8px;">
+          <label>Part Number</label>
+          <div class="scan-row" style="margin-bottom:0;">
+            <input class="fc mono" id="delivery-pn" type="text" placeholder="Scan PN from pick label"
+              onkeydown="onKeyDown(event,this)" oninput="onDeliveryPNInput()"/>
+            <span class="scan-tag tag-wait" id="delivery-pn-tag">● SCAN</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIVE SUMMARY -->
+    <div class="sb-card">
+      <div class="sb-card-hdr">
+        <div class="card-icon icon-green">📊</div>
+        <span class="sb-card-title">Live Summary</span>
+      </div>
+      <div class="sb-card-body" id="delivery-summary">
+        <div class="sum-row" id="kpi-pallets"><span class="sum-lbl">Pallets</span><span class="sum-val" id="ds-pallets">0</span></div>
+        <div class="sum-row" id="kpi-boxes"><span class="sum-lbl">Total Boxes</span><span class="sum-val" id="ds-boxes">0</span></div>
+        <div class="sum-row" id="kpi-pick"><span class="sum-lbl">Pick Total (pcs)</span><span class="sum-val" id="ds-pick">0</span></div>
+        <div class="sum-row" id="kpi-box"><span class="sum-lbl">Verified (pcs)</span><span class="sum-val" id="ds-box">0</span></div>
+        <div id="sb-status-box">
+          <span style="font-size:9px;color:#8b949e;letter-spacing:.08em;text-transform:uppercase;">Status</span>
+          <span class="sum-val" id="ds-status" style="font-size:14px;color:#6e7681;">— Waiting</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRINT & EXPORT -->
+    <div class="sb-card">
+      <div class="sb-card-hdr">
+        <div class="card-icon icon-orange">🖨</div>
+        <span class="sb-card-title">Print &amp; Export</span>
+      </div>
+      <div class="sb-card-body">
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <button class="btn btn-blue" style="flex:1;justify-content:center;padding:9px 12px;font-size:13px;" onclick="doExportPDF()">⬇ PDF</button>
+          <button class="btn btn-ghost-blue" style="flex:1;justify-content:center;padding:9px 12px;font-size:13px;" onclick="doPrint()">🖨 Print</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <button class="btn btn-ghost-blue" style="flex:1;justify-content:center;padding:8px 10px;font-size:12px;" onclick="doExportJSON()">⬇ JSON</button>
+          <button class="btn btn-ghost-blue" style="flex:1;justify-content:center;padding:8px 10px;font-size:12px;" onclick="doExportCSV()">⬇ CSV</button>
+        </div>
+        <div style="font-size:11px;color:#6e7681;text-align:center;line-height:1.4;">Complete all pallets before exporting.</div>
+      </div>
+    </div>
+
+    <!-- SESSION -->
+    <div class="sb-card">
+      <div class="sb-card-hdr">
+        <div class="card-icon icon-blue">💾</div>
+        <span class="sb-card-title">Sesión</span>
+      </div>
+      <div class="sb-card-body">
+        <div id="save-indicator" style="font-size:11px;color:#6e7681;text-align:center;margin-bottom:8px;letter-spacing:.04em;">Auto-guardado activo</div>
+        <button class="btn btn-ghost-blue" style="width:100%;justify-content:center;padding:8px 10px;font-size:12px;" onclick="resetChecklist()">＋ Nuevo checklist</button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ── MAIN CONTENT ── -->
+  <div id="app">
+    <div class="scan-banner">
+      <div class="scan-dot"></div>
+      <div class="scan-text">Scanner ready — click a field and scan. Press Enter to auto-advance. Non-numeric characters in quantity fields are stripped automatically.</div>
+    </div>
+    <div id="pallet-tabs">
+      <button class="tab-add-btn" onclick="addPallet()">＋ Add Pallet</button>
+    </div>
+    <div id="pallets-wrap"></div>
+  </div>
+
+</div>
+
+<div id="print-root" style="display:none;"></div>
+
+<script>
+/* ══ SECURITY — HTML escape ═════════════════════════════ */
+function esc(s) {
+  return String(s == null ? '—' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/* ══ STATE ══════════════════════════════════════════════ */
+let palletCounter = 0;
+let activePid = null;
+let destination = 'europe';
+const HEIGHT_LIMITS = { europe: 180, export: 160 };
+const PTYPE = { KP:'60×80', EP:'120×80', BP:'120×100', GP:'125×100', NP:'130×110' };
+
+/* ══ INIT ═══════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  document.getElementById('hdr-date').textContent =
+    now.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+  document.getElementById('chk-date').value = now.toISOString().slice(0,10);
+  const restored = loadState();
+  if (!restored || document.querySelectorAll('.pallet-block').length === 0) addPallet();
+});
+
+// Track last input time on every input to distinguish scanner vs keyboard + auto-save
+document.addEventListener('input', e => {
+  if (e.target.tagName === 'INPUT') {
+    e.target._lastInputTime = Date.now();
+    saveStateDebounced();
+  }
+}, true);
+
+/* ══ DESTINATION ════════════════════════════════════════ */
+function setDestination(val) {
+  destination = val;
+  document.querySelectorAll('.dest-pill').forEach(p => {
+    p.classList.toggle('selected', p.dataset.val === val);
+    if (p.dataset.val === val && val === 'export') p.classList.add('sel-purple');
+    else p.classList.remove('sel-purple');
+  });
+  document.querySelectorAll('.pallet-block').forEach(b => updateHeightWarning(b.dataset.pid));
+  saveStateDebounced();
+}
+
+/* ══ ADD PALLET ═════════════════════════════════════════ */
+function addPallet() {
+  palletCounter++;
+  const pid = palletCounter;
+  const wrap = document.getElementById('pallets-wrap');
+  const div = document.createElement('div');
+  div.className = 'pallet-block';
+  div.dataset.pid = pid;
+  div.style.display = 'none';
+  div.innerHTML = buildPalletHTML(pid);
+  wrap.appendChild(div);
+  addPickRow(pid);
+  addBoxRow(pid);
+  addGroupRow(pid);
+  addPerBoxRow(pid);
+  addPalletTab(pid);
+  numberPallets();
+  switchTab(pid);
+  updateDeliverySummary();
+  saveStateDebounced();
+}
+
+function addPalletTab(pid) {
+  const tabs = document.getElementById('pallet-tabs');
+  const addBtn = tabs.querySelector('.tab-add-btn');
+  const tab = document.createElement('button');
+  tab.className = 'pallet-tab';
+  tab.dataset.tabPid = pid;
+  tab.onclick = () => switchTab(pid);
+  tab.innerHTML = `<span class="tab-badge">${pid}</span><span class="tab-label">Pallet</span>`;
+  tabs.insertBefore(tab, addBtn);
+}
+
+function switchTab(pid) {
+  activePid = pid;
+  document.querySelectorAll('.pallet-tab').forEach(t => {
+    t.classList.toggle('active', parseInt(t.dataset.tabPid) === pid);
+  });
+  document.querySelectorAll('.pallet-block').forEach(b => {
+    b.style.display = parseInt(b.dataset.pid) === pid ? '' : 'none';
+  });
+}
+
+function removePallet(pid) {
+  const tab = document.querySelector(`.pallet-tab[data-tab-pid="${pid}"]`);
+  if (tab) {
+    if (activePid === pid) {
+      const next = tab.nextElementSibling;
+      const prev = tab.previousElementSibling;
+      const adj = (next && next.classList.contains('pallet-tab')) ? next
+                : (prev && prev.classList.contains('pallet-tab')) ? prev : null;
+      if (adj) switchTab(parseInt(adj.dataset.tabPid));
+      else activePid = null;
+    }
+    tab.remove();
+  }
+  document.querySelector(`.pallet-block[data-pid="${pid}"]`)?.remove();
+  numberPallets();
+  updateDeliverySummary();
+  saveStateDebounced();
+}
+
+function numberPallets() {
+  document.querySelectorAll('.pallet-block').forEach((b, i) => {
+    b.querySelector('.pallet-num').textContent = `Pallet ${i + 1}`;
+  });
+  document.querySelectorAll('.pallet-tab').forEach((t, i) => {
+    t.querySelector('.tab-badge').textContent = i + 1;
+    t.querySelector('.tab-label').textContent = `Pallet ${i + 1}`;
+  });
+}
+
+function buildPalletHTML(pid) {
+  const ptypePills = Object.keys(PTYPE).map(t =>
+    `<button class="ptype-pill" data-type="${t}" onclick="selectPType(${pid},'${t}')">
+       ${t}<span class="ptype-size">${PTYPE[t]}</span>
+     </button>`
+  ).join('');
+
+  return `
+  <div class="pallet-hdr">
+    <span class="pallet-num">Pallet ${pid}</span>
+    <span class="hdr-status-badge hdr-pending" id="hdr-status-${pid}">PENDING</span>
+    <div class="pallet-hdr-right">
+      <div class="mode-sw" id="mode-sw-${pid}">
+        <button class="mode-btn active" onclick="setBoxMode(${pid},'scan')">Scan</button>
+        <button class="mode-btn" onclick="setBoxMode(${pid},'visual')">Visual</button>
+      </div>
+      <button class="btn-rm-pallet" onclick="removePallet(${pid})">✕ Remove</button>
+    </div>
+  </div>
+
+  <div class="pallet-meta-row">
+    <div>
+      <div class="meta-label">Pallet Type</div>
+      <div class="ptype-row" id="ptype-pills-${pid}">${ptypePills}</div>
+    </div>
+    <div class="fg">
+      <label>Weight (kg)</label>
+      <input class="fc mono" type="number" min="0" step="0.1" id="weight-${pid}" placeholder="e.g. 320" oninput="updateDeliverySummary()"/>
+    </div>
+    <div class="fg">
+      <label>Height (cm)</label>
+      <input class="fc mono" type="number" min="0" id="height-${pid}" placeholder="e.g. 150" oninput="onHeightInput(${pid},this)"/>
+      <div class="height-warn" id="height-warn-${pid}">⚠ Exceeds max height</div>
+    </div>
+    <div></div>
+  </div>
+
+  <!-- PICK LABELS -->
+  <div class="psec-hdr picks">
+    <span class="psec-title">Pick Labels</span>
+    <span class="psec-badge badge-blue" id="pick-badge-${pid}">0 pcs expected</span>
+  </div>
+  <div class="psec-body">
+    <div style="font-size:11px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Pick Label Quantities</div>
+    <div id="pick-rows-${pid}" class="qty-rows-wrap"></div>
+    <button class="btn btn-ghost-blue btn-sm" onclick="addPickRow(${pid})" style="margin-top:2px;">＋ Add pick label</button>
+  </div>
+
+  <!-- BOX VERIFICATION -->
+  <div class="psec-hdr boxes">
+    <span class="psec-title">Box Verification</span>
+    <span class="psec-badge badge-green" id="box-badge-${pid}">0 pcs verified · 0 boxes</span>
+  </div>
+  <div class="psec-body">
+
+    <!-- Shared PN field: shown in Shared-PN scan mode and Visual mode -->
+    <div id="box-pn-wrap-${pid}" style="margin-bottom:12px;">
+      <div class="fg">
+        <label>Part Number — Box Label</label>
+        <div class="scan-row" style="margin-bottom:0;">
+          <input class="fc mono" id="box-pn-${pid}" type="text" placeholder="Scan PN from first box"
+            onkeydown="onKeyDown(event,this)" oninput="onBoxPNInput(${pid},this)"/>
+          <span class="scan-tag tag-wait" id="box-pn-tag-${pid}">● SCAN</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="scan-mode-${pid}">
+      <!-- PN scan mode sub-toggle -->
+      <div class="pn-sw-wrap">
+        <span style="font-size:10px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.06em;">PN scan mode</span>
+        <div class="mode-sw" id="pn-sw-${pid}">
+          <button class="mode-btn active" onclick="setPNMode(${pid},'shared')">Shared PN</button>
+          <button class="mode-btn" onclick="setPNMode(${pid},'per-box')">PN per box</button>
+        </div>
+      </div>
+
+      <!-- Shared PN: one PN field + qty per box -->
+      <div id="pn-shared-wrap-${pid}">
+        <div style="font-size:11px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Box Quantities — one per box</div>
+        <div id="box-rows-${pid}" class="qty-rows-wrap"></div>
+        <button class="btn btn-ghost-green btn-sm" onclick="addBoxRow(${pid})" style="margin-top:2px;">＋ Add box</button>
+      </div>
+
+      <!-- Per-box PN: PN + qty for each box individually -->
+      <div id="pn-perbox-wrap-${pid}" style="display:none;">
+        <div class="perbox-col-hdr">
+          <span></span><span>Part Number</span><span></span><span>Qty (pcs)</span><span></span><span></span>
+        </div>
+        <div id="perbox-rows-${pid}"></div>
+        <button class="btn btn-ghost-green btn-sm" onclick="addPerBoxRow(${pid})" style="margin-top:4px;">＋ Add box</button>
+      </div>
+    </div>
+
+    <div id="visual-mode-${pid}" style="display:none;">
+      <div class="info-banner">Visual mode: enter quantity groups — e.g. 20 boxes × 10 pcs each.</div>
+      <div style="display:grid;grid-template-columns:90px 18px 110px 1fr 24px;gap:7px;margin-bottom:5px;">
+        <span style="font-size:10px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.05em;">Boxes</span>
+        <span></span>
+        <span style="font-size:10px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.05em;">Pcs each</span>
+        <span style="font-size:10px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.05em;">Subtotal</span>
+        <span></span>
+      </div>
+      <div id="group-rows-${pid}"></div>
+      <button class="btn btn-ghost-green btn-sm" onclick="addGroupRow(${pid})" style="margin-top:2px;">＋ Add group</button>
+    </div>
+  </div>
+
+  <!-- VALIDATION STRIP -->
+  <div class="val-strip pending" id="val-strip-${pid}">
+    <div class="val-cell">
+      <span class="val-lbl">Pick PN</span>
+      <span class="val-val" id="v-pick-pn-${pid}">—</span>
+    </div>
+    <div class="val-cell">
+      <span class="val-lbl">Box PN</span>
+      <span class="val-val" id="v-box-pn-${pid}">—</span>
+    </div>
+    <div class="val-cell">
+      <span class="val-lbl">PN Check</span>
+      <span class="val-val" id="v-pn-check-${pid}">—</span>
+    </div>
+    <div class="val-cell">
+      <span class="val-lbl">Pick Labels</span>
+      <span class="val-val" id="v-pick-labels-${pid}" style="font-size:12px;line-height:1.5;">—</span>
+    </div>
+    <div class="val-cell">
+      <span class="val-lbl">Expected (pcs)</span>
+      <span class="val-val" id="v-pick-total-${pid}">—</span>
+    </div>
+    <div class="val-cell">
+      <span class="val-lbl">Verified (pcs)</span>
+      <span class="val-val" id="v-box-total-${pid}">—</span>
+    </div>
+    <div class="val-cell">
+      <span class="val-lbl">Boxes</span>
+      <span class="val-val" id="v-box-count-${pid}">—</span>
+    </div>
+    <span class="val-badge pending" id="v-status-${pid}">PENDING</span>
+  </div>
+  `;
+}
+
+/* ══ PALLET TYPE ════════════════════════════════════════ */
+function selectPType(pid, type) {
+  document.querySelectorAll(`#ptype-pills-${pid} .ptype-pill`).forEach(p =>
+    p.classList.toggle('selected', p.dataset.type === type)
+  );
+  saveStateDebounced();
+}
+function getPType(pid) {
+  const sel = document.querySelector(`#ptype-pills-${pid} .ptype-pill.selected`);
+  return sel ? sel.dataset.type : '';
+}
+
+/* ══ HEIGHT WARNING ═════════════════════════════════════ */
+function onHeightInput(pid, el) {
+  updateHeightWarning(pid);
+  updateDeliverySummary();
+}
+function updateHeightWarning(pid) {
+  const el = document.getElementById(`height-${pid}`);
+  const warn = document.getElementById(`height-warn-${pid}`);
+  if (!el || !warn) return;
+  const h = parseFloat(el.value);
+  const limit = HEIGHT_LIMITS[destination];
+  if (h && h > limit) {
+    warn.textContent = `⚠ Exceeds max for ${destination === 'europe' ? 'Europe' : 'Export'} (limit: ${limit} cm)`;
+    warn.classList.add('show');
+    el.style.borderColor = '#dc2626';
+  } else {
+    warn.classList.remove('show');
+    el.style.borderColor = '';
+  }
+}
+
+/* ══ BOX MODE ═══════════════════════════════════════════ */
+function setBoxMode(pid, mode) {
+  const btns = document.querySelectorAll(`#mode-sw-${pid} .mode-btn`);
+  btns[0].classList.toggle('active', mode === 'scan');
+  btns[1].classList.toggle('active', mode === 'visual');
+  document.getElementById(`scan-mode-${pid}`).style.display = mode === 'scan' ? '' : 'none';
+  document.getElementById(`visual-mode-${pid}`).style.display = mode === 'visual' ? '' : 'none';
+  // In per-box PN scan mode, shared PN field is hidden; always show in visual mode
+  const pnWrap = document.getElementById(`box-pn-wrap-${pid}`);
+  if (pnWrap) pnWrap.style.display = (mode === 'scan' && getPNMode(pid) === 'per-box') ? 'none' : '';
+  updatePalletSummary(pid);
+  saveStateDebounced();
+}
+function getBoxMode(pid) {
+  const btns = document.querySelectorAll(`#mode-sw-${pid} .mode-btn`);
+  return btns[1]?.classList.contains('active') ? 'visual' : 'scan';
+}
+
+/* ══ PN SCAN MODE ═══════════════════════════════════════ */
+function setPNMode(pid, mode) {
+  const btns = document.querySelectorAll(`#pn-sw-${pid} .mode-btn`);
+  btns[0].classList.toggle('active', mode === 'shared');
+  btns[1].classList.toggle('active', mode === 'per-box');
+  document.getElementById(`pn-shared-wrap-${pid}`).style.display = mode === 'shared' ? '' : 'none';
+  document.getElementById(`pn-perbox-wrap-${pid}`).style.display = mode === 'per-box' ? '' : 'none';
+  const pnWrap = document.getElementById(`box-pn-wrap-${pid}`);
+  if (pnWrap) pnWrap.style.display = mode === 'per-box' ? 'none' : '';
+  updatePalletSummary(pid);
+  saveStateDebounced();
+}
+function getPNMode(pid) {
+  const btns = document.querySelectorAll(`#pn-sw-${pid} .mode-btn`);
+  return btns[1]?.classList.contains('active') ? 'per-box' : 'shared';
+}
+
+/* ══ PER-BOX ROWS ═══════════════════════════════════════ */
+function addPerBoxRow(pid) {
+  const wrap = document.getElementById(`perbox-rows-${pid}`);
+  const n = wrap.children.length + 1;
+  const div = document.createElement('div');
+  div.className = 'perbox-row';
+  div.innerHTML = `
+    <span class="scan-row-num">B${n}</span>
+    <input class="fc mono" type="text" placeholder="Scan PN"
+      onkeydown="onKeyDown(event,this)" oninput="onPerBoxPNInput(${pid},this)"/>
+    <span class="scan-tag tag-wait">● SCAN</span>
+    <input class="fc mono" type="text" placeholder="Qty"
+      onkeydown="onKeyDown(event,this)" oninput="handleQtyInput(${pid},this)"/>
+    <span class="scan-tag tag-wait">● SCAN</span>
+    <button class="btn-rm-row" onclick="removePerBoxRow(${pid},this)">✕</button>
+  `;
+  wrap.appendChild(div);
+  updatePalletSummary(pid);
+  return div;
+}
+function removePerBoxRow(pid, btn) {
+  btn.closest('.perbox-row').remove();
+  renumber(document.getElementById(`perbox-rows-${pid}`), 'B');
+  updatePalletSummary(pid);
+  saveStateDebounced();
+}
+function onPerBoxPNInput(pid, el) {
+  if (el.dataset.scanned === 'true') markTyped(el);
+  const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
+  const boxPN = el.value.trim().toUpperCase();
+  if (delivPN && boxPN) {
+    const match = delivPN === boxPN;
+    el.classList.toggle('pn-err', !match);
+    el.style.borderColor = match ? '#16a34a' : '';
+  } else {
+    el.classList.remove('pn-err');
+    el.style.borderColor = '';
+  }
+  updatePalletSummary(pid);
+}
+
+/* ══ PICK ROWS ══════════════════════════════════════════ */
+function addPickRow(pid) {
+  const wrap = document.getElementById(`pick-rows-${pid}`);
+  const n = wrap.children.length + 1;
+  const div = document.createElement('div');
+  div.className = 'scan-row pick-row';
+  div.innerHTML = `
+    <span class="scan-row-num">PL ${n}</span>
+    <input class="fc mono" type="text" placeholder="Qty" style="max-width:110px;"
+      onkeydown="onKeyDown(event,this)" oninput="handleQtyInput(${pid},this)"/>
+    <span class="scan-tag tag-wait">● SCAN</span>
+    <button class="btn-rm-row" onclick="removePickRow(${pid},this)">✕</button>
+  `;
+  wrap.appendChild(div);
+  updatePalletSummary(pid);
+}
+function removePickRow(pid, btn) {
+  btn.closest('.pick-row').remove();
+  renumber(document.getElementById(`pick-rows-${pid}`), 'PL ');
+  updatePalletSummary(pid);
+  saveStateDebounced();
+}
+
+/* ══ BOX ROWS ═══════════════════════════════════════════ */
+function addBoxRow(pid) {
+  const wrap = document.getElementById(`box-rows-${pid}`);
+  const n = wrap.children.length + 1;
+  const div = document.createElement('div');
+  div.className = 'scan-row box-row';
+  div.innerHTML = `
+    <span class="scan-row-num">B${n}</span>
+    <input class="fc mono" type="text" placeholder="Qty" style="max-width:110px;"
+      onkeydown="onKeyDown(event,this)" oninput="handleQtyInput(${pid},this)"/>
+    <span class="scan-tag tag-wait">● SCAN</span>
+    <button class="btn-rm-row" onclick="removeBoxRow(${pid},this)">✕</button>
+  `;
+  wrap.appendChild(div);
+  updatePalletSummary(pid);
+  return div;
+}
+function removeBoxRow(pid, btn) {
+  btn.closest('.box-row').remove();
+  renumber(document.getElementById(`box-rows-${pid}`), 'B');
+  updatePalletSummary(pid);
+  saveStateDebounced();
+}
+
+/* ══ GROUP ROWS (VISUAL) ════════════════════════════════ */
+function addGroupRow(pid) {
+  const wrap = document.getElementById(`group-rows-${pid}`);
+  const div = document.createElement('div');
+  div.className = 'visual-group-row group-row';
+  div.innerHTML = `
+    <input class="fc mono" type="number" min="0" placeholder="# boxes" oninput="updateGroup(${pid},this)"/>
+    <span class="x-sign">×</span>
+    <input class="fc mono" type="number" min="0" placeholder="pcs" oninput="updateGroup(${pid},this)"/>
+    <span class="group-result">= 0 pcs</span>
+    <button class="btn-rm-row" onclick="removeGroupRow(${pid},this)">✕</button>
+  `;
+  wrap.appendChild(div);
+  updatePalletSummary(pid);
+}
+function removeGroupRow(pid, btn) {
+  btn.closest('.group-row').remove();
+  updatePalletSummary(pid);
+  saveStateDebounced();
+}
+function updateGroup(pid, inp) {
+  const row = inp.closest('.group-row');
+  const [a, b] = row.querySelectorAll('input');
+  const total = (parseInt(a.value)||0) * (parseInt(b.value)||0);
+  row.querySelector('.group-result').textContent = `= ${total.toLocaleString()} pcs`;
+  updatePalletSummary(pid);
+}
+
+/* ══ RENUMBER ═══════════════════════════════════════════ */
+function renumber(wrap, prefix) {
+  [...wrap.children].forEach((row, i) => {
+    const el = row.querySelector('.scan-row-num');
+    if (el) el.textContent = prefix + (i + 1);
+  });
+}
+
+/* ══ SCAN AUDIO & ERROR FEEDBACK ════════════════════════ */
+let _audioCtx = null;
+function _getACtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return _audioCtx;
+}
+function beepOk() {
+  try {
+    const ctx = _getACtx();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 880;
+    g.gain.setValueAtTime(0.22, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+    o.start(); o.stop(ctx.currentTime + 0.12);
+  } catch(e) {}
+}
+function beepError() {
+  try {
+    const ctx = _getACtx();
+    [0, 0.22].forEach(function(d) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sawtooth'; o.frequency.value = 160;
+      g.gain.setValueAtTime(0.45, ctx.currentTime + d);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + d + 0.18);
+      o.start(ctx.currentTime + d); o.stop(ctx.currentTime + d + 0.18);
+    });
+  } catch(e) {}
+}
+
+let _toastTimer = null;
+function triggerScanError(el) {
+  beepError();
+  el.classList.remove('scan-wrong');
+  void el.offsetWidth;
+  el.classList.add('scan-wrong');
+  const toast = document.getElementById('scan-err-toast');
+  toast.style.display = 'block';
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function() { toast.style.display = 'none'; }, 2500);
+  setTimeout(function() {
+    el.classList.remove('scan-wrong', 'scanned', 'scan-flash-ok', 'pn-err');
+    el.value = '';
+    el.style.borderColor = '';
+    el.dataset.scanned = '';
+    const tag = el.nextElementSibling;
+    if (tag && tag.classList.contains('scan-tag')) {
+      tag.textContent = '● SCAN';
+      tag.className = 'scan-tag tag-wait';
+      tag.style.animation = '';
+    }
+    el.focus();
+    saveStateDebounced();
+  }, 460);
+}
+
+/* ══ INPUT HANDLING ═════════════════════════════════════ */
+function onKeyDown(event, el) {
+  if (event.key !== 'Enter') return;
+  event.preventDefault();
+  const isScanned = Date.now() - (el._lastInputTime || 0) < 50;
+
+  // ── Wrong qty scan: non-numeric chars were typed (scanner hit wrong barcode) ──
+  if (el._wrongScan) {
+    delete el._wrongScan;
+    triggerScanError(el);
+    return;
+  }
+
+  // ── Wrong PN scan: scanned value ≠ delivery PN when delivery PN is set ──
+  if (isScanned) {
+    const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
+    const perboxRow = el.closest('.perbox-row');
+    const isPNField = (el.id && el.id.startsWith('box-pn-')) ||
+                      (perboxRow && el === perboxRow.querySelectorAll('input')[0]);
+    if (isPNField && delivPN && el.value.trim().toUpperCase() !== delivPN) {
+      triggerScanError(el);
+      return;
+    }
+  }
+
+  if (isScanned) markScanned(el);
+  else if (el.value.trim()) markTyped(el);
+
+  const block = el.closest('.pallet-block');
+  const pid = block?.dataset.pid;
+
+  // If last box row → auto-add new box row and focus it
+  if (pid && el.closest('.box-row')) {
+    const wrap = document.getElementById(`box-rows-${pid}`);
+    if (el.closest('.box-row') === wrap.lastElementChild) {
+      const newRow = addBoxRow(pid);
+      newRow.querySelector('input').focus();
+      return;
+    }
+  }
+
+  // If qty field (2nd input) of last per-box row → auto-add new perbox row
+  if (pid && el.closest('.perbox-row')) {
+    const row = el.closest('.perbox-row');
+    const inputs = row.querySelectorAll('input');
+    const isQtyField = el === inputs[1];
+    const wrap = document.getElementById(`perbox-rows-${pid}`);
+    if (isQtyField && row === wrap.lastElementChild) {
+      const newRow = addPerBoxRow(pid);
+      newRow.querySelector('input').focus();
+      return;
+    }
+  }
+
+  autoAdvance(el);
+}
+
+function markScanned(el) {
+  el.dataset.scanned = 'true';
+  el.classList.add('scanned');
+  beepOk();
+  el.classList.remove('scan-flash-ok');
+  void el.offsetWidth;
+  el.classList.add('scan-flash-ok');
+  const tag = el.nextElementSibling;
+  if (tag && tag.classList.contains('scan-tag')) {
+    tag.textContent = '✓ SCANNED';
+    tag.className = 'scan-tag tag-scan';
+    tag.style.animation = 'none';
+  }
+  saveStateDebounced();
+}
+function markTyped(el) {
+  el.dataset.scanned = '';
+  el.classList.remove('scanned', 'scan-flash-ok');
+  const tag = el.nextElementSibling;
+  if (tag && tag.classList.contains('scan-tag')) {
+    tag.textContent = '✎ TYPED';
+    tag.className = 'scan-tag tag-typed';
+    tag.style.animation = 'none';
+  }
+}
+function resetTag(el) {
+  el.dataset.scanned = '';
+  const tag = el.nextElementSibling;
+  if (tag && tag.classList.contains('scan-tag')) {
+    tag.textContent = '● SCAN';
+    tag.className = 'scan-tag tag-wait';
+    tag.style.animation = '';
+  }
+}
+
+/* ══ PERSISTENCE (localStorage) ═════════════════════════ */
+const STORAGE_KEY = 'arrowPackingV1';
+const STORAGE_VERSION = 1;
+let _saveTimer = null;
+let _restoring = false;
+
+function tagStateOf(el) {
+  if (!el) return 'wait';
+  if (el.dataset && el.dataset.scanned === 'true') return 'scanned';
+  const tag = el.nextElementSibling;
+  if (tag && tag.classList.contains('tag-typed')) return 'typed';
+  return 'wait';
+}
+
+function applyTagState(el, state) {
+  if (!el) return;
+  if (state === 'scanned') {
+    el.dataset.scanned = 'true';
+    el.classList.add('scanned');
+    const tag = el.nextElementSibling;
+    if (tag && tag.classList.contains('scan-tag')) {
+      tag.textContent = '✓ SCANNED';
+      tag.className = 'scan-tag tag-scan';
+      tag.style.animation = 'none';
+    }
+  } else if (state === 'typed') {
+    el.dataset.scanned = '';
+    el.classList.remove('scanned', 'scan-flash-ok');
+    const tag = el.nextElementSibling;
+    if (tag && tag.classList.contains('scan-tag')) {
+      tag.textContent = '✎ TYPED';
+      tag.className = 'scan-tag tag-typed';
+      tag.style.animation = 'none';
+    }
+  } else {
+    el.dataset.scanned = '';
+    el.classList.remove('scanned', 'scan-flash-ok');
+    const tag = el.nextElementSibling;
+    if (tag && tag.classList.contains('scan-tag')) {
+      tag.textContent = '● SCAN';
+      tag.className = 'scan-tag tag-wait';
+      tag.style.animation = '';
+    }
+  }
+}
+
+function serializeState() {
+  const delivPNEl = document.getElementById('delivery-pn');
+  const state = {
+    v: STORAGE_VERSION,
+    savedAt: new Date().toISOString(),
+    delivery: {
+      operator: document.getElementById('operator')?.value || '',
+      deliveryNum: document.getElementById('delivery-num')?.value || '',
+      destination: destination,
+      pn: delivPNEl?.value || '',
+      pnTag: tagStateOf(delivPNEl)
+    },
+    pallets: []
+  };
+  document.querySelectorAll('.pallet-block').forEach(b => {
+    const pid = b.dataset.pid;
+    const pnMode = getPNMode(pid);
+    const boxMode = getBoxMode(pid);
+    const boxPNEl = document.getElementById(`box-pn-${pid}`);
+    const p = {
+      type: getPType(pid),
+      weight: document.getElementById(`weight-${pid}`)?.value || '',
+      height: document.getElementById(`height-${pid}`)?.value || '',
+      pnMode: pnMode,
+      boxMode: boxMode,
+      boxPn: boxPNEl?.value || '',
+      boxPnTag: tagStateOf(boxPNEl),
+      pickLabels: [],
+      boxes: [],
+      groups: [],
+      perBoxRows: []
+    };
+    document.querySelectorAll(`#pick-rows-${pid} .pick-row`).forEach(row => {
+      const inp = row.querySelector('input');
+      p.pickLabels.push({ qty: inp?.value || '', tag: tagStateOf(inp) });
+    });
+    document.querySelectorAll(`#box-rows-${pid} .box-row`).forEach(row => {
+      const inp = row.querySelector('input');
+      p.boxes.push({ qty: inp?.value || '', tag: tagStateOf(inp) });
+    });
+    document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(row => {
+      const [a, c] = row.querySelectorAll('input');
+      p.groups.push({ count: a?.value || '', qty: c?.value || '' });
+    });
+    document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).forEach(row => {
+      const [pnInp, qtyInp] = row.querySelectorAll('input');
+      p.perBoxRows.push({
+        pn: pnInp?.value || '',
+        qty: qtyInp?.value || '',
+        pnTag: tagStateOf(pnInp),
+        qtyTag: tagStateOf(qtyInp)
+      });
+    });
+    state.pallets.push(p);
+  });
+  return state;
+}
+
+function restoreState(state) {
+  if (!state || state.v !== STORAGE_VERSION) return false;
+  _restoring = true;
+  try {
+    // Clear existing pallets and tabs
+    document.querySelectorAll('.pallet-block').forEach(b => b.remove());
+    document.querySelectorAll('.pallet-tab').forEach(t => t.remove());
+    palletCounter = 0;
+    activePid = null;
+
+    // Delivery
+    if (state.delivery) {
+      const opEl = document.getElementById('operator');
+      const dnEl = document.getElementById('delivery-num');
+      const dpnEl = document.getElementById('delivery-pn');
+      if (opEl) opEl.value = state.delivery.operator || '';
+      if (dnEl) dnEl.value = state.delivery.deliveryNum || '';
+      if (dpnEl) {
+        dpnEl.value = state.delivery.pn || '';
+        applyTagState(dpnEl, state.delivery.pnTag || 'wait');
+      }
+      if (state.delivery.destination) setDestination(state.delivery.destination);
+    }
+
+    // Pallets
+    (state.pallets || []).forEach((p, idx) => {
+      addPallet();
+      const pid = palletCounter;
+      // Clear default rows added by addPallet
+      document.querySelectorAll(`#pick-rows-${pid} .pick-row`).forEach(r => r.remove());
+      document.querySelectorAll(`#box-rows-${pid} .box-row`).forEach(r => r.remove());
+      document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(r => r.remove());
+      document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).forEach(r => r.remove());
+
+      if (p.type) selectPType(pid, p.type);
+      const wEl = document.getElementById(`weight-${pid}`);
+      const hEl = document.getElementById(`height-${pid}`);
+      if (wEl) wEl.value = p.weight || '';
+      if (hEl) hEl.value = p.height || '';
+      if (p.boxMode) setBoxMode(pid, p.boxMode);
+      if (p.pnMode) setPNMode(pid, p.pnMode);
+
+      const boxPNEl = document.getElementById(`box-pn-${pid}`);
+      if (boxPNEl) {
+        boxPNEl.value = p.boxPn || '';
+        applyTagState(boxPNEl, p.boxPnTag || 'wait');
+      }
+
+      (p.pickLabels || []).forEach(pl => {
+        addPickRow(pid);
+        const rows = document.querySelectorAll(`#pick-rows-${pid} .pick-row`);
+        const inp = rows[rows.length - 1]?.querySelector('input');
+        if (inp) { inp.value = pl.qty || ''; applyTagState(inp, pl.tag || 'wait'); }
+      });
+      if (!p.pickLabels || p.pickLabels.length === 0) addPickRow(pid);
+
+      (p.boxes || []).forEach(bx => {
+        addBoxRow(pid);
+        const rows = document.querySelectorAll(`#box-rows-${pid} .box-row`);
+        const inp = rows[rows.length - 1]?.querySelector('input');
+        if (inp) { inp.value = bx.qty || ''; applyTagState(inp, bx.tag || 'wait'); }
+      });
+      if (!p.boxes || p.boxes.length === 0) addBoxRow(pid);
+
+      (p.groups || []).forEach(g => {
+        addGroupRow(pid);
+        const rows = document.querySelectorAll(`#group-rows-${pid} .group-row`);
+        const [a, c] = rows[rows.length - 1]?.querySelectorAll('input') || [];
+        if (a) a.value = g.count || '';
+        if (c) c.value = g.qty || '';
+        if (a) updateGroup(pid, a);
+      });
+      if (!p.groups || p.groups.length === 0) addGroupRow(pid);
+
+      (p.perBoxRows || []).forEach(pb => {
+        addPerBoxRow(pid);
+        const rows = document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`);
+        const [pnInp, qtyInp] = rows[rows.length - 1]?.querySelectorAll('input') || [];
+        if (pnInp) { pnInp.value = pb.pn || ''; applyTagState(pnInp, pb.pnTag || 'wait'); }
+        if (qtyInp) { qtyInp.value = pb.qty || ''; applyTagState(qtyInp, pb.qtyTag || 'wait'); }
+      });
+      if (!p.perBoxRows || p.perBoxRows.length === 0) addPerBoxRow(pid);
+
+      updateHeightWarning(pid);
+      updatePalletSummary(pid);
+    });
+
+    // Re-validate PN cross-checks
+    onDeliveryPNInput();
+    if (state.pallets && state.pallets.length > 0) switchTab(1);
+    updateDeliverySummary();
+    return true;
+  } finally {
+    _restoring = false;
+  }
+}
+
+function saveState() {
+  if (_restoring) return;
+  try {
+    const json = JSON.stringify(serializeState());
+    localStorage.setItem(STORAGE_KEY, json);
+    const ind = document.getElementById('save-indicator');
+    if (ind) {
+      const t = new Date();
+      const hh = String(t.getHours()).padStart(2, '0');
+      const mm = String(t.getMinutes()).padStart(2, '0');
+      ind.textContent = `Guardado ${hh}:${mm}`;
+      ind.style.opacity = '1';
+    }
+  } catch (e) {
+    if (e && e.name === 'QuotaExceededError') {
+      const ind = document.getElementById('save-indicator');
+      if (ind) { ind.textContent = '⚠ Sin espacio'; ind.style.opacity = '1'; }
+    }
+  }
+}
+
+function saveStateDebounced() {
+  if (_restoring) return;
+  if (_saveTimer) clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveState, 400);
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const state = JSON.parse(raw);
+    return restoreState(state);
+  } catch (e) {
+    return false;
+  }
+}
+
+function resetChecklist() {
+  if (!confirm('¿Empezar un checklist nuevo? Se borrarán todos los datos actuales.')) return;
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  location.reload();
+}
+
+function autoAdvance(el) {
+  const all = [...document.querySelectorAll('.pallet-block input')].filter(i => {
+    const block = i.closest('.pallet-block');
+    return block && block.style.display !== 'none';
+  });
+  const idx = all.indexOf(el);
+  if (idx >= 0 && idx < all.length - 1) {
+    all[idx + 1].focus();
+    all[idx + 1].select();
+  }
+}
+
+function handleQtyInput(pid, el) {
+  if (el.dataset.scanned === 'true') markTyped(el);
+  const raw = el.value;
+  const digitsOnly = raw.replace(/[^0-9]/g, '');
+  // Error if: no digits at all (country code "NL") OR letter appears AFTER a digit (PO format e.g. "VT9A00000...")
+  if ((digitsOnly === '' && raw.length > 0) || /\d[a-zA-Z]/.test(raw)) {
+    el._wrongScan = true;
+  } else {
+    delete el._wrongScan;
+  }
+  // Strip non-digits and leading zeros (e.g., Zebra sends "00250" → "250", "A00250" → "250")
+  el.value = digitsOnly === '' ? '' : String(parseInt(digitsOnly, 10) || 0);
+  updatePalletSummary(pid);
+}
+
+function onDeliveryPNInput() {
+  const elDPN = document.getElementById('delivery-pn');
+  if (elDPN && elDPN.dataset.scanned === 'true') markTyped(elDPN);
+  const delivPN = (elDPN?.value || '').trim().toUpperCase();
+  document.querySelectorAll('.pallet-block').forEach(b => {
+    const pid = b.dataset.pid;
+    // Re-validate per-box PN fields if in per-box mode
+    if (getPNMode(pid) === 'per-box') {
+      b.querySelectorAll('.perbox-row').forEach(row => {
+        const pnInput = row.querySelectorAll('input')[0];
+        const boxPN = pnInput.value.trim().toUpperCase();
+        if (delivPN && boxPN) {
+          const match = delivPN === boxPN;
+          pnInput.classList.toggle('pn-err', !match);
+          pnInput.style.borderColor = match ? '#16a34a' : '';
+        } else {
+          pnInput.classList.remove('pn-err');
+          pnInput.style.borderColor = '';
+        }
+      });
+    }
+    updatePalletSummary(pid);
+  });
+}
+
+function onBoxPNInput(pid, el) {
+  if (el.dataset.scanned === 'true') markTyped(el);
+  const pickPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
+  const boxPN = el.value.trim().toUpperCase();
+  if (pickPN && boxPN) {
+    el.classList.toggle('pn-err', pickPN !== boxPN);
+    if (pickPN === boxPN) el.style.borderColor = '#16a34a';
+    else el.style.borderColor = '';
+  } else {
+    el.classList.remove('pn-err');
+    el.style.borderColor = '';
+  }
+  updatePalletSummary(pid);
+}
+
+/* ══ PALLET SUMMARY ═════════════════════════════════════ */
+function updatePalletSummary(pid) {
+  // Pick
+  let pickTotal = 0;
+  const pickInputs = [...document.querySelectorAll(`#pick-rows-${pid} .pick-row input`)];
+  const pickLabelParts = [];
+  pickInputs.forEach((inp, i) => {
+    const qty = parseInt(inp.value) || 0;
+    pickTotal += qty;
+    if (qty > 0) pickLabelParts.push(`PL${i + 1}: ${qty.toLocaleString()}`);
+  });
+  const plCount = pickLabelParts.length;
+  document.getElementById(`pick-badge-${pid}`).textContent =
+    `${pickTotal.toLocaleString()} pcs expected${plCount > 1 ? ` · ${plCount} PL` : ''}`;
+  const labelsEl = document.getElementById(`v-pick-labels-${pid}`);
+  if (labelsEl) labelsEl.textContent = pickLabelParts.length > 0 ? pickLabelParts.join(' · ') : '—';
+
+  // Box
+  const mode = getBoxMode(pid);
+  const pnMode = getPNMode(pid);
+  let boxTotal = 0, boxCount = 0;
+  if (mode === 'scan') {
+    if (pnMode === 'per-box') {
+      document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).forEach(row => {
+        boxTotal += parseInt(row.querySelectorAll('input')[1]?.value) || 0;
+      });
+      boxCount = document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).length;
+    } else {
+      document.querySelectorAll(`#box-rows-${pid} .box-row`).forEach(row => {
+        boxTotal += parseInt(row.querySelector('input')?.value) || 0;
+      });
+      boxCount = document.querySelectorAll(`#box-rows-${pid} .box-row`).length;
+    }
+  } else {
+    document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(row => {
+      const [a, b] = row.querySelectorAll('input');
+      const count = parseInt(a?.value) || 0;
+      const qty = parseInt(b?.value) || 0;
+      boxTotal += count * qty;
+      boxCount += count;
+    });
+  }
+  document.getElementById(`box-badge-${pid}`).textContent = `${boxTotal.toLocaleString()} pcs verified · ${boxCount} boxes`;
+
+  // PN
+  const pickPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
+  let pnOk = null;
+
+  if (mode === 'scan' && pnMode === 'per-box') {
+    const perboxRows = [...document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`)];
+    document.getElementById(`v-pick-pn-${pid}`).textContent = pickPN || '—';
+    document.getElementById(`v-box-pn-${pid}`).textContent  = perboxRows.length ? 'per box' : '—';
+    if (pickPN && perboxRows.length > 0) {
+      let allFilled = true, anyMismatch = false;
+      perboxRows.forEach(row => {
+        const pn = row.querySelectorAll('input')[0].value.trim().toUpperCase();
+        if (!pn) { allFilled = false; return; }
+        if (pn !== pickPN) anyMismatch = true;
+      });
+      if (anyMismatch) pnOk = false;
+      else if (allFilled) pnOk = true;
+    }
+  } else {
+    const boxPN = (document.getElementById(`box-pn-${pid}`)?.value || '').trim().toUpperCase();
+    document.getElementById(`v-pick-pn-${pid}`).textContent = pickPN || '—';
+    document.getElementById(`v-box-pn-${pid}`).textContent  = boxPN  || '—';
+    if (pickPN && boxPN) pnOk = pickPN === boxPN;
+  }
+
+  const pnEl = document.getElementById(`v-pn-check-${pid}`);
+  if (pnOk === true)  { pnEl.textContent = '✓ MATCH';    pnEl.style.color = '#16a34a'; }
+  else if (pnOk === false) { pnEl.textContent = '✗ MISMATCH'; pnEl.style.color = '#dc2626'; }
+  else { pnEl.textContent = '—'; pnEl.style.color = ''; }
+
+  document.getElementById(`v-pick-total-${pid}`).textContent = pickTotal ? pickTotal.toLocaleString() : '—';
+  document.getElementById(`v-box-total-${pid}`).textContent  = boxTotal  ? boxTotal.toLocaleString()  : '—';
+  document.getElementById(`v-box-count-${pid}`).textContent  = boxCount  || '—';
+
+  // Status
+  let status = 'pending';
+  if (mode === 'scan' && pnMode === 'per-box') {
+    const rows = document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`);
+    if (pickTotal > 0 && boxTotal > 0 && pickPN && rows.length > 0) {
+      status = (pnOk === true && pickTotal === boxTotal) ? 'match' : 'mismatch';
+    }
+  } else {
+    const boxPN = (document.getElementById(`box-pn-${pid}`)?.value || '').trim().toUpperCase();
+    if (pickTotal > 0 && boxTotal > 0 && pickPN && boxPN) {
+      status = (pnOk && pickTotal === boxTotal) ? 'match' : 'mismatch';
+    }
+  }
+  document.getElementById(`val-strip-${pid}`).className = `val-strip ${status}`;
+  const badge = document.getElementById(`v-status-${pid}`);
+  badge.className = `val-badge ${status}`;
+  badge.textContent = status === 'match' ? '✓ MATCH' : status === 'mismatch' ? '✗ MISMATCH' : 'PENDING';
+  document.querySelector(`.pallet-block[data-pid="${pid}"]`).className =
+    `pallet-block ${status === 'match' ? 'ok' : status === 'mismatch' ? 'err' : ''}`;
+  const tab = document.querySelector(`.pallet-tab[data-tab-pid="${pid}"]`);
+  if (tab) {
+    tab.classList.remove('tab-ok', 'tab-err');
+    if (status === 'match') tab.classList.add('tab-ok');
+    else if (status === 'mismatch') tab.classList.add('tab-err');
+  }
+
+  const hdrBadge = document.getElementById(`hdr-status-${pid}`);
+  if (hdrBadge) {
+    if (status === 'match')         { hdrBadge.textContent = '✓ OK';       hdrBadge.className = 'hdr-status-badge hdr-ok'; }
+    else if (status === 'mismatch') { hdrBadge.textContent = '✗ MISMATCH'; hdrBadge.className = 'hdr-status-badge hdr-err'; }
+    else                            { hdrBadge.textContent = 'PENDING';     hdrBadge.className = 'hdr-status-badge hdr-pending'; }
+  }
+
+  updateDeliverySummary();
+}
+
+/* ══ DELIVERY SUMMARY ═══════════════════════════════════ */
+function updateDeliverySummary() {
+  const blocks = document.querySelectorAll('.pallet-block');
+
+  let totalPick = 0, totalBox = 0, totalBoxes = 0;
+  let allMatch = true, anyMismatch = false;
+
+  blocks.forEach(b => {
+    const pid = b.dataset.pid;
+    document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach(i => {
+      totalPick += parseInt(i.value) || 0;
+    });
+    const mode = getBoxMode(pid);
+    if (mode === 'scan') {
+      if (getPNMode(pid) === 'per-box') {
+        const rows = document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`);
+        totalBoxes += rows.length;
+        rows.forEach(row => { totalBox += parseInt(row.querySelectorAll('input')[1]?.value) || 0; });
+      } else {
+        const rows = document.querySelectorAll(`#box-rows-${pid} .box-row`);
+        totalBoxes += rows.length;
+        rows.forEach(row => { totalBox += parseInt(row.querySelector('input')?.value) || 0; });
+      }
+    } else {
+      document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(row => {
+        const [a, c] = row.querySelectorAll('input');
+        const count = parseInt(a?.value)||0, qty = parseInt(c?.value)||0;
+        totalBox += count * qty; totalBoxes += count;
+      });
+    }
+    const st = document.getElementById(`v-status-${pid}`)?.textContent || '';
+    if (st !== '✓ MATCH') allMatch = false;
+    if (st === '✗ MISMATCH') anyMismatch = true;
+  });
+
+  document.getElementById('ds-pallets').textContent = blocks.length;
+  document.getElementById('ds-boxes').textContent   = totalBoxes.toLocaleString();
+  document.getElementById('ds-pick').textContent    = totalPick.toLocaleString();
+  document.getElementById('ds-box').textContent     = totalBox.toLocaleString();
+
+  const stEl     = document.getElementById('ds-status');
+  const statusBox = document.getElementById('sb-status-box');
+  const kpiBox   = document.getElementById('kpi-box');
+  const hasData  = totalPick > 0 || totalBox > 0;
+
+  if (allMatch && blocks.length && hasData) {
+    stEl.textContent = '✓ ALL OK';
+    stEl.style.color = '#34d399';
+    if (statusBox) { statusBox.style.background = 'rgba(16,185,129,.08)'; statusBox.style.borderColor = 'rgba(16,185,129,.25)'; }
+    if (kpiBox) { kpiBox.querySelector('.sum-val').style.color = '#34d399'; }
+  } else if (anyMismatch) {
+    stEl.textContent = '✗ ERRORS';
+    stEl.style.color = '#f87171';
+    if (statusBox) { statusBox.style.background = 'rgba(239,68,68,.08)'; statusBox.style.borderColor = 'rgba(239,68,68,.25)'; }
+    if (kpiBox) { kpiBox.querySelector('.sum-val').style.color = '#f87171'; }
+  } else if (hasData) {
+    stEl.textContent = '● In progress';
+    stEl.style.color = '#fbbf24';
+    if (statusBox) { statusBox.style.background = 'rgba(251,191,36,.08)'; statusBox.style.borderColor = 'rgba(251,191,36,.25)'; }
+    if (kpiBox) { kpiBox.querySelector('.sum-val').style.color = '#e6edf3'; }
+  } else {
+    stEl.textContent = '— Waiting';
+    stEl.style.color = '#6e7681';
+    if (statusBox) { statusBox.style.background = 'transparent'; statusBox.style.borderColor = '#30363d'; }
+    if (kpiBox) { kpiBox.querySelector('.sum-val').style.color = '#e6edf3'; }
+  }
+}
+
+/* ══ BUILD PRINT HTML ═══════════════════════════════════ */
+function buildPrintHTML() {
+  const operator = document.getElementById('operator').value || '—';
+  const delivNum = document.getElementById('delivery-num').value || '—';
+  const dateVal  = document.getElementById('chk-date').value;
+  const dateStr  = dateVal ? new Date(dateVal+'T12:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  const dest     = destination === 'europe' ? 'Europe (max 180 cm)' : 'Export (max 160 cm)';
+  const delivPN  = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase() || '—';
+  const now      = new Date().toLocaleString('en-GB');
+
+  let html = `<div class="pr-page">
+  <div class="pr-header">
+    <div>
+      <div class="pr-header-title">Arrow Electronics</div>
+      <div class="pr-header-sub">Warehouse Packing Checklist &nbsp;&middot;&nbsp; Microsoft Area &nbsp;&middot;&nbsp; Sevenum NL</div>
+    </div>
+    <div class="pr-header-right">
+      <div class="pr-header-deliv">Delivery #${esc(delivNum)}</div>
+      <div class="pr-header-date">${esc(dateStr)}</div>
+    </div>
+  </div>
+  <div class="pr-meta-strip">
+    <div class="pr-meta-cell"><div class="pr-meta-lbl">Operator</div><div class="pr-meta-val">${esc(operator)}</div></div>
+    <div class="pr-meta-cell"><div class="pr-meta-lbl">Part Number</div><div class="pr-meta-val">${esc(delivPN)}</div></div>
+    <div class="pr-meta-cell"><div class="pr-meta-lbl">Destination</div><div class="pr-meta-val">${esc(dest)}</div></div>
+    <div class="pr-meta-cell"><div class="pr-meta-lbl">Generated</div><div class="pr-meta-val">${esc(now)}</div></div>
+  </div>
+  <div class="pr-content">`;
+
+  const blocks = document.querySelectorAll('.pallet-block');
+  let palletIdx = 0;
+  let grandPickTotal = 0, grandBoxTotal = 0, grandBoxCount = 0;
+  let allOk = true, anyErr = false;
+  const consolidado = [];
+
+  blocks.forEach(b => {
+    palletIdx++;
+    const pid    = b.dataset.pid;
+    const ptype  = getPType(pid) || '—';
+    const dims   = PTYPE[ptype] || '—';
+    const weight = document.getElementById(`weight-${pid}`)?.value || '—';
+    const height = document.getElementById(`height-${pid}`)?.value || '—';
+
+    let pickTotal = 0;
+    const pickLabelEntries = [];
+    document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach((inp, i) => {
+      const qty = parseInt(inp?.value) || 0;
+      pickTotal += qty;
+      if (qty > 0) pickLabelEntries.push({ n: i + 1, qty });
+    });
+
+    const mode   = getBoxMode(pid);
+    const pnMode = getPNMode(pid);
+    let boxTotal = 0, boxCount = 0;
+    const boxGroups = [];
+    let pnOk = null;
+    let boxPN = '—';
+
+    if (mode === 'scan') {
+      if (pnMode === 'per-box') {
+        let allFilled = true, anyMismatch = false;
+        document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).forEach(row => {
+          const inputs = row.querySelectorAll('input');
+          const pn  = (inputs[0]?.value || '').trim().toUpperCase();
+          const qty = parseInt(inputs[1]?.value) || 0;
+          if (!pn) allFilled = false;
+          if (pn && delivPN !== '—' && pn !== delivPN) anyMismatch = true;
+          if (qty > 0) {
+            const existing = boxGroups.find(g => g.qty === qty);
+            if (existing) existing.count++;
+            else boxGroups.push({ count:1, qty, total:qty });
+            boxTotal += qty; boxCount++;
+          }
+        });
+        // Recalculate totals for grouped entries
+        boxGroups.forEach(g => { g.total = g.count * g.qty; });
+        boxPN = 'per box';
+        if (delivPN !== '—') {
+          if (anyMismatch) pnOk = false;
+          else if (allFilled && boxCount > 0) pnOk = true;
+        }
+      } else {
+        boxPN = (document.getElementById(`box-pn-${pid}`)?.value || '').trim().toUpperCase() || '—';
+        const qtyMap = new Map();
+        document.querySelectorAll(`#box-rows-${pid} .box-row input`).forEach(inp => {
+          const qty = parseInt(inp?.value) || 0;
+          if (qty > 0) qtyMap.set(qty, (qtyMap.get(qty) || 0) + 1);
+        });
+        qtyMap.forEach((count, qty) => {
+          boxGroups.push({ count, qty, total: count * qty });
+          boxTotal += count * qty; boxCount += count;
+        });
+        if (delivPN !== '—' && boxPN !== '—') pnOk = delivPN === boxPN;
+      }
+    } else {
+      boxPN = (document.getElementById(`box-pn-${pid}`)?.value || '').trim().toUpperCase() || '—';
+      document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(row => {
+        const [a, c] = row.querySelectorAll('input');
+        const count = parseInt(a?.value) || 0, qty = parseInt(c?.value) || 0;
+        if (count > 0 || qty > 0) boxGroups.push({ count, qty, total: count * qty });
+        boxTotal += count * qty; boxCount += count;
+      });
+      if (delivPN !== '—' && boxPN !== '—') pnOk = delivPN === boxPN;
+    }
+
+    grandPickTotal += pickTotal; grandBoxTotal += boxTotal; grandBoxCount += boxCount;
+    const qtyOk = pickTotal > 0 && pickTotal === boxTotal;
+    const ready = pickTotal > 0 && boxTotal > 0;
+    const st    = ready ? ((pnOk !== false && qtyOk) ? 'ok' : 'err') : 'pending';
+    const stLbl = st === 'ok' ? '✓ MATCH' : st === 'err' ? '✗ MISMATCH' : '⏳ PENDING';
+    const stCls = st === 'ok' ? 'pr-match' : st === 'err' ? 'pr-mismatch' : 'pr-pending';
+    if (st === 'err') anyErr = true;
+    if (st !== 'ok')  allOk = false;
+    consolidado.push({ palletIdx, ptype, dims, weight, boxCount, pickTotal, boxTotal, st, stLbl, stCls });
+
+    const pnLabel = pnOk === true ? 'PN OK ✓' : pnOk === false ? 'PN MISMATCH ✗' : 'Not verified';
+    const pnClass = pnOk === true ? 'pr-pn-ok' : pnOk === false ? 'pr-pn-err' : 'pr-pn-pending';
+
+    const breakdownRows = boxGroups.length
+      ? boxGroups.map(g =>
+          `<tr><td>${g.count}</td><td>${g.qty.toLocaleString()}</td><td>${g.total.toLocaleString()}</td></tr>`
+        ).join('')
+      : `<tr><td colspan="3" style="color:#94a3b8;font-style:italic;text-align:center;">No data entered</td></tr>`;
+
+    const pickLabelStr = pickLabelEntries.length > 1
+      ? pickLabelEntries.map(e => `PL ${e.n}: ${e.qty.toLocaleString()} pcs`).join(' &nbsp;+&nbsp; ')
+      : '';
+
+    html += `
+    <div class="pr-pallet-hdr">
+      <span class="pr-pallet-hdr-title">PALLET ${palletIdx} &nbsp;&mdash;&nbsp; ${esc(ptype)} (${esc(dims)} cm) &nbsp;|&nbsp; ${esc(weight)} kg &nbsp;|&nbsp; ${esc(height)} cm</span>
+      <span class="pr-badge pr-badge-${st}">${stLbl}</span>
+    </div>
+    <div class="pr-pn-line">
+      <span>Pick PN: <b>${esc(delivPN)}</b> &nbsp;|&nbsp; Box PN: <b>${esc(boxPN)}</b></span>
+      <span class="${pnClass}">${pnLabel}</span>
+    </div>
+    ${pickLabelStr ? `<div class="pr-pick-labels-line">Pick Labels: ${pickLabelStr} &nbsp;|&nbsp; Total: <b>${pickTotal.toLocaleString()} pcs</b></div>` : ''}
+    <div class="pr-breakdown-lbl">Box Breakdown by Quantity</div>
+    <table class="pr-table pr-breakdown-tbl">
+      <tr><th>No. of Boxes</th><th>Pcs / Box</th><th>Subtotal (pcs)</th></tr>
+      ${breakdownRows}
+    </table>
+    <table class="pr-table pr-summary-tbl">
+      <tr><th>Expected (pcs)</th><th>Verified (pcs)</th><th>Total Boxes</th><th>Status</th></tr>
+      <tr>
+        <td>${pickTotal > 0 ? pickTotal.toLocaleString() : '—'}</td>
+        <td>${boxTotal  > 0 ? boxTotal.toLocaleString()  : '—'}</td>
+        <td>${boxCount  || '—'}</td>
+        <td class="${stCls}">${stLbl}</td>
+      </tr>
+    </table>`;
+  });
+
+  // Consolidado General
+  const overallSt  = allOk && blocks.length ? 'ok' : anyErr ? 'err' : 'pending';
+  const overallLbl = overallSt === 'ok' ? '✓ ALL OK' : overallSt === 'err' ? '✗ ERRORS FOUND' : '⏳ PENDING';
+
+  const consolRows = consolidado.map(c => `
+    <tr>
+      <td>P${c.palletIdx}</td><td>${esc(c.ptype)}</td><td>${esc(c.dims)} cm</td><td>${esc(c.weight)} kg</td>
+      <td>${c.boxCount || '—'}</td>
+      <td>${c.pickTotal > 0 ? c.pickTotal.toLocaleString() : '—'}</td>
+      <td>${c.boxTotal  > 0 ? c.boxTotal.toLocaleString()  : '—'}</td>
+      <td class="${c.stCls}">${c.stLbl}</td>
+    </tr>`).join('');
+
+  html += `
+  </div>
+  <div style="padding:0 18px;">
+    <div class="pr-consolidado-hdr">Delivery Summary</div>
+    <table class="pr-table pr-consol-tbl">
+      <tr><th>Pallet</th><th>Type</th><th>Dims</th><th>Weight</th><th>Boxes</th><th>Exp.(pcs)</th><th>Verif.(pcs)</th><th>Status</th></tr>
+      ${consolRows}
+    </table>
+    <div class="pr-totals-box">
+      <div class="pr-total-cell"><div class="pr-total-lbl">Pallets</div><div class="pr-total-val">${blocks.length}</div></div>
+      <div class="pr-total-cell"><div class="pr-total-lbl">Total Boxes</div><div class="pr-total-val">${grandBoxCount.toLocaleString()}</div></div>
+      <div class="pr-total-cell"><div class="pr-total-lbl">Expected (pcs)</div><div class="pr-total-val">${grandPickTotal.toLocaleString()}</div></div>
+      <div class="pr-total-cell"><div class="pr-total-lbl">Verified (pcs)</div><div class="pr-total-val">${grandBoxTotal.toLocaleString()}</div></div>
+      <div class="pr-total-cell"><div class="pr-total-lbl">Overall Status</div><div class="pr-total-val ${overallSt}">${overallLbl}</div></div>
+    </div>
+    <div class="pr-sig">
+      <div class="pr-sig-box">
+        <div class="pr-sig-lbl">Operator Signature</div>
+        <div class="pr-sig-name">${esc(operator)}</div>
+      </div>
+    </div>
+  </div>
+  <div class="pr-footer">Arrow WH Packing Checklist &nbsp;&middot;&nbsp; Generated: ${esc(now)} &nbsp;&middot;&nbsp; Microsoft Area Sevenum</div>
+  </div>`;
+
+  return html;
+}
+
+/* ══ PRINT ══════════════════════════════════════════════ */
+function doPrint() {
+  const root = document.getElementById('print-root');
+  root.innerHTML = buildPrintHTML();
+  root.style.display = 'block';
+  window.print();
+  root.style.display = 'none';
+}
+
+/* ══ PDF EXPORT ════════════════════════════════════════ */
+function doExportPDF() {
+  if (!window.jspdf) { alert('PDF library not loaded. Please check your internet connection.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'mm', format:'a4' });
+  const PAGE_W = 210, M = 14, CW = PAGE_W - M * 2;
+
+  const operator = document.getElementById('operator').value || '—';
+  const delivNum = document.getElementById('delivery-num').value || '—';
+  const dateVal  = document.getElementById('chk-date').value;
+  const dateStr  = dateVal ? new Date(dateVal+'T12:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  const dest     = destination === 'europe' ? 'Europe (max 180 cm)' : 'Export (max 160 cm)';
+  const delivPN  = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase() || '—';
+  const now      = new Date().toLocaleString('en-GB');
+
+  // ── Header banner ──────────────────────────────────────────────────
+  doc.setFillColor(10, 31, 54);
+  doc.rect(0, 0, PAGE_W, 26, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(13); doc.setFont(undefined,'bold');
+  doc.text('Arrow Electronics', M, 10);
+  doc.setFontSize(8); doc.setFont(undefined,'normal');
+  doc.text('Warehouse Packing Checklist  -  Microsoft Area  -  Sevenum NL', M, 16);
+  doc.setFontSize(9); doc.setFont(undefined,'bold');
+  doc.text('Delivery #' + delivNum, PAGE_W - M, 10, { align:'right' });
+  doc.setFontSize(8); doc.setFont(undefined,'normal');
+  doc.text(dateStr, PAGE_W - M, 16, { align:'right' });
+
+  // ── Metadata strip ─────────────────────────────────────────────────
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(226, 232, 240);
+  doc.rect(M, 28, CW, 16, 'FD');
+  const metaCols = [['OPERATOR', operator], ['PART NUMBER', delivPN], ['DESTINATION', dest]];
+  const cw4 = CW / 3;
+  metaCols.forEach(function([lbl, val], i) {
+    const x = M + cw4 * i + 4;
+    doc.setFontSize(7); doc.setTextColor(100,116,139); doc.setFont(undefined,'bold');
+    doc.text(lbl, x, 34);
+    doc.setFontSize(8.5); doc.setTextColor(15,23,42); doc.setFont(undefined,'normal');
+    const capped = String(val).length > 26 ? String(val).slice(0,25) + '...' : String(val);
+    doc.text(capped, x, 40);
+  });
+
+  let y = 50;
+
+  const blocks = document.querySelectorAll('.pallet-block');
+  let palletIdx = 0;
+  let grandPickTotal = 0, grandBoxTotal = 0, grandBoxCount = 0;
+  let allOk = true, anyErr = false;
+  const consolidado = [];
+
+  blocks.forEach(function(b) {
+    palletIdx++;
+    const pid    = b.dataset.pid;
+    const ptype  = getPType(pid) || '—';
+    const dims   = PTYPE[ptype] || '—';
+    const weight = document.getElementById('weight-' + pid)?.value || '—';
+    const height = document.getElementById('height-' + pid)?.value || '—';
+
+    // Pick label total
+    let pickTotal = 0;
+    document.querySelectorAll('#pick-rows-' + pid + ' .pick-row input').forEach(function(inp) {
+      pickTotal += parseInt(inp?.value) || 0;
+    });
+
+    // Box mode & pn mode
+    const mode   = getBoxMode(pid);
+    const pnMode = getPNMode(pid);
+    let boxTotal = 0, boxCount = 0;
+    const boxGroups = []; // {count, qty}
+    let pnOk = null;
+    let boxPN = '—';
+
+    if (mode === 'scan') {
+      if (pnMode === 'per-box') {
+        let allPNFilled = true, anyPNMismatch = false;
+        document.querySelectorAll('#perbox-rows-' + pid + ' .perbox-row').forEach(function(row) {
+          const inputs = row.querySelectorAll('input');
+          const pn  = (inputs[0]?.value || '').trim().toUpperCase();
+          const qty = parseInt(inputs[1]?.value) || 0;
+          if (!pn) allPNFilled = false;
+          if (pn && delivPN !== '—' && pn !== delivPN) anyPNMismatch = true;
+          if (qty > 0) {
+            const existing = boxGroups.find(function(g){ return g.qty === qty; });
+            if (existing) existing.count++; else boxGroups.push({count:1, qty:qty});
+            boxTotal += qty; boxCount++;
+          }
+        });
+        boxPN = 'per box';
+        if (delivPN !== '—') {
+          if (anyPNMismatch) pnOk = false;
+          else if (allPNFilled && boxCount > 0) pnOk = true;
+        }
+      } else {
+        boxPN = (document.getElementById('box-pn-' + pid)?.value || '').trim().toUpperCase() || '—';
+        const qtyMap = new Map();
+        document.querySelectorAll('#box-rows-' + pid + ' .box-row input').forEach(function(inp) {
+          const qty = parseInt(inp?.value) || 0;
+          if (qty > 0) qtyMap.set(qty, (qtyMap.get(qty) || 0) + 1);
+        });
+        qtyMap.forEach(function(count, qty) {
+          boxGroups.push({count:count, qty:qty});
+          boxTotal += count * qty; boxCount += count;
+        });
+        if (delivPN !== '—' && boxPN !== '—') pnOk = delivPN === boxPN;
+      }
+    } else {
+      boxPN = (document.getElementById('box-pn-' + pid)?.value || '').trim().toUpperCase() || '—';
+      document.querySelectorAll('#group-rows-' + pid + ' .group-row').forEach(function(row) {
+        const inputs = row.querySelectorAll('input');
+        const count = parseInt(inputs[0]?.value)||0, qty = parseInt(inputs[1]?.value)||0;
+        if (count > 0 && qty > 0) {
+          boxGroups.push({count:count, qty:qty});
+          boxTotal += count * qty; boxCount += count;
+        }
+      });
+      if (delivPN !== '—' && boxPN !== '—') pnOk = delivPN === boxPN;
+    }
+
+    grandPickTotal += pickTotal; grandBoxTotal += boxTotal; grandBoxCount += boxCount;
+
+    const qtyOk    = pickTotal > 0 && pickTotal === boxTotal;
+    const ready    = pickTotal > 0 && boxTotal > 0;
+    const palletSt = ready ? ((pnOk !== false && qtyOk) ? 'OK' : 'MISMATCH') : 'PENDING';
+    if (ready && !(pnOk !== false && qtyOk)) anyErr = true;
+    if (!ready || !(pnOk !== false && qtyOk)) allOk = false;
+
+    consolidado.push([
+      'P' + palletIdx, ptype, dims + ' cm', weight + ' kg',
+      String(boxCount),
+      pickTotal > 0 ? pickTotal.toLocaleString() : '—',
+      boxTotal  > 0 ? boxTotal.toLocaleString()  : '—',
+      palletSt,
+    ]);
+
+    // ── Page break check ──────────────────────────────────
+    if (y > 248) { doc.addPage(); y = 14; }
+
+    // ── Pallet header bar ─────────────────────────────────
+    const hdrC = palletSt==='OK' ? [16,100,60] : palletSt==='MISMATCH' ? [155,20,20] : [15,41,66];
+    doc.setFillColor(hdrC[0], hdrC[1], hdrC[2]);
+    doc.rect(M, y, CW, 8, 'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont(undefined,'bold');
+    doc.text(
+      'PALLET ' + palletIdx + '   ' + ptype + '  (' + dims + ' cm)   ' + weight + ' kg   ' + height + ' cm',
+      M+3, y+5.5
+    );
+    const stLabel = palletSt==='OK' ? 'OK' : palletSt==='MISMATCH' ? 'MISMATCH' : 'PENDING';
+    doc.setFontSize(8);
+    doc.text(stLabel, PAGE_W - M - 3, y+5.5, { align:'right' });
+    y += 9;
+
+    // ── PN line ───────────────────────────────────────────
+    const pnLabel = pnOk === true ? 'PN OK' : pnOk === false ? 'PN MISMATCH' : 'PN not verified';
+    const pnColor = pnOk === true ? [21,128,61] : pnOk === false ? [185,28,28] : [100,116,139];
+    doc.setFontSize(7.5); doc.setTextColor(60,60,60); doc.setFont(undefined,'normal');
+    doc.text('Pick PN: ' + delivPN + '   |   Box PN: ' + boxPN, M+2, y+4);
+    doc.setFont(undefined,'bold'); doc.setTextColor(pnColor[0], pnColor[1], pnColor[2]);
+    doc.text(pnLabel, PAGE_W - M - 2, y+4, { align:'right' });
+    y += 7;
+
+    // ── Box groups line (N carton x Q pcs) ───────────────
+    const boxLine = boxGroups.length
+      ? boxGroups.map(function(g){ return g.count + ' carton x ' + g.qty.toLocaleString() + ' pcs'; }).join('   +   ')
+      : '—';
+    doc.setFontSize(7); doc.setTextColor(100,116,139); doc.setFont(undefined,'bold');
+    doc.text('BOXES:', M+2, y+3.5);
+    doc.setFontSize(8.5); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
+    const wrappedBox = doc.splitTextToSize(boxLine, CW - 22);
+    doc.text(wrappedBox, M+22, y+3.5);
+    y += Math.max(wrappedBox.length * 5, 5);
+
+    // ── Totals line ───────────────────────────────────────
+    doc.setFontSize(7.5); doc.setTextColor(60,60,60); doc.setFont(undefined,'normal');
+    const expStr   = pickTotal > 0 ? pickTotal.toLocaleString() : '—';
+    const verifStr = boxTotal  > 0 ? boxTotal.toLocaleString()  : '—';
+    doc.text(
+      'Expected: ' + expStr + ' pcs   |   Verified: ' + verifStr + ' pcs   |   Total boxes: ' + (boxCount || '—'),
+      PAGE_W - M - 2, y+3, { align:'right' }
+    );
+    y += 6;
+
+    // ── Divider ───────────────────────────────────────────
+    doc.setDrawColor(200,200,200);
+    doc.line(M, y, PAGE_W - M, y);
+    y += 5;
+  });
+
+  // ── Delivery Summary table ─────────────────────────────────────────
+  if (y > 215) { doc.addPage(); y = 14; }
+  const overallSt    = allOk && blocks.length ? 'ALL OK' : anyErr ? 'ERRORS FOUND' : 'PENDING';
+  const overallColor = allOk && blocks.length ? [21,128,61] : anyErr ? [185,28,28] : [100,116,139];
+
+  doc.setFillColor(241,245,249); doc.setDrawColor(203,213,225);
+  doc.rect(M, y, CW, 7, 'FD');
+  doc.setTextColor(15,23,42); doc.setFontSize(9); doc.setFont(undefined,'bold');
+  doc.text('DELIVERY SUMMARY', M+3, y+5);
+  y += 9;
+
+  doc.autoTable({
+    startY: y,
+    head: [['Pallet', 'Type', 'Dims', 'Weight', 'Boxes', 'Exp.(pcs)', 'Verif.(pcs)', 'Status']],
+    body: consolidado,
+    styles: { fontSize:8, cellPadding:2.5 },
+    headStyles: { fillColor:[15,41,66], textColor:255, fontStyle:'bold' },
+    columnStyles: {
+      0:{cellWidth:14,halign:'center'}, 1:{cellWidth:13,halign:'center'},
+      2:{cellWidth:23},                 3:{cellWidth:17,halign:'center'},
+      4:{cellWidth:13,halign:'center'}, 5:{cellWidth:24,halign:'right'},
+      6:{cellWidth:24,halign:'right'},  7:{cellWidth:24,halign:'center'},
+    },
+    didParseCell: function(data) {
+      if (data.column.index === 7 && data.section === 'body') {
+        const v = data.cell.raw;
+        data.cell.styles.fontStyle = 'bold';
+        if (v === 'OK')            data.cell.styles.textColor = [21,128,61];
+        else if (v === 'MISMATCH') data.cell.styles.textColor = [185,28,28];
+        else                       data.cell.styles.textColor = [100,116,139];
+      }
+    },
+    margin: { left:M, right:M }, theme:'grid',
+  });
+  y = doc.lastAutoTable.finalY + 4;
+
+  // ── Grand totals box ───────────────────────────────────────────────
+  doc.setFillColor(241,245,249); doc.setDrawColor(203,213,225);
+  doc.rect(M, y, CW, 16, 'FD');
+  const totals = [
+    ['PALLETS',         String(blocks.length),              M+5],
+    ['TOTAL BOXES',     grandBoxCount.toLocaleString(),     M+42],
+    ['EXPECTED (PCS)',  grandPickTotal.toLocaleString(),    M+90],
+    ['VERIFIED (PCS)',  grandBoxTotal.toLocaleString(),     M+133],
+  ];
+  totals.forEach(function([lbl, val, x]) {
+    doc.setFontSize(7); doc.setTextColor(100,116,139); doc.setFont(undefined,'bold');
+    doc.text(lbl, x, y+5);
+    doc.setFontSize(11); doc.setTextColor(15,23,42); doc.setFont(undefined,'bold');
+    doc.text(val, x, y+13);
+  });
+  const stX = PAGE_W - M - doc.getTextWidth(overallSt) - 5;
+  doc.setFontSize(7); doc.setTextColor(100,116,139); doc.setFont(undefined,'bold');
+  doc.text('OVERALL STATUS', stX, y+5);
+  doc.setFontSize(11); doc.setTextColor(overallColor[0], overallColor[1], overallColor[2]); doc.setFont(undefined,'bold');
+  doc.text(overallSt, stX, y+13);
+  y += 22;
+
+  // ── Signature ──────────────────────────────────────────────────────
+  if (y > 258) { doc.addPage(); y = 14; }
+  y += 8;
+  const sigW = 80, sigX = M;
+  const lineY = y + 14;
+  doc.setDrawColor(51,65,85); doc.line(sigX, lineY, sigX + sigW, lineY);
+  doc.setFontSize(8); doc.setTextColor(100,116,139); doc.setFont(undefined,'normal');
+  doc.text('OPERATOR SIGN.', sigX + sigW/2, lineY+5, { align:'center' });
+  doc.text('Nombre: ' + operator, sigX + sigW/2, lineY+10, { align:'center' });
+  y += 32;
+
+  // ── Footer ─────────────────────────────────────────────────────────
+  doc.setFontSize(7); doc.setTextColor(148,163,184); doc.setFont(undefined,'normal');
+  doc.text('Arrow WH Packing Checklist  -  Generated: ' + now + '  -  Microsoft Area Sevenum', PAGE_W/2, y, { align:'center' });
+
+  doc.save('packing-' + delivNum + '-' + new Date().toISOString().slice(0,10) + '.pdf');
+}
+
+/* ══ DATA EXPORT (JSON / CSV) ═══════════════════════════ */
+function buildExportData() {
+  const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
+  const data = {
+    exportedAt: new Date().toISOString(),
+    delivery: {
+      operator: document.getElementById('operator')?.value || '',
+      deliveryNum: document.getElementById('delivery-num')?.value || '',
+      partNumber: delivPN,
+      destination: destination,
+      heightLimit: HEIGHT_LIMITS[destination]
+    },
+    pallets: [],
+    summary: { totalPallets: 0, totalBoxes: 0, totalExpected: 0, totalVerified: 0, overallStatus: 'pending' }
+  };
+
+  let allMatch = true, anyMismatch = false, anyData = false;
+
+  const blocks = document.querySelectorAll('.pallet-block');
+  blocks.forEach((b, idx) => {
+    const pid = b.dataset.pid;
+    const type = getPType(pid);
+    const pnMode = getPNMode(pid);
+    const boxMode = getBoxMode(pid);
+    const weight = parseFloat(document.getElementById(`weight-${pid}`)?.value) || 0;
+    const height = parseFloat(document.getElementById(`height-${pid}`)?.value) || 0;
+    const limit = HEIGHT_LIMITS[destination];
+
+    const pallet = {
+      id: idx + 1,
+      type: type || null,
+      dimensions: type ? PTYPE[type] : null,
+      weight: weight || null,
+      height: height || null,
+      pnMode: pnMode,
+      boxMode: boxMode,
+      status: 'pending',
+      pickLabels: [],
+      boxes: [],
+      totals: { expected: 0, verified: 0, boxCount: 0, pnMatch: null, qtyMatch: null, heightOk: height ? height <= limit : null }
+    };
+
+    // Pick labels
+    let pickTotal = 0;
+    document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach((inp, i) => {
+      const q = parseInt(inp.value) || 0;
+      pickTotal += q;
+      if (q > 0) pallet.pickLabels.push({ label: `PL${i + 1}`, qty: q });
+    });
+    pallet.totals.expected = pickTotal;
+
+    // Boxes by mode
+    let boxTotal = 0, boxCount = 0;
+    if (boxMode === 'scan' && pnMode === 'per-box') {
+      document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).forEach((row, i) => {
+        const [pnInp, qtyInp] = row.querySelectorAll('input');
+        const pn = (pnInp?.value || '').trim().toUpperCase();
+        const q = parseInt(qtyInp?.value) || 0;
+        const src = tagStateOf(qtyInp);
+        boxTotal += q;
+        boxCount += 1;
+        pallet.boxes.push({ id: `B${i + 1}`, partNumber: pn, qty: q, source: src === 'wait' ? 'pending' : src });
+      });
+    } else if (boxMode === 'scan') {
+      const sharedPN = (document.getElementById(`box-pn-${pid}`)?.value || '').trim().toUpperCase();
+      document.querySelectorAll(`#box-rows-${pid} .box-row`).forEach((row, i) => {
+        const inp = row.querySelector('input');
+        const q = parseInt(inp?.value) || 0;
+        const src = tagStateOf(inp);
+        boxTotal += q;
+        boxCount += 1;
+        pallet.boxes.push({ id: `B${i + 1}`, partNumber: sharedPN, qty: q, source: src === 'wait' ? 'pending' : src });
+      });
+    } else { // visual
+      const sharedPN = (document.getElementById(`box-pn-${pid}`)?.value || '').trim().toUpperCase();
+      let cursor = 1;
+      document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(row => {
+        const [a, c] = row.querySelectorAll('input');
+        const count = parseInt(a?.value) || 0;
+        const q = parseInt(c?.value) || 0;
+        for (let i = 0; i < count; i++) {
+          pallet.boxes.push({ id: `B${cursor}`, partNumber: sharedPN, qty: q, source: 'visual' });
+          cursor++;
+        }
+        boxTotal += count * q;
+        boxCount += count;
+      });
+    }
+    pallet.totals.verified = boxTotal;
+    pallet.totals.boxCount = boxCount;
+
+    // PN match
+    let pnOk = null;
+    if (delivPN) {
+      if (boxMode === 'scan' && pnMode === 'per-box') {
+        const rows = pallet.boxes.filter(x => x.partNumber);
+        if (rows.length > 0) {
+          const allFilled = pallet.boxes.every(x => x.partNumber);
+          const anyMis = rows.some(x => x.partNumber !== delivPN);
+          if (anyMis) pnOk = false;
+          else if (allFilled) pnOk = true;
+        }
+      } else {
+        const sharedPN = (document.getElementById(`box-pn-${pid}`)?.value || '').trim().toUpperCase();
+        if (sharedPN) pnOk = sharedPN === delivPN;
+      }
+    }
+    pallet.totals.pnMatch = pnOk;
+    pallet.totals.qtyMatch = (pickTotal > 0 && boxTotal > 0) ? pickTotal === boxTotal : null;
+
+    // Status
+    if (pickTotal > 0 && boxTotal > 0 && delivPN) {
+      if (pnOk === true && pickTotal === boxTotal) pallet.status = 'ok';
+      else pallet.status = 'mismatch';
+    } else if (pickTotal > 0 || boxTotal > 0) {
+      pallet.status = 'pending';
+    }
+
+    data.pallets.push(pallet);
+
+    // Summary aggregation
+    data.summary.totalBoxes += boxCount;
+    data.summary.totalExpected += pickTotal;
+    data.summary.totalVerified += boxTotal;
+    if (pickTotal > 0 || boxTotal > 0) anyData = true;
+    if (pallet.status !== 'ok') allMatch = false;
+    if (pallet.status === 'mismatch') anyMismatch = true;
+  });
+
+  data.summary.totalPallets = blocks.length;
+  if (blocks.length && allMatch && anyData) data.summary.overallStatus = 'ok';
+  else if (anyMismatch) data.summary.overallStatus = 'mismatch';
+  else data.summary.overallStatus = 'pending';
+
+  return data;
+}
+
+function _downloadBlob(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function _exportFilename(ext) {
+  const delivNum = (document.getElementById('delivery-num')?.value || 'checklist').replace(/[^\w-]/g, '_');
+  const t = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const stamp = `${t.getFullYear()}${pad(t.getMonth() + 1)}${pad(t.getDate())}-${pad(t.getHours())}${pad(t.getMinutes())}`;
+  return `packing-${delivNum}-${stamp}.${ext}`;
+}
+
+function doExportJSON() {
+  const data = buildExportData();
+  _downloadBlob(JSON.stringify(data, null, 2), _exportFilename('json'), 'application/json');
+}
+
+function _csvEscape(v) {
+  if (v == null) return '';
+  const s = String(v);
+  if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+function doExportCSV() {
+  const data = buildExportData();
+  const headers = ['delivery_num','part_number','operator','destination','pallet_id','pallet_type','pallet_dimensions','pallet_weight_kg','pallet_height_cm','pallet_status','box_id','box_pn','box_qty','source'];
+  const rows = [headers.join(',')];
+  data.pallets.forEach(p => {
+    if (p.boxes.length === 0) {
+      rows.push([
+        data.delivery.deliveryNum, data.delivery.partNumber, data.delivery.operator, data.delivery.destination,
+        p.id, p.type || '', p.dimensions || '', p.weight || '', p.height || '', p.status,
+        '', '', '', ''
+      ].map(_csvEscape).join(','));
+      return;
+    }
+    p.boxes.forEach(bx => {
+      rows.push([
+        data.delivery.deliveryNum, data.delivery.partNumber, data.delivery.operator, data.delivery.destination,
+        p.id, p.type || '', p.dimensions || '', p.weight || '', p.height || '', p.status,
+        bx.id, bx.partNumber || '', bx.qty, bx.source
+      ].map(_csvEscape).join(','));
+    });
+  });
+  // UTF-8 BOM for Excel compatibility
+  const csv = '﻿' + rows.join('\r\n');
+  _downloadBlob(csv, _exportFilename('csv'), 'text/csv;charset=utf-8');
+}
+</script>
+</body>
+</html>
