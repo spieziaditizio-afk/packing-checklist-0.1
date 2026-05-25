@@ -19,6 +19,51 @@ body{font-family:'DM Sans',sans-serif;background:#0d1117;min-height:100vh;font-s
 .logo-title{color:#e6edf3;font-size:17px;font-weight:600;line-height:1.2;}
 .logo-sub{color:rgba(255,255,255,.35);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
 .header-right{margin-left:auto;text-align:right;color:rgba(255,255,255,.3);font-size:11px;font-family:'DM Mono',monospace;}
+.mute-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.75);width:38px;height:38px;border-radius:9px;font-size:18px;line-height:1;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;padding:0;}
+.mute-btn:hover{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.18);}
+.mute-btn.muted{color:rgba(255,255,255,.35);background:rgba(255,255,255,.03);}
+
+/* ── TOPBAR BUTTONS (help, sessions) ── */
+.topbar-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.75);height:38px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;padding:0 12px;font-family:'DM Sans',sans-serif;}
+.topbar-btn:hover{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.18);}
+.topbar-btn .btn-icon{font-size:16px;line-height:1;}
+.topbar-btn .btn-label{font-family:'DM Mono',monospace;font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.topbar-btn-icon-only{width:38px;padding:0;justify-content:center;font-size:18px;}
+
+/* ── SESSIONS DROPDOWN ── */
+.topbar-menu{position:absolute;top:60px;right:18px;width:360px;max-height:60vh;overflow-y:auto;background:#161b22;border:1px solid #30363d;border-radius:11px;box-shadow:0 16px 48px rgba(0,0,0,.6),0 0 0 1px rgba(56,189,248,.06);z-index:200;}
+.menu-header{padding:12px 14px 9px;font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #21262d;display:flex;align-items:center;justify-content:space-between;}
+.menu-header-count{color:#38bdf8;font-family:'DM Mono',monospace;}
+.menu-footer{padding:9px;border-top:1px solid #21262d;background:rgba(0,0,0,.15);}
+.menu-footer button{width:100%;background:rgba(56,189,248,.1);border:1px dashed rgba(56,189,248,.35);color:#38bdf8;padding:10px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.menu-footer button:hover{background:rgba(56,189,248,.2);border-style:solid;}
+.menu-empty{padding:22px 14px;color:#6e7681;font-size:12px;text-align:center;font-style:italic;}
+.session-row{display:flex;align-items:center;gap:4px;padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s;}
+.session-row:hover{background:rgba(255,255,255,.03);}
+.session-row.active{background:rgba(16,185,129,.07);border-left:2px solid #10b981;padding-left:8px;}
+.session-main{flex:1;cursor:pointer;min-width:0;}
+.session-label{font-size:13px;font-weight:600;color:#e6edf3;font-family:'DM Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.session-active-dot{color:#10b981;margin-left:5px;font-size:10px;}
+.session-meta{font-size:10.5px;color:#8b949e;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.session-icon{background:transparent;border:none;color:rgba(255,255,255,.4);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:13px;transition:all .15s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.session-icon:hover{background:rgba(255,255,255,.08);color:#fff;}
+
+/* ── WELCOME SPLASH ── */
+#welcome-splash{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at top,#0d1117 0%,#010409 100%);display:none;align-items:center;justify-content:center;padding:20px;}
+.splash-card{max-width:560px;width:100%;background:#161b22;border:1px solid #21262d;border-radius:16px;padding:38px 36px 32px;text-align:center;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.7);}
+.splash-icon{font-size:54px;margin-bottom:4px;line-height:1;}
+.splash-title{color:#e6edf3;font-size:22px;font-weight:900;letter-spacing:.18em;margin:12px 0 4px;}
+.splash-sub{color:#38bdf8;font-size:12px;letter-spacing:.05em;margin-bottom:6px;}
+.splash-divider{width:50px;height:2px;background:rgba(56,189,248,.4);margin:14px auto 18px;border-radius:2px;}
+.splash-steps{list-style:none;text-align:left;margin:0 0 22px;padding:0;counter-reset:step;}
+.splash-steps li{counter-increment:step;padding:11px 14px 11px 52px;position:relative;color:#cbd5e1;font-size:13px;line-height:1.45;border-radius:9px;margin-bottom:5px;background:rgba(255,255,255,.025);}
+.splash-steps li::before{content:counter(step);position:absolute;left:14px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:rgba(56,189,248,.15);color:#38bdf8;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;}
+.splash-steps li b{color:#e6edf3;text-transform:uppercase;font-size:10.5px;letter-spacing:.09em;font-weight:700;display:block;margin-bottom:2px;}
+.splash-cta{background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;padding:14px 28px;font-size:14.5px;font-weight:700;border-radius:10px;cursor:pointer;letter-spacing:.05em;width:100%;transition:transform .15s,box-shadow .15s;font-family:'DM Sans',sans-serif;}
+.splash-cta:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(16,185,129,.32);}
+.splash-close{position:absolute;top:12px;right:12px;background:transparent;border:none;color:rgba(255,255,255,.4);font-size:18px;cursor:pointer;width:30px;height:30px;border-radius:6px;line-height:1;}
+.splash-close:hover{background:rgba(255,255,255,.08);color:#fff;}
+.splash-footer{margin-top:14px;font-size:10.5px;color:#6e7681;letter-spacing:.04em;}
 
 /* ── CARDS ── */
 .card{background:#161b22;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3);margin-bottom:16px;overflow:hidden;border:1px solid #21262d;}
@@ -331,6 +376,7 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
       <div class="logo-sub">Packing Checklist · Microsoft Area · Sevenum</div>
     </div>
     <div class="header-right" id="hdr-date"></div>
+    <button id="mute-toggle" class="mute-btn" onclick="toggleMute()" title="Sounds on — click to mute">🔊</button>
   </div>
 </div>
 
@@ -465,6 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('hdr-date').textContent =
     now.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
   document.getElementById('chk-date').value = now.toISOString().slice(0,10);
+  updateMuteButton();
   const restored = loadState();
   if (!restored || document.querySelectorAll('.pallet-block').length === 0) addPallet();
 });
@@ -725,7 +772,8 @@ function updateHeightWarning(pid) {
   if (!el || !warn) return;
   const h = parseFloat(el.value);
   const limit = HEIGHT_LIMITS[destination];
-  if (h && h > limit) {
+  const exceeded = !!(h && h > limit);
+  if (exceeded) {
     warn.textContent = `⚠ Exceeds max for ${destination === 'europe' ? 'Europe' : 'Export'} (limit: ${limit} cm)`;
     warn.classList.add('show');
     el.style.borderColor = '#dc2626';
@@ -733,6 +781,9 @@ function updateHeightWarning(pid) {
     warn.classList.remove('show');
     el.style.borderColor = '';
   }
+  // Audio: warn only on the rising edge (ok → exceeded), not on every keystroke.
+  if (exceeded && !_lastHeightExceed[pid]) warnHeight();
+  _lastHeightExceed[pid] = exceeded;
 }
 
 /* ══ BOX MODE ═══════════════════════════════════════════ */
@@ -895,36 +946,89 @@ function renumber(wrap, prefix) {
   });
 }
 
-/* ══ SCAN AUDIO & ERROR FEEDBACK ════════════════════════ */
+/* ══ AUDIO FEEDBACK ═════════════════════════════════════ */
+// All sounds are synthesized via Web Audio API (no files, works offline).
+// Globally gated by the mute toggle (persisted to localStorage[MUTE_KEY]).
 let _audioCtx = null;
+const MUTE_KEY = 'arrowPackingMutedV1';
+
+function isMuted() { return localStorage.getItem(MUTE_KEY) === '1'; }
+function setMuted(v) {
+  if (v) localStorage.setItem(MUTE_KEY, '1');
+  else   localStorage.removeItem(MUTE_KEY);
+  updateMuteButton();
+}
+function toggleMute() { setMuted(!isMuted()); }
+function updateMuteButton() {
+  const btn = document.getElementById('mute-toggle');
+  if (!btn) return;
+  const muted = isMuted();
+  btn.textContent = muted ? '🔇' : '🔊';
+  btn.title = muted ? 'Sounds muted — click to enable' : 'Sounds on — click to mute';
+  btn.classList.toggle('muted', muted);
+}
 function _getACtx() {
   if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  // Browsers suspend AudioContext until first user interaction — resume defensively.
+  if (_audioCtx.state === 'suspended') _audioCtx.resume();
   return _audioCtx;
 }
-function beepOk() {
+// Single-tone helper. opts: { dur, type, gain, when } (all optional).
+function _tone(freq, opts) {
+  if (isMuted()) return;
   try {
     const ctx = _getACtx();
+    const dur  = opts?.dur  ?? 0.12;
+    const type = opts?.type ?? 'sine';
+    const gain = opts?.gain ?? 0.22;
+    const when = opts?.when ?? 0;
     const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.value = freq;
     o.connect(g); g.connect(ctx.destination);
-    o.frequency.value = 880;
-    g.gain.setValueAtTime(0.22, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-    o.start(); o.stop(ctx.currentTime + 0.12);
+    const t0 = ctx.currentTime + when;
+    g.gain.setValueAtTime(gain, t0);
+    g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+    o.start(t0); o.stop(t0 + dur);
   } catch(e) {}
 }
+
+// Single-scan success (fired on every valid scan/typed-accepted via markScanned).
+function beepOk()    { _tone(880); }
+// Wrong scan / wrong PN. Two low sawtooth pulses.
 function beepError() {
-  try {
-    const ctx = _getACtx();
-    [0, 0.22].forEach(function(d) {
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.type = 'sawtooth'; o.frequency.value = 160;
-      g.gain.setValueAtTime(0.45, ctx.currentTime + d);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + d + 0.18);
-      o.start(ctx.currentTime + d); o.stop(ctx.currentTime + d + 0.18);
-    });
-  } catch(e) {}
+  _tone(160, {type:'sawtooth', gain:0.45, dur:0.18});
+  _tone(160, {type:'sawtooth', gain:0.45, dur:0.18, when:0.22});
 }
+// Pallet transitioned to MATCH (Target = Verified, PN OK). C-E-G ascending.
+function chimeMatch() {
+  _tone(523.25, {dur:0.10, gain:0.20});
+  _tone(659.25, {dur:0.10, gain:0.20, when:0.08});
+  _tone(783.99, {dur:0.18, gain:0.24, when:0.16});
+}
+// Pallet transitioned to MISMATCH. G-E-C descending, triangle (softer than error).
+function chimeMismatch() {
+  _tone(392.00, {type:'triangle', dur:0.12, gain:0.22});
+  _tone(329.63, {type:'triangle', dur:0.12, gain:0.22, when:0.10});
+  _tone(261.63, {type:'triangle', dur:0.20, gain:0.26, when:0.20});
+}
+// All pallets in the delivery are MATCH — short rising jingle. Plays once per transition.
+function fanfareComplete() {
+  _tone(523.25, {dur:0.10, gain:0.20});
+  _tone(783.99, {dur:0.10, gain:0.22, when:0.10});
+  _tone(1046.50, {dur:0.10, gain:0.22, when:0.20});
+  _tone(1318.51, {dur:0.10, gain:0.24, when:0.30});
+  _tone(1567.98, {dur:0.28, gain:0.26, when:0.40});
+}
+// Height exceeded the Europe/Export limit. Two square-wave pulses (clearly "warning").
+function warnHeight() {
+  _tone(500, {type:'square', dur:0.16, gain:0.30});
+  _tone(500, {type:'square', dur:0.16, gain:0.30, when:0.22});
+}
+
+// Transition-tracking state. Initial undefined → first observation is silent (no chime on load).
+const _lastPalletStatus  = {};
+let   _lastDeliveryDone  = false;
+const _lastHeightExceed  = {};
 
 let _toastTimer = null;
 function triggerScanError(el) {
@@ -1055,10 +1159,54 @@ function resetTag(el) {
 }
 
 /* ══ PERSISTENCE (localStorage) ═════════════════════════ */
-const STORAGE_KEY = 'arrowPackingV1';
+// Multi-session support: each session lives under `arrowPackingV1:<sessionId>`.
+// Active sessionId is read from URL hash `#s=...` (defaults to 'default').
+const STORAGE_BASE    = 'arrowPackingV1';
+const SESSION_PREFIX  = STORAGE_BASE + ':';
 const STORAGE_VERSION = 1;
+const WELCOME_KEY     = 'arrowPackingWelcomeSeenV1';
 let _saveTimer = null;
 let _restoring = false;
+
+function makeSessionId() { return 's_' + Math.random().toString(36).slice(2, 8); }
+function getSessionId() {
+  const m = location.hash.match(/[#&]s=([a-z0-9_-]+)/i);
+  return m ? m[1] : 'default';
+}
+function getStorageKey() { return SESSION_PREFIX + getSessionId(); }
+function setActiveSession(id) {
+  // Triggers hashchange listener → full reload to swap loaded state cleanly.
+  location.hash = '#s=' + encodeURIComponent(id);
+}
+function migrateLegacyState() {
+  // Pre-multisession state lived under `arrowPackingV1` (no suffix). Move it to `:default` once.
+  const legacy = localStorage.getItem(STORAGE_BASE);
+  if (legacy && !localStorage.getItem(SESSION_PREFIX + 'default')) {
+    localStorage.setItem(SESSION_PREFIX + 'default', legacy);
+    localStorage.removeItem(STORAGE_BASE);
+  }
+}
+function listSessions() {
+  const out = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!k || !k.startsWith(SESSION_PREFIX)) continue;
+    const id = k.slice(SESSION_PREFIX.length);
+    try {
+      const data = JSON.parse(localStorage.getItem(k));
+      out.push({
+        id,
+        deliveryNum:  data?.delivery?.deliveryNum || '',
+        operator:     data?.delivery?.operator || '',
+        savedAt:      data?.savedAt || '',
+        palletCount:  (data?.pallets || []).length,
+      });
+    } catch(e) {
+      out.push({ id, deliveryNum: '(corrupt)', operator: '', savedAt: '', palletCount: 0 });
+    }
+  }
+  return out.sort((a, b) => (b.savedAt || '').localeCompare(a.savedAt || ''));
+}
 
 function tagStateOf(el) {
   if (!el) return 'wait';
@@ -1259,7 +1407,8 @@ function saveState() {
   if (_restoring) return;
   try {
     const json = JSON.stringify(serializeState());
-    localStorage.setItem(STORAGE_KEY, json);
+    localStorage.setItem(getStorageKey(), json);
+    updateSessionsButton();
     const ind = document.getElementById('save-indicator');
     if (ind) {
       const t = new Date();
@@ -1284,7 +1433,7 @@ function saveStateDebounced() {
 
 function loadState() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(getStorageKey());
     if (!raw) return false;
     const state = JSON.parse(raw);
     return restoreState(state);
@@ -1295,7 +1444,7 @@ function loadState() {
 
 function resetChecklist() {
   if (!confirm('¿Empezar un checklist nuevo? Se borrarán todos los datos actuales.')) return;
-  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  try { localStorage.removeItem(getStorageKey()); } catch (e) {}
   location.reload();
 }
 
@@ -1473,6 +1622,13 @@ function updatePalletSummary(pid) {
     else                            { hdrBadge.textContent = 'PENDING';     hdrBadge.className = 'hdr-status-badge hdr-pending'; }
   }
 
+  // Audio: chime only on actual status transitions (silent on first observation / load).
+  if (_lastPalletStatus[pid] !== undefined && _lastPalletStatus[pid] !== status) {
+    if (status === 'match')         chimeMatch();
+    else if (status === 'mismatch') chimeMismatch();
+  }
+  _lastPalletStatus[pid] = status;
+
   updateDeliverySummary();
 }
 
@@ -1521,7 +1677,11 @@ function updateDeliverySummary() {
   const kpiBox   = document.getElementById('kpi-box');
   const hasData  = totalPick > 0 || totalBox > 0;
 
-  if (allMatch && blocks.length && hasData) {
+  const deliveryDone = !!(allMatch && blocks.length && hasData);
+  if (deliveryDone && !_lastDeliveryDone) fanfareComplete(); // rising-edge only
+  _lastDeliveryDone = deliveryDone;
+
+  if (deliveryDone) {
     stEl.textContent = '✓ ALL OK';
     stEl.style.color = '#34d399';
     if (statusBox) { statusBox.style.background = 'rgba(16,185,129,.08)'; statusBox.style.borderColor = 'rgba(16,185,129,.25)'; }
