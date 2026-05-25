@@ -199,7 +199,6 @@ body{font-family:'DM Sans',sans-serif;background:#0d1117;min-height:100vh;font-s
   .pr-pn-pending{color:#94a3b8!important;}
 
   /* Pick labels breakdown line */
-  .pr-pick-labels-line{font-size:8px;color:#334155!important;padding:3px 10px;background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;}
 
   /* Breakdown label */
   .pr-breakdown-lbl{font-size:7.5px;font-weight:bold;color:#475569!important;text-transform:uppercase;letter-spacing:.05em;padding:4px 10px 2px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;}
@@ -409,7 +408,6 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
           <button class="btn btn-ghost-blue" style="flex:1;justify-content:center;padding:9px 12px;font-size:13px;" onclick="doPrint()">🖨 Print</button>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:8px;">
-          <button class="btn btn-ghost-blue" style="flex:1;justify-content:center;padding:8px 10px;font-size:12px;" onclick="doExportJSON()">⬇ JSON</button>
           <button class="btn btn-ghost-blue" style="flex:1;justify-content:center;padding:8px 10px;font-size:12px;" onclick="doExportCSV()">⬇ CSV</button>
         </div>
         <div style="font-size:11px;color:#6e7681;text-align:center;line-height:1.4;">Complete all pallets before exporting.</div>
@@ -575,10 +573,6 @@ function buildPalletHTML(pid) {
     <span class="pallet-num">Pallet ${pid}</span>
     <span class="hdr-status-badge hdr-pending" id="hdr-status-${pid}">PENDING</span>
     <div class="pallet-hdr-right">
-      <div class="mode-sw" id="mode-sw-${pid}">
-        <button class="mode-btn active" onclick="setBoxMode(${pid},'scan')">Scan</button>
-        <button class="mode-btn" onclick="setBoxMode(${pid},'visual')">Visual</button>
-      </div>
       <button class="btn-rm-pallet" onclick="removePallet(${pid})">✕ Remove</button>
     </div>
   </div>
@@ -603,7 +597,7 @@ function buildPalletHTML(pid) {
   <!-- PICK LABELS -->
   <div class="psec-hdr picks">
     <span class="psec-title">Pick Labels</span>
-    <span class="psec-badge badge-blue" id="pick-badge-${pid}">0 pcs expected</span>
+    <span class="psec-badge badge-blue" id="pick-badge-${pid}">0 pcs target</span>
   </div>
   <div class="psec-body">
     <div style="font-size:11px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Pick Label Quantities</div>
@@ -613,8 +607,14 @@ function buildPalletHTML(pid) {
 
   <!-- BOX VERIFICATION -->
   <div class="psec-hdr boxes">
-    <span class="psec-title">Box Verification</span>
-    <span class="psec-badge badge-green" id="box-badge-${pid}">0 pcs verified · 0 boxes</span>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span class="psec-title">Box Verification</span>
+      <span class="psec-badge badge-green" id="box-badge-${pid}">0 pcs verified · 0 boxes</span>
+    </div>
+    <div class="mode-sw" id="mode-sw-${pid}">
+      <button class="mode-btn active" onclick="setBoxMode(${pid},'scan')">Scan</button>
+      <button class="mode-btn" onclick="setBoxMode(${pid},'visual')">Visual</button>
+    </div>
   </div>
   <div class="psec-body">
 
@@ -686,11 +686,7 @@ function buildPalletHTML(pid) {
       <span class="val-val" id="v-pn-check-${pid}">—</span>
     </div>
     <div class="val-cell">
-      <span class="val-lbl">Pick Labels</span>
-      <span class="val-val" id="v-pick-labels-${pid}" style="font-size:12px;line-height:1.5;">—</span>
-    </div>
-    <div class="val-cell">
-      <span class="val-lbl">Expected (pcs)</span>
+      <span class="val-lbl">Target (pcs)</span>
       <span class="val-val" id="v-pick-total-${pid}">—</span>
     </div>
     <div class="val-cell">
@@ -822,7 +818,7 @@ function addPickRow(pid) {
   const div = document.createElement('div');
   div.className = 'scan-row pick-row';
   div.innerHTML = `
-    <span class="scan-row-num">PL ${n}</span>
+    <span class="scan-row-num">Pick ${n}</span>
     <input class="fc mono" type="text" placeholder="Qty" style="max-width:110px;"
       onkeydown="onKeyDown(event,this)" oninput="handleQtyInput(${pid},this)"/>
     <span class="scan-tag tag-wait">● SCAN</span>
@@ -833,7 +829,7 @@ function addPickRow(pid) {
 }
 function removePickRow(pid, btn) {
   btn.closest('.pick-row').remove();
-  renumber(document.getElementById(`pick-rows-${pid}`), 'PL ');
+  renumber(document.getElementById(`pick-rows-${pid}`), 'Pick ');
   updatePalletSummary(pid);
   saveStateDebounced();
 }
@@ -1363,18 +1359,14 @@ function onBoxPNInput(pid, el) {
 function updatePalletSummary(pid) {
   // Pick
   let pickTotal = 0;
-  const pickInputs = [...document.querySelectorAll(`#pick-rows-${pid} .pick-row input`)];
-  const pickLabelParts = [];
-  pickInputs.forEach((inp, i) => {
+  let pickCount = 0;
+  document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach(inp => {
     const qty = parseInt(inp.value) || 0;
     pickTotal += qty;
-    if (qty > 0) pickLabelParts.push(`PL${i + 1}: ${qty.toLocaleString()}`);
+    if (qty > 0) pickCount++;
   });
-  const plCount = pickLabelParts.length;
   document.getElementById(`pick-badge-${pid}`).textContent =
-    `${pickTotal.toLocaleString()} pcs expected${plCount > 1 ? ` · ${plCount} PL` : ''}`;
-  const labelsEl = document.getElementById(`v-pick-labels-${pid}`);
-  if (labelsEl) labelsEl.textContent = pickLabelParts.length > 0 ? pickLabelParts.join(' · ') : '—';
+    `${pickTotal.toLocaleString()} pcs target${pickCount > 1 ? ` · ${pickCount} picks` : ''}`;
 
   // Box
   const mode = getBoxMode(pid);
@@ -1585,11 +1577,8 @@ function buildPrintHTML() {
     const height = document.getElementById(`height-${pid}`)?.value || '—';
 
     let pickTotal = 0;
-    const pickLabelEntries = [];
-    document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach((inp, i) => {
-      const qty = parseInt(inp?.value) || 0;
-      pickTotal += qty;
-      if (qty > 0) pickLabelEntries.push({ n: i + 1, qty });
+    document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach(inp => {
+      pickTotal += parseInt(inp?.value) || 0;
     });
 
     const mode   = getBoxMode(pid);
@@ -1665,10 +1654,6 @@ function buildPrintHTML() {
         ).join('')
       : `<tr><td colspan="3" style="color:#94a3b8;font-style:italic;text-align:center;">No data entered</td></tr>`;
 
-    const pickLabelStr = pickLabelEntries.length > 1
-      ? pickLabelEntries.map(e => `PL ${e.n}: ${e.qty.toLocaleString()} pcs`).join(' &nbsp;+&nbsp; ')
-      : '';
-
     html += `
     <div class="pr-pallet-hdr">
       <span class="pr-pallet-hdr-title">PALLET ${palletIdx} &nbsp;&mdash;&nbsp; ${esc(ptype)} (${esc(dims)} cm) &nbsp;|&nbsp; ${esc(weight)} kg &nbsp;|&nbsp; ${esc(height)} cm</span>
@@ -1678,14 +1663,13 @@ function buildPrintHTML() {
       <span>Pick PN: <b>${esc(delivPN)}</b> &nbsp;|&nbsp; Box PN: <b>${esc(boxPN)}</b></span>
       <span class="${pnClass}">${pnLabel}</span>
     </div>
-    ${pickLabelStr ? `<div class="pr-pick-labels-line">Pick Labels: ${pickLabelStr} &nbsp;|&nbsp; Total: <b>${pickTotal.toLocaleString()} pcs</b></div>` : ''}
     <div class="pr-breakdown-lbl">Box Breakdown by Quantity</div>
     <table class="pr-table pr-breakdown-tbl">
       <tr><th>No. of Boxes</th><th>Pcs / Box</th><th>Subtotal (pcs)</th></tr>
       ${breakdownRows}
     </table>
     <table class="pr-table pr-summary-tbl">
-      <tr><th>Expected (pcs)</th><th>Verified (pcs)</th><th>Total Boxes</th><th>Status</th></tr>
+      <tr><th>Target (pcs)</th><th>Verified (pcs)</th><th>Total Boxes</th><th>Status</th></tr>
       <tr>
         <td>${pickTotal > 0 ? pickTotal.toLocaleString() : '—'}</td>
         <td>${boxTotal  > 0 ? boxTotal.toLocaleString()  : '—'}</td>
@@ -1719,7 +1703,7 @@ function buildPrintHTML() {
     <div class="pr-totals-box">
       <div class="pr-total-cell"><div class="pr-total-lbl">Pallets</div><div class="pr-total-val">${blocks.length}</div></div>
       <div class="pr-total-cell"><div class="pr-total-lbl">Total Boxes</div><div class="pr-total-val">${grandBoxCount.toLocaleString()}</div></div>
-      <div class="pr-total-cell"><div class="pr-total-lbl">Expected (pcs)</div><div class="pr-total-val">${grandPickTotal.toLocaleString()}</div></div>
+      <div class="pr-total-cell"><div class="pr-total-lbl">Target (pcs)</div><div class="pr-total-val">${grandPickTotal.toLocaleString()}</div></div>
       <div class="pr-total-cell"><div class="pr-total-lbl">Verified (pcs)</div><div class="pr-total-val">${grandBoxTotal.toLocaleString()}</div></div>
       <div class="pr-total-cell"><div class="pr-total-lbl">Overall Status</div><div class="pr-total-val ${overallSt}">${overallLbl}</div></div>
     </div>
@@ -1922,7 +1906,7 @@ function doExportPDF() {
     const expStr   = pickTotal > 0 ? pickTotal.toLocaleString() : '—';
     const verifStr = boxTotal  > 0 ? boxTotal.toLocaleString()  : '—';
     doc.text(
-      'Expected: ' + expStr + ' pcs   |   Verified: ' + verifStr + ' pcs   |   Total boxes: ' + (boxCount || '—'),
+      'Target: ' + expStr + ' pcs   |   Verified: ' + verifStr + ' pcs   |   Total boxes: ' + (boxCount || '—'),
       PAGE_W - M - 2, y+3, { align:'right' }
     );
     y += 6;
@@ -1975,7 +1959,7 @@ function doExportPDF() {
   const totals = [
     ['PALLETS',         String(blocks.length),              M+5],
     ['TOTAL BOXES',     grandBoxCount.toLocaleString(),     M+42],
-    ['EXPECTED (PCS)',  grandPickTotal.toLocaleString(),    M+90],
+    ['TARGET (PCS)',    grandPickTotal.toLocaleString(),    M+90],
     ['VERIFIED (PCS)',  grandBoxTotal.toLocaleString(),     M+133],
   ];
   totals.forEach(function([lbl, val, x]) {
@@ -2009,7 +1993,7 @@ function doExportPDF() {
   doc.save('packing-' + delivNum + '-' + new Date().toISOString().slice(0,10) + '.pdf');
 }
 
-/* ══ DATA EXPORT (JSON / CSV) ═══════════════════════════ */
+/* ══ DATA EXPORT (CSV) ══════════════════════════════════ */
 function buildExportData() {
   const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
   const data = {
@@ -2056,7 +2040,7 @@ function buildExportData() {
     document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach((inp, i) => {
       const q = parseInt(inp.value) || 0;
       pickTotal += q;
-      if (q > 0) pallet.pickLabels.push({ label: `PL${i + 1}`, qty: q });
+      if (q > 0) pallet.pickLabels.push({ label: `Pick ${i + 1}`, qty: q });
     });
     pallet.totals.expected = pickTotal;
 
@@ -2164,11 +2148,6 @@ function _exportFilename(ext) {
   const pad = n => String(n).padStart(2, '0');
   const stamp = `${t.getFullYear()}${pad(t.getMonth() + 1)}${pad(t.getDate())}-${pad(t.getHours())}${pad(t.getMinutes())}`;
   return `packing-${delivNum}-${stamp}.${ext}`;
-}
-
-function doExportJSON() {
-  const data = buildExportData();
-  _downloadBlob(JSON.stringify(data, null, 2), _exportFilename('json'), 'application/json');
 }
 
 function _csvEscape(v) {
