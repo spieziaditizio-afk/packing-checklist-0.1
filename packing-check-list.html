@@ -826,6 +826,7 @@ function addPickRow(pid) {
   `;
   wrap.appendChild(div);
   updatePalletSummary(pid);
+  return div;
 }
 function removePickRow(pid, btn) {
   btn.closest('.pick-row').remove();
@@ -981,6 +982,16 @@ function onKeyDown(event, el) {
 
   const block = el.closest('.pallet-block');
   const pid = block?.dataset.pid;
+
+  // If last pick row → auto-add new pick row and focus it (else fall through to autoAdvance which moves to next pick)
+  if (pid && el.closest('.pick-row')) {
+    const wrap = document.getElementById(`pick-rows-${pid}`);
+    if (el.closest('.pick-row') === wrap.lastElementChild) {
+      const newRow = addPickRow(pid);
+      newRow.querySelector('input').focus();
+      return;
+    }
+  }
 
   // If last box row → auto-add new box row and focus it
   if (pid && el.closest('.box-row')) {
@@ -1375,14 +1386,14 @@ function updatePalletSummary(pid) {
   if (mode === 'scan') {
     if (pnMode === 'per-box') {
       document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).forEach(row => {
-        boxTotal += parseInt(row.querySelectorAll('input')[1]?.value) || 0;
+        const qty = parseInt(row.querySelectorAll('input')[1]?.value) || 0;
+        if (qty > 0) { boxTotal += qty; boxCount++; }
       });
-      boxCount = document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).length;
     } else {
       document.querySelectorAll(`#box-rows-${pid} .box-row`).forEach(row => {
-        boxTotal += parseInt(row.querySelector('input')?.value) || 0;
+        const qty = parseInt(row.querySelector('input')?.value) || 0;
+        if (qty > 0) { boxTotal += qty; boxCount++; }
       });
-      boxCount = document.querySelectorAll(`#box-rows-${pid} .box-row`).length;
     }
   } else {
     document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(row => {
@@ -2051,6 +2062,7 @@ function buildExportData() {
         const [pnInp, qtyInp] = row.querySelectorAll('input');
         const pn = (pnInp?.value || '').trim().toUpperCase();
         const q = parseInt(qtyInp?.value) || 0;
+        if (q <= 0) return; // skip empty rows
         const src = tagStateOf(qtyInp);
         boxTotal += q;
         boxCount += 1;
@@ -2061,6 +2073,7 @@ function buildExportData() {
       document.querySelectorAll(`#box-rows-${pid} .box-row`).forEach((row, i) => {
         const inp = row.querySelector('input');
         const q = parseInt(inp?.value) || 0;
+        if (q <= 0) return; // skip empty rows
         const src = tagStateOf(inp);
         boxTotal += q;
         boxCount += 1;
