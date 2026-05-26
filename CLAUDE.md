@@ -16,8 +16,9 @@ A single-file (~2200 lines) HTML web app for verifying packing checklists at Arr
 ## Workflow
 
 - **Run**: open the HTML file in Chrome. No server needed.
-- **Edit**: change the file, reload the browser (Ctrl+R). State persists in `localStorage` so reloads don't wipe in-progress data — clear via the in-app "Reset" button or `localStorage.removeItem('arrowPackingV1')`.
+- **Edit**: change the file, reload the browser (Ctrl+R). State persists in `localStorage` keyed by the active session (URL hash `#s=…`, defaults to `:default`) — clear all sessions via DevTools or remove keys matching `arrowPackingV1:*`.
 - **Test the scanner pipeline without a Zebra**: just type fast and press Enter. The scanner-vs-typed heuristic is `Date.now() - el._lastInputTime < 50ms`, so manual typing is correctly detected as "TYPED" (amber tag) instead of "SCANNED" (green). Test the wrong-scan branch by typing letters into a Qty field.
+- **Test multi-session**: append `#s=<anything>` to the URL or use the 📑 dropdown → "New session". Each session is independent; opening two browser windows on the same file with different hashes works side-by-side.
 - **No tests, no lint, no CI.** Verification is manual in-browser.
 
 ## Architecture inside the single file
@@ -40,7 +41,12 @@ Each **pallet** has: type (`KP|EP|BP|GP|NP` → dimensions via `PTYPE` map), wei
 
 The validation strip at the bottom of each pallet aggregates: `Pick PN | Box PN | PN Check | Target (pcs) | Verified (pcs) | Boxes` + a status badge.
 
-**Empty rows never count.** Pick rows, box rows and per-box rows all guard with `if (qty > 0)` before incrementing. If you add a new counting path, follow the same pattern in `updatePalletSummary`, `buildPrintHTML`, the jsPDF builder (`doExportPDF`) and `buildExportData` — these four places aggregate independently and must stay in sync.
+**Empty rows never count.** Pick rows, box rows and per-box rows all guard with `if (qty > 0)` before incrementing. If you add a new counting path, follow the same pattern in **all five aggregators** — they read live DOM independently and must stay in sync:
+1. `updatePalletSummary` — per-pallet badge + validation strip
+2. `updateDeliverySummary` — sidebar Live Summary (delivery total)
+3. `buildPrintHTML` — browser print preview
+4. `doExportPDF` — jsPDF + autoTable
+5. `buildExportData` — CSV exporter
 
 ### Central input pipeline
 
@@ -59,9 +65,19 @@ Adding a new row type? It needs the same triple-check before reaching `autoAdvan
 
 `handleQtyInput` strips non-digits + leading zeros (`A00250` → `250`) and flags `el._wrongScan` if the input looks like a country code (no digits at all) or a PO (`/\d[a-zA-Z]/`).
 
-### Persistence
+### Persistence & multi-session
 
-`saveStateDebounced()` (400ms debounce) writes to `localStorage[STORAGE_KEY = 'arrowPackingV1']`. On load, `loadState()` rehydrates via `restoreState()`. The serialized shape includes per-input tag state (`scanned` / `typed` / `wait`) so the green/amber/gray badges survive reloads. When adding a new field, both `serializeState` and `restoreState` must handle it — they are mirror functions.
+Each in-progress delivery is its own "session", keyed by `localStorage['arrowPackingV1:<sessionId>']`. The active session ID lives in the URL hash (`#s=<id>`, defaults to `default`), making sessions bookmarkable and openable in parallel browser windows for true side-by-side use. The 📑 dropdown in the topbar lists/switches/deletes sessions; `hashchange` triggers a full page reload to swap loaded state cleanly.
+
+`saveStateDebounced()` (400ms debounce) writes via `getStorageKey()` → the active-session key. `loadState()` rehydrates via `restoreState()`. `migrateLegacyState()` (called once at DOMContentLoaded) moves any pre-multisession state from the unprefixed `arrowPackingV1` key into `arrowPackingV1:default`.
+
+The serialized shape includes per-input tag state (`scanned` / `typed` / `wait`) so the green/amber/gray badges survive reloads. When adding a new field, both `serializeState` and `restoreState` must handle it — they are mirror functions.
+
+### Audio & welcome splash
+
+`/* ══ AUDIO FEEDBACK ══ */` defines all sounds via Web Audio (no files). Every sound funnels through `_tone(freq, opts)`, which is gated by `isMuted()` (persisted to `localStorage['arrowPackingMutedV1']`). The mute toggle 🔊/🔇 lives in the topbar. Status-transition chimes (`chimeMatch`, `chimeMismatch`, `fanfareComplete`, `warnHeight`) fire on rising edges only — tracked via `_lastPalletStatus`, `_lastDeliveryDone`, `_lastHeightExceed` maps so chimes don't fire on every keystroke or on initial state load.
+
+The quick-guide splash (`#welcome-splash`) auto-opens on first ever load (`localStorage['arrowPackingWelcomeSeenV1']` flag). The `?` button in the topbar re-opens it anytime without clearing the flag.
 
 ### Outputs
 
@@ -77,9 +93,11 @@ The PDF builder duplicates the box-counting logic of the print builder. If you c
 
 ## Constants you'll touch often
 
-- `PTYPE` (l.460): pallet code → dimensions in cm (e.g. `EP:'120×80'`).
-- `HEIGHT_LIMITS` (l.459): `{ europe: 180, export: 160 }`. Drives the "exceeds max" warning on the height input.
-- `STORAGE_KEY` (l.1058): `'arrowPackingV1'` — bump the version suffix if you change the serialized shape in a backwards-incompatible way.
+- `PTYPE`: pallet code → dimensions in cm (e.g. `EP:'120×80'`).
+- `HEIGHT_LIMITS`: `{ europe: 180, export: 160 }`. Drives the "exceeds max" warning on the height input.
+- `STORAGE_BASE` / `SESSION_PREFIX`: `'arrowPackingV1'` / `'arrowPackingV1:'` — bump the `V1` suffix if you change the serialized shape in a backwards-incompatible way (also requires migrating existing `:default`, `:s_xxx` keys).
+- `STORAGE_VERSION`: numeric guard inside the saved JSON; `restoreState` refuses to load when the file's version differs.
+- `WELCOME_KEY`, `MUTE_KEY`: global (not per-session) UI preferences in localStorage.
 
 ## UI language
 

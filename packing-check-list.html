@@ -65,6 +65,14 @@ body{font-family:'DM Sans',sans-serif;background:#0d1117;min-height:100vh;font-s
 .splash-close:hover{background:rgba(255,255,255,.08);color:#fff;}
 .splash-footer{margin-top:14px;font-size:10.5px;color:#6e7681;letter-spacing:.04em;}
 
+/* ── EMPTY STATE (no pallets yet) ── */
+#empty-state{display:none;max-width:480px;margin:56px auto 40px;padding:48px 30px;text-align:center;background:rgba(255,255,255,.02);border:1.5px dashed rgba(56,189,248,.18);border-radius:14px;}
+.empty-icon{font-size:54px;line-height:1;margin-bottom:16px;opacity:.65;}
+.empty-title{color:#cbd5e1;font-size:14px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;margin-bottom:10px;}
+.empty-text{color:#8b949e;font-size:13px;line-height:1.5;margin:0 auto 24px;max-width:360px;}
+.empty-cta{background:linear-gradient(135deg,#38bdf8,#0ea5e9);color:#fff;border:none;padding:13px 32px;font-size:14px;font-weight:700;border-radius:9px;cursor:pointer;letter-spacing:.04em;transition:transform .15s,box-shadow .15s;font-family:'DM Sans',sans-serif;}
+.empty-cta:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(56,189,248,.35);}
+
 /* ── CARDS ── */
 .card{background:#161b22;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3);margin-bottom:16px;overflow:hidden;border:1px solid #21262d;}
 .card-head{padding:12px 18px;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:10px;}
@@ -376,9 +384,44 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
       <div class="logo-sub">Packing Checklist · Microsoft Area · Sevenum</div>
     </div>
     <div class="header-right" id="hdr-date"></div>
+    <button id="help-btn" class="topbar-btn topbar-btn-icon-only" onclick="showWelcome()" title="Open quick guide">?</button>
+    <button id="sessions-btn" class="topbar-btn" onclick="toggleSessionsMenu(event)" title="Switch session / open another delivery">
+      <span class="btn-icon">📑</span>
+      <span class="btn-label">default</span>
+    </button>
     <button id="mute-toggle" class="mute-btn" onclick="toggleMute()" title="Sounds on — click to mute">🔊</button>
   </div>
+  <div id="sessions-menu" class="topbar-menu" style="display:none;">
+    <div class="menu-header">
+      <span>Sessions</span>
+      <span class="menu-header-count" id="sessions-count">0</span>
+    </div>
+    <div id="sessions-list"></div>
+    <div class="menu-footer">
+      <button onclick="newSession()">+ New session (this tab)</button>
+    </div>
+  </div>
 </div>
+
+<!-- ── WELCOME SPLASH ── -->
+<section id="welcome-splash">
+  <div class="splash-card">
+    <button class="splash-close" onclick="closeWelcome()" title="Close">✕</button>
+    <div class="splash-icon">📦</div>
+    <div class="splash-title">ARROW PACKING CHECKLIST</div>
+    <div class="splash-sub">Sevenum NL · Microsoft Area</div>
+    <div class="splash-divider"></div>
+    <ol class="splash-steps">
+      <li><b>Delivery</b>Operator, delivery #, Pick Label PN, destination (Europe / Export).</li>
+      <li><b>Pallet</b>Add pallet — pick type (KP/EP/BP/GP/NP), weight (kg), height (cm).</li>
+      <li><b>Pick Labels</b>Enter target quantities. Sum of Pick 1, Pick 2… = target pieces per pallet.</li>
+      <li><b>Verify</b>Scan boxes (Shared PN or PN per box) — or use Visual mode for N×M groups.</li>
+      <li><b>Export</b>Validation strip green = MATCH. Download PDF / CSV or Print.</li>
+    </ol>
+    <button class="splash-cta" onclick="closeWelcome()">START VERIFYING →</button>
+    <div class="splash-footer">Auto-saved · Multi-session via 📑 · Tap ? to reopen this guide</div>
+  </div>
+</section>
 
 <div id="app-layout">
 
@@ -484,6 +527,12 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
       <button class="tab-add-btn" onclick="addPallet()">＋ Add Pallet</button>
     </div>
     <div id="pallets-wrap"></div>
+    <div id="empty-state">
+      <div class="empty-icon">📦</div>
+      <div class="empty-title">No pallets yet</div>
+      <div class="empty-text">Fill the delivery info above, then add the first pallet of this delivery.</div>
+      <button class="empty-cta" onclick="addPallet()">＋&nbsp;&nbsp;Add First Pallet</button>
+    </div>
   </div>
 
 </div>
@@ -507,13 +556,17 @@ const PTYPE = { KP:'60×80', EP:'120×80', BP:'120×100', GP:'125×100', NP:'130
 
 /* ══ INIT ═══════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
+  migrateLegacyState();
   const now = new Date();
   document.getElementById('hdr-date').textContent =
     now.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
   document.getElementById('chk-date').value = now.toISOString().slice(0,10);
   updateMuteButton();
-  const restored = loadState();
-  if (!restored || document.querySelectorAll('.pallet-block').length === 0) addPallet();
+  updateSessionsButton();
+  loadState(); // may restore 0 or more pallets; no auto-add for fresh/empty sessions
+  updateDeliverySummary(); // ensures empty-state visibility is correct on init
+  // First-ever load → show quick guide. Tap '?' anytime to reopen.
+  if (!localStorage.getItem(WELCOME_KEY)) showWelcome();
 });
 
 // Track last input time on every input to distinguish scanner vs keyboard + auto-save
@@ -523,6 +576,17 @@ document.addEventListener('input', e => {
     saveStateDebounced();
   }
 }, true);
+
+// URL hash is the source of truth for active session → reload on hash change.
+window.addEventListener('hashchange', () => location.reload());
+
+// Click outside the sessions menu closes it.
+document.addEventListener('click', e => {
+  const menu = document.getElementById('sessions-menu');
+  if (!menu || menu.style.display === 'none') return;
+  if (e.target.closest('#sessions-menu') || e.target.closest('#sessions-btn')) return;
+  menu.style.display = 'none';
+});
 
 /* ══ DESTINATION ════════════════════════════════════════ */
 function setDestination(val) {
@@ -1208,6 +1272,84 @@ function listSessions() {
   return out.sort((a, b) => (b.savedAt || '').localeCompare(a.savedAt || ''));
 }
 
+/* ══ SESSIONS UI ════════════════════════════════════════ */
+function toggleSessionsMenu(event) {
+  if (event) event.stopPropagation();
+  const menu = document.getElementById('sessions-menu');
+  if (!menu) return;
+  if (menu.style.display !== 'none') { menu.style.display = 'none'; return; }
+  populateSessionsMenu();
+  menu.style.display = 'block';
+}
+function populateSessionsMenu() {
+  const list = document.getElementById('sessions-list');
+  const countEl = document.getElementById('sessions-count');
+  if (!list) return;
+  const active = getSessionId();
+  const sessions = listSessions();
+  if (countEl) countEl.textContent = sessions.length;
+  if (sessions.length === 0) {
+    list.innerHTML = '<div class="menu-empty">No saved sessions yet.</div>';
+    return;
+  }
+  list.innerHTML = sessions.map(s => {
+    const label = s.deliveryNum || (s.id === 'default' ? 'default' : s.id);
+    const metaParts = [];
+    if (s.operator) metaParts.push(esc(s.operator));
+    metaParts.push(`${s.palletCount} pallet${s.palletCount === 1 ? '' : 's'}`);
+    if (s.savedAt) {
+      const d = new Date(s.savedAt);
+      metaParts.push(d.toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }));
+    }
+    const isActive = s.id === active;
+    return `
+      <div class="session-row ${isActive ? 'active' : ''}">
+        <div class="session-main" onclick="switchSession('${esc(s.id)}')">
+          <div class="session-label">${esc(label)}${isActive ? '<span class="session-active-dot">● active</span>' : ''}</div>
+          <div class="session-meta">${metaParts.join(' · ')}</div>
+        </div>
+        <button class="session-icon" title="Open in new tab" onclick="event.stopPropagation();openSessionInNewTab('${esc(s.id)}')">↗</button>
+        <button class="session-icon" title="Delete" onclick="event.stopPropagation();deleteSession('${esc(s.id)}')">🗑</button>
+      </div>`;
+  }).join('');
+}
+function newSession() { setActiveSession(makeSessionId()); }
+function switchSession(id) {
+  if (id === getSessionId()) {
+    const m = document.getElementById('sessions-menu'); if (m) m.style.display = 'none';
+    return;
+  }
+  setActiveSession(id);
+}
+function openSessionInNewTab(id) {
+  window.open(location.pathname + '#s=' + encodeURIComponent(id), '_blank');
+}
+function deleteSession(id) {
+  const s = listSessions().find(x => x.id === id);
+  const label = s?.deliveryNum || id;
+  if (!confirm(`Delete session "${label}"?\nThis cannot be undone.`)) return;
+  try { localStorage.removeItem(SESSION_PREFIX + id); } catch (e) {}
+  if (id === getSessionId()) location.reload();
+  else populateSessionsMenu();
+}
+function updateSessionsButton() {
+  const btn = document.getElementById('sessions-btn');
+  if (!btn) return;
+  const lbl = btn.querySelector('.btn-label');
+  if (!lbl) return;
+  const delivNum = document.getElementById('delivery-num')?.value || '';
+  const id = getSessionId();
+  lbl.textContent = delivNum || (id === 'default' ? 'default' : id);
+}
+
+/* ══ WELCOME SPLASH ═════════════════════════════════════ */
+function showWelcome()  { const s = document.getElementById('welcome-splash'); if (s) s.style.display = 'flex'; }
+function closeWelcome() {
+  const s = document.getElementById('welcome-splash');
+  if (s) s.style.display = 'none';
+  try { localStorage.setItem(WELCOME_KEY, '1'); } catch (e) {}
+}
+
 function tagStateOf(el) {
   if (!el) return 'wait';
   if (el.dataset && el.dataset.scanned === 'true') return 'scanned';
@@ -1634,7 +1776,12 @@ function updatePalletSummary(pid) {
 
 /* ══ DELIVERY SUMMARY ═══════════════════════════════════ */
 function updateDeliverySummary() {
+  updateSessionsButton(); // keep topbar label in sync with delivery# field
   const blocks = document.querySelectorAll('.pallet-block');
+
+  // Empty-state placeholder: shown only when 0 pallets exist.
+  const emptyEl = document.getElementById('empty-state');
+  if (emptyEl) emptyEl.style.display = blocks.length === 0 ? '' : 'none';
 
   let totalPick = 0, totalBox = 0, totalBoxes = 0;
   let allMatch = true, anyMismatch = false;
@@ -1647,13 +1794,15 @@ function updateDeliverySummary() {
     const mode = getBoxMode(pid);
     if (mode === 'scan') {
       if (getPNMode(pid) === 'per-box') {
-        const rows = document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`);
-        totalBoxes += rows.length;
-        rows.forEach(row => { totalBox += parseInt(row.querySelectorAll('input')[1]?.value) || 0; });
+        document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).forEach(row => {
+          const qty = parseInt(row.querySelectorAll('input')[1]?.value) || 0;
+          if (qty > 0) { totalBox += qty; totalBoxes++; }
+        });
       } else {
-        const rows = document.querySelectorAll(`#box-rows-${pid} .box-row`);
-        totalBoxes += rows.length;
-        rows.forEach(row => { totalBox += parseInt(row.querySelector('input')?.value) || 0; });
+        document.querySelectorAll(`#box-rows-${pid} .box-row`).forEach(row => {
+          const qty = parseInt(row.querySelector('input')?.value) || 0;
+          if (qty > 0) { totalBox += qty; totalBoxes++; }
+        });
       }
     } else {
       document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(row => {
