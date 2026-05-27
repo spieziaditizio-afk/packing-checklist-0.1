@@ -92,7 +92,6 @@ body{font-family:'DM Sans',sans-serif;background:#0d1117;min-height:100vh;font-s
 .fc:focus{border-color:#38bdf8;background:#161b22;box-shadow:0 0 0 3px rgba(56,189,248,.15);}
 .fc::placeholder{color:#6e7681;}
 .fc.mono{font-family:'DM Mono',monospace;font-size:16px;letter-spacing:.02em;}
-.fc.scanned{border-color:#10b981!important;background:rgba(16,185,129,.08)!important;color:#34d399;}
 .fc.pn-err{border-color:#ef4444!important;background:rgba(239,68,68,.08)!important;}
 
 /* ── PILLS ── */
@@ -148,10 +147,6 @@ body{font-family:'DM Sans',sans-serif;background:#0d1117;min-height:100vh;font-s
 .qty-rows-wrap{display:flex;flex-wrap:wrap;gap:6px 10px;margin-bottom:4px;}
 .qty-rows-wrap .scan-row{margin-bottom:0;}
 .scan-row-num{font-size:12px;font-weight:600;color:#6e7681;width:40px;flex-shrink:0;font-family:'DM Mono',monospace;}
-.scan-tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px;flex-shrink:0;white-space:nowrap;}
-.tag-scan{background:rgba(16,185,129,.15);color:#34d399;}
-.tag-typed{background:rgba(245,158,11,.15);color:#f59e0b;}
-.tag-wait{background:rgba(148,163,184,.1);color:#6e7681;animation:pulse 1.8s ease-in-out infinite;}
 .btn-rm-row{width:26px;height:26px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#6e7681;background:#21262d;border:1px solid #30363d;border-radius:6px;cursor:pointer;transition:all .12s;font-family:'DM Sans',sans-serif;}
 .btn-rm-row:hover{background:rgba(239,68,68,.15);color:#f87171;border-color:rgba(239,68,68,.3);}
 
@@ -461,7 +456,6 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
           <div class="scan-row" style="margin-bottom:0;">
             <input class="fc mono" id="delivery-pn" type="text" placeholder="Scan PN from pick label"
               onkeydown="onKeyDown(event,this)" oninput="onDeliveryPNInput()"/>
-            <span class="scan-tag tag-wait" id="delivery-pn-tag">● SCAN</span>
           </div>
         </div>
       </div>
@@ -569,12 +563,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!localStorage.getItem(WELCOME_KEY)) showWelcome();
 });
 
-// Track last input time on every input to distinguish scanner vs keyboard + auto-save
+// Auto-save on every input keystroke (debounced 400ms).
 document.addEventListener('input', e => {
-  if (e.target.tagName === 'INPUT') {
-    e.target._lastInputTime = Date.now();
-    saveStateDebounced();
-  }
+  if (e.target.tagName === 'INPUT') saveStateDebounced();
 }, true);
 
 // URL hash is the source of truth for active session → reload on hash change.
@@ -736,7 +727,6 @@ function buildPalletHTML(pid) {
         <div class="scan-row" style="margin-bottom:0;">
           <input class="fc mono" id="box-pn-${pid}" type="text" placeholder="Scan PN from first box"
             onkeydown="onKeyDown(event,this)" oninput="onBoxPNInput(${pid},this)"/>
-          <span class="scan-tag tag-wait" id="box-pn-tag-${pid}">● SCAN</span>
         </div>
       </div>
     </div>
@@ -895,10 +885,8 @@ function addPerBoxRow(pid) {
     <span class="scan-row-num">B${n}</span>
     <input class="fc mono" type="text" placeholder="Scan PN"
       onkeydown="onKeyDown(event,this)" oninput="onPerBoxPNInput(${pid},this)"/>
-    <span class="scan-tag tag-wait">● SCAN</span>
     <input class="fc mono" type="text" placeholder="Qty"
       onkeydown="onKeyDown(event,this)" oninput="handleQtyInput(${pid},this)"/>
-    <span class="scan-tag tag-wait">● SCAN</span>
     <button class="btn-rm-row" onclick="removePerBoxRow(${pid},this)">✕</button>
   `;
   wrap.appendChild(div);
@@ -912,7 +900,6 @@ function removePerBoxRow(pid, btn) {
   saveStateDebounced();
 }
 function onPerBoxPNInput(pid, el) {
-  if (el.dataset.scanned === 'true') markTyped(el);
   const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
   const boxPN = el.value.trim().toUpperCase();
   if (delivPN && boxPN) {
@@ -936,7 +923,6 @@ function addPickRow(pid) {
     <span class="scan-row-num">Pick ${n}</span>
     <input class="fc mono" type="text" placeholder="Qty" style="max-width:110px;"
       onkeydown="onKeyDown(event,this)" oninput="handleQtyInput(${pid},this)"/>
-    <span class="scan-tag tag-wait">● SCAN</span>
     <button class="btn-rm-row" onclick="removePickRow(${pid},this)">✕</button>
   `;
   wrap.appendChild(div);
@@ -960,7 +946,6 @@ function addBoxRow(pid) {
     <span class="scan-row-num">B${n}</span>
     <input class="fc mono" type="text" placeholder="Qty" style="max-width:110px;"
       onkeydown="onKeyDown(event,this)" oninput="handleQtyInput(${pid},this)"/>
-    <span class="scan-tag tag-wait">● SCAN</span>
     <button class="btn-rm-row" onclick="removeBoxRow(${pid},this)">✕</button>
   `;
   wrap.appendChild(div);
@@ -1056,7 +1041,7 @@ function _tone(freq, opts) {
   } catch(e) {}
 }
 
-// Single-scan success (fired on every valid scan/typed-accepted via markScanned).
+// Per-input success — fired on every valid Enter via markAccepted.
 function beepOk()    { _tone(880); }
 // Wrong scan / wrong PN. Two low sawtooth pulses.
 function beepError() {
@@ -1105,16 +1090,9 @@ function triggerScanError(el) {
   if (_toastTimer) clearTimeout(_toastTimer);
   _toastTimer = setTimeout(function() { toast.style.display = 'none'; }, 2500);
   setTimeout(function() {
-    el.classList.remove('scan-wrong', 'scanned', 'scan-flash-ok', 'pn-err');
+    el.classList.remove('scan-wrong', 'scan-flash-ok', 'pn-err');
     el.value = '';
     el.style.borderColor = '';
-    el.dataset.scanned = '';
-    const tag = el.nextElementSibling;
-    if (tag && tag.classList.contains('scan-tag')) {
-      tag.textContent = '● SCAN';
-      tag.className = 'scan-tag tag-wait';
-      tag.style.animation = '';
-    }
     el.focus();
     saveStateDebounced();
   }, 460);
@@ -1124,7 +1102,6 @@ function triggerScanError(el) {
 function onKeyDown(event, el) {
   if (event.key !== 'Enter') return;
   event.preventDefault();
-  const isScanned = Date.now() - (el._lastInputTime || 0) < 50;
 
   // ── Wrong qty scan: non-numeric chars were typed (scanner hit wrong barcode) ──
   if (el._wrongScan) {
@@ -1133,20 +1110,17 @@ function onKeyDown(event, el) {
     return;
   }
 
-  // ── Wrong PN scan: scanned value ≠ delivery PN when delivery PN is set ──
-  if (isScanned) {
-    const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
-    const perboxRow = el.closest('.perbox-row');
-    const isPNField = (el.id && el.id.startsWith('box-pn-')) ||
-                      (perboxRow && el === perboxRow.querySelectorAll('input')[0]);
-    if (isPNField && delivPN && el.value.trim().toUpperCase() !== delivPN) {
-      triggerScanError(el);
-      return;
-    }
+  // ── Wrong PN: value on a PN field ≠ delivery PN. Applies whether typed or scanned. ──
+  const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
+  const perboxRow = el.closest('.perbox-row');
+  const isPNField = (el.id && el.id.startsWith('box-pn-')) ||
+                    (perboxRow && el === perboxRow.querySelectorAll('input')[0]);
+  if (isPNField && delivPN && el.value.trim() && el.value.trim().toUpperCase() !== delivPN) {
+    triggerScanError(el);
+    return;
   }
 
-  if (isScanned) markScanned(el);
-  else if (el.value.trim()) markTyped(el);
+  if (el.value.trim()) markAccepted(el);
 
   const block = el.closest('.pallet-block');
   const pid = block?.dataset.pid;
@@ -1187,39 +1161,16 @@ function onKeyDown(event, el) {
   autoAdvance(el);
 }
 
-function markScanned(el) {
-  el.dataset.scanned = 'true';
-  el.classList.add('scanned');
+// Fires on every valid Enter: brief green flash + success beep. No persistent
+// typed-vs-scanned state — the heuristic produced false-positives during field
+// testing with slower Zebras, so the distinction was dropped (only the per-pallet
+// validation strip matters now).
+function markAccepted(el) {
   beepOk();
   el.classList.remove('scan-flash-ok');
   void el.offsetWidth;
   el.classList.add('scan-flash-ok');
-  const tag = el.nextElementSibling;
-  if (tag && tag.classList.contains('scan-tag')) {
-    tag.textContent = '✓ SCANNED';
-    tag.className = 'scan-tag tag-scan';
-    tag.style.animation = 'none';
-  }
   saveStateDebounced();
-}
-function markTyped(el) {
-  el.dataset.scanned = '';
-  el.classList.remove('scanned', 'scan-flash-ok');
-  const tag = el.nextElementSibling;
-  if (tag && tag.classList.contains('scan-tag')) {
-    tag.textContent = '✎ TYPED';
-    tag.className = 'scan-tag tag-typed';
-    tag.style.animation = 'none';
-  }
-}
-function resetTag(el) {
-  el.dataset.scanned = '';
-  const tag = el.nextElementSibling;
-  if (tag && tag.classList.contains('scan-tag')) {
-    tag.textContent = '● SCAN';
-    tag.className = 'scan-tag tag-wait';
-    tag.style.animation = '';
-  }
 }
 
 /* ══ PERSISTENCE (localStorage) ═════════════════════════ */
@@ -1350,46 +1301,6 @@ function closeWelcome() {
   try { localStorage.setItem(WELCOME_KEY, '1'); } catch (e) {}
 }
 
-function tagStateOf(el) {
-  if (!el) return 'wait';
-  if (el.dataset && el.dataset.scanned === 'true') return 'scanned';
-  const tag = el.nextElementSibling;
-  if (tag && tag.classList.contains('tag-typed')) return 'typed';
-  return 'wait';
-}
-
-function applyTagState(el, state) {
-  if (!el) return;
-  if (state === 'scanned') {
-    el.dataset.scanned = 'true';
-    el.classList.add('scanned');
-    const tag = el.nextElementSibling;
-    if (tag && tag.classList.contains('scan-tag')) {
-      tag.textContent = '✓ SCANNED';
-      tag.className = 'scan-tag tag-scan';
-      tag.style.animation = 'none';
-    }
-  } else if (state === 'typed') {
-    el.dataset.scanned = '';
-    el.classList.remove('scanned', 'scan-flash-ok');
-    const tag = el.nextElementSibling;
-    if (tag && tag.classList.contains('scan-tag')) {
-      tag.textContent = '✎ TYPED';
-      tag.className = 'scan-tag tag-typed';
-      tag.style.animation = 'none';
-    }
-  } else {
-    el.dataset.scanned = '';
-    el.classList.remove('scanned', 'scan-flash-ok');
-    const tag = el.nextElementSibling;
-    if (tag && tag.classList.contains('scan-tag')) {
-      tag.textContent = '● SCAN';
-      tag.className = 'scan-tag tag-wait';
-      tag.style.animation = '';
-    }
-  }
-}
-
 function serializeState() {
   const delivPNEl = document.getElementById('delivery-pn');
   const state = {
@@ -1399,8 +1310,7 @@ function serializeState() {
       operator: document.getElementById('operator')?.value || '',
       deliveryNum: document.getElementById('delivery-num')?.value || '',
       destination: destination,
-      pn: delivPNEl?.value || '',
-      pnTag: tagStateOf(delivPNEl)
+      pn: delivPNEl?.value || ''
     },
     pallets: []
   };
@@ -1416,19 +1326,16 @@ function serializeState() {
       pnMode: pnMode,
       boxMode: boxMode,
       boxPn: boxPNEl?.value || '',
-      boxPnTag: tagStateOf(boxPNEl),
       pickLabels: [],
       boxes: [],
       groups: [],
       perBoxRows: []
     };
     document.querySelectorAll(`#pick-rows-${pid} .pick-row`).forEach(row => {
-      const inp = row.querySelector('input');
-      p.pickLabels.push({ qty: inp?.value || '', tag: tagStateOf(inp) });
+      p.pickLabels.push({ qty: row.querySelector('input')?.value || '' });
     });
     document.querySelectorAll(`#box-rows-${pid} .box-row`).forEach(row => {
-      const inp = row.querySelector('input');
-      p.boxes.push({ qty: inp?.value || '', tag: tagStateOf(inp) });
+      p.boxes.push({ qty: row.querySelector('input')?.value || '' });
     });
     document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(row => {
       const [a, c] = row.querySelectorAll('input');
@@ -1438,9 +1345,7 @@ function serializeState() {
       const [pnInp, qtyInp] = row.querySelectorAll('input');
       p.perBoxRows.push({
         pn: pnInp?.value || '',
-        qty: qtyInp?.value || '',
-        pnTag: tagStateOf(pnInp),
-        qtyTag: tagStateOf(qtyInp)
+        qty: qtyInp?.value || ''
       });
     });
     state.pallets.push(p);
@@ -1465,10 +1370,7 @@ function restoreState(state) {
       const dpnEl = document.getElementById('delivery-pn');
       if (opEl) opEl.value = state.delivery.operator || '';
       if (dnEl) dnEl.value = state.delivery.deliveryNum || '';
-      if (dpnEl) {
-        dpnEl.value = state.delivery.pn || '';
-        applyTagState(dpnEl, state.delivery.pnTag || 'wait');
-      }
+      if (dpnEl) dpnEl.value = state.delivery.pn || '';
       if (state.delivery.destination) setDestination(state.delivery.destination);
     }
 
@@ -1491,16 +1393,13 @@ function restoreState(state) {
       if (p.pnMode) setPNMode(pid, p.pnMode);
 
       const boxPNEl = document.getElementById(`box-pn-${pid}`);
-      if (boxPNEl) {
-        boxPNEl.value = p.boxPn || '';
-        applyTagState(boxPNEl, p.boxPnTag || 'wait');
-      }
+      if (boxPNEl) boxPNEl.value = p.boxPn || '';
 
       (p.pickLabels || []).forEach(pl => {
         addPickRow(pid);
         const rows = document.querySelectorAll(`#pick-rows-${pid} .pick-row`);
         const inp = rows[rows.length - 1]?.querySelector('input');
-        if (inp) { inp.value = pl.qty || ''; applyTagState(inp, pl.tag || 'wait'); }
+        if (inp) inp.value = pl.qty || '';
       });
       if (!p.pickLabels || p.pickLabels.length === 0) addPickRow(pid);
 
@@ -1508,7 +1407,7 @@ function restoreState(state) {
         addBoxRow(pid);
         const rows = document.querySelectorAll(`#box-rows-${pid} .box-row`);
         const inp = rows[rows.length - 1]?.querySelector('input');
-        if (inp) { inp.value = bx.qty || ''; applyTagState(inp, bx.tag || 'wait'); }
+        if (inp) inp.value = bx.qty || '';
       });
       if (!p.boxes || p.boxes.length === 0) addBoxRow(pid);
 
@@ -1526,8 +1425,8 @@ function restoreState(state) {
         addPerBoxRow(pid);
         const rows = document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`);
         const [pnInp, qtyInp] = rows[rows.length - 1]?.querySelectorAll('input') || [];
-        if (pnInp) { pnInp.value = pb.pn || ''; applyTagState(pnInp, pb.pnTag || 'wait'); }
-        if (qtyInp) { qtyInp.value = pb.qty || ''; applyTagState(qtyInp, pb.qtyTag || 'wait'); }
+        if (pnInp) pnInp.value = pb.pn || '';
+        if (qtyInp) qtyInp.value = pb.qty || '';
       });
       if (!p.perBoxRows || p.perBoxRows.length === 0) addPerBoxRow(pid);
 
@@ -1603,7 +1502,6 @@ function autoAdvance(el) {
 }
 
 function handleQtyInput(pid, el) {
-  if (el.dataset.scanned === 'true') markTyped(el);
   const raw = el.value;
   const digitsOnly = raw.replace(/[^0-9]/g, '');
   // Error if: no digits at all (country code "NL") OR letter appears AFTER a digit (PO format e.g. "VT9A00000...")
@@ -1619,7 +1517,6 @@ function handleQtyInput(pid, el) {
 
 function onDeliveryPNInput() {
   const elDPN = document.getElementById('delivery-pn');
-  if (elDPN && elDPN.dataset.scanned === 'true') markTyped(elDPN);
   const delivPN = (elDPN?.value || '').trim().toUpperCase();
   document.querySelectorAll('.pallet-block').forEach(b => {
     const pid = b.dataset.pid;
@@ -1643,7 +1540,6 @@ function onDeliveryPNInput() {
 }
 
 function onBoxPNInput(pid, el) {
-  if (el.dataset.scanned === 'true') markTyped(el);
   const pickPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
   const boxPN = el.value.trim().toUpperCase();
   if (pickPN && boxPN) {
@@ -2372,10 +2268,9 @@ function buildExportData() {
         const pn = (pnInp?.value || '').trim().toUpperCase();
         const q = parseInt(qtyInp?.value) || 0;
         if (q <= 0) return; // skip empty rows
-        const src = tagStateOf(qtyInp);
         boxTotal += q;
         boxCount += 1;
-        pallet.boxes.push({ id: `B${i + 1}`, partNumber: pn, qty: q, source: src === 'wait' ? 'pending' : src });
+        pallet.boxes.push({ id: `B${i + 1}`, partNumber: pn, qty: q, source: 'scan' });
       });
     } else if (boxMode === 'scan') {
       const sharedPN = (document.getElementById(`box-pn-${pid}`)?.value || '').trim().toUpperCase();
@@ -2383,10 +2278,9 @@ function buildExportData() {
         const inp = row.querySelector('input');
         const q = parseInt(inp?.value) || 0;
         if (q <= 0) return; // skip empty rows
-        const src = tagStateOf(inp);
         boxTotal += q;
         boxCount += 1;
-        pallet.boxes.push({ id: `B${i + 1}`, partNumber: sharedPN, qty: q, source: src === 'wait' ? 'pending' : src });
+        pallet.boxes.push({ id: `B${i + 1}`, partNumber: sharedPN, qty: q, source: 'scan' });
       });
     } else { // visual
       const sharedPN = (document.getElementById(`box-pn-${pid}`)?.value || '').trim().toUpperCase();

@@ -17,7 +17,7 @@ A single-file (~2200 lines) HTML web app for verifying packing checklists at Arr
 
 - **Run**: open the HTML file in Chrome. No server needed.
 - **Edit**: change the file, reload the browser (Ctrl+R). State persists in `localStorage` keyed by the active session (URL hash `#s=…`, defaults to `:default`) — clear all sessions via DevTools or remove keys matching `arrowPackingV1:*`.
-- **Test the scanner pipeline without a Zebra**: just type fast and press Enter. The scanner-vs-typed heuristic is `Date.now() - el._lastInputTime < 50ms`, so manual typing is correctly detected as "TYPED" (amber tag) instead of "SCANNED" (green). Test the wrong-scan branch by typing letters into a Qty field.
+- **Test the scanner pipeline without a Zebra**: just type and press Enter — the app no longer distinguishes typed vs scanned (the timing heuristic produced too many false positives in field testing). Every valid Enter gets a green flash + beep, period. Test the wrong-scan branch by typing letters into a Qty field; test the wrong-PN branch by entering a PN that doesn't match the delivery PN.
 - **Test multi-session**: append `#s=<anything>` to the URL or use the 📑 dropdown → "New session". Each session is independent; opening two browser windows on the same file with different hashes works side-by-side.
 - **No tests, no lint, no CI.** Verification is manual in-browser.
 
@@ -55,11 +55,13 @@ Every scannable `<input>` wires `onkeydown="onKeyDown(event, this)"` and `oninpu
 ```
 onKeyDown
   ├── wrong-scan check (el._wrongScan flag set by handleQtyInput when PO format /\d[a-zA-Z]/ detected)
-  ├── wrong-PN check (scanned value ≠ delivery PN on a PN field)
-  ├── markScanned (if isScanned) OR markTyped (if value present)
+  ├── wrong-PN check (value on a PN field ≠ delivery PN, applies whether typed or scanned)
+  ├── markAccepted(el) — beep + transient green flash (only visible feedback that input was registered)
   ├── auto-add new pick-row / box-row / perbox-row when on the LAST row → focus new row, return
   └── autoAdvance(el) → focuses the next visible input across the whole pallet block
 ```
+
+There is **no persistent typed-vs-scanned visual state**. The old `markScanned` / `markTyped` / `tagStateOf` / `applyTagState` / scan-tag UI was removed after field testing — the timing heuristic (`< 50ms` between keystrokes) misclassified slower Zebras as typed input, producing visual discrepancies without changing any validation logic. Per-pallet status now relies entirely on the validation strip (`MATCH` / `MISMATCH` / `PENDING`).
 
 Adding a new row type? It needs the same triple-check before reaching `autoAdvance` to avoid the cursor jumping out of its section. Pattern: when `el.closest('.your-row') === wrap.lastElementChild`, call your `addYourRow(pid)`, focus its input, and `return`.
 
