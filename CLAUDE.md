@@ -17,7 +17,8 @@ A single-file (~2200 lines) HTML web app for verifying packing checklists at Arr
 
 - **Run**: open the HTML file in Chrome. No server needed.
 - **Edit**: change the file, reload the browser (Ctrl+R). State persists in `localStorage` keyed by the active session (URL hash `#s=…`, defaults to `:default`) — clear all sessions via DevTools or remove keys matching `arrowPackingV1:*`.
-- **Test the scanner pipeline without a Zebra**: just type and press Enter — the app no longer distinguishes typed vs scanned (the timing heuristic produced too many false positives in field testing). Every valid Enter gets a green flash + beep, period. Test the wrong-scan branch by typing letters into a Qty field; test the wrong-PN branch by entering a PN that doesn't match the delivery PN.
+- **Production scanner**: Zebra **DS3678** (cordless rugged 1D/2D imager, connects via Bluetooth cradle in HID Keyboard Wedge mode). Suffix is configurable via 123Scan / programming barcodes — the app accepts both Enter (CR) and Tab so it's tolerant of any unit's configuration without having to touch the hardware. Other scannable inputs (operator name, delivery#) inherit the same handler.
+- **Test the scanner pipeline without a Zebra**: just type and press Enter — the app no longer distinguishes typed vs scanned (the timing heuristic produced too many false positives in field testing). Every valid Enter (or Tab) gets a green flash + beep, period. Test the wrong-scan branch by typing letters into a Qty field; test the wrong-PN branch by entering a PN that doesn't match the delivery PN.
 - **Test multi-session**: append `#s=<anything>` to the URL or use the 📑 dropdown → "New session". Each session is independent; opening two browser windows on the same file with different hashes works side-by-side.
 - **No tests, no lint, no CI.** Verification is manual in-browser.
 
@@ -50,7 +51,7 @@ The validation strip at the bottom of each pallet aggregates: `Pick PN | Box PN 
 
 ### Central input pipeline
 
-Every scannable `<input>` wires `onkeydown="onKeyDown(event, this)"` and `oninput="handleQtyInput(...)"` (or PN equivalent). The flow on Enter is:
+Every scannable `<input>` wires `onkeydown="onKeyDown(event, this)"` and `oninput="handleQtyInput(...)"` (or PN equivalent). The flow on **Enter or Tab** (the Zebra DS3678 used at the packing stations can be configured to emit either CR or Tab as its keystroke suffix via 123Scan; intercepting both lets us tolerate either configuration without touching the hardware. `Shift+Tab` is passed through to the browser for backward navigation):
 
 ```
 onKeyDown

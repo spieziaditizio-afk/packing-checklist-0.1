@@ -1100,7 +1100,12 @@ function triggerScanError(el) {
 
 /* ══ INPUT HANDLING ═════════════════════════════════════ */
 function onKeyDown(event, el) {
-  if (event.key !== 'Enter') return;
+  // Accept Enter (manual + most Zebras) AND Tab (some Zebras send Tab as suffix instead of CR).
+  // Without intercepting Tab, the browser's default tab order moves focus to the next focusable
+  // element — which is the row's ✕ button, not the next input. Shift+Tab is left to the browser
+  // so users can still navigate backward.
+  const isAdvance = event.key === 'Enter' || (event.key === 'Tab' && !event.shiftKey);
+  if (!isAdvance) return;
   event.preventDefault();
 
   // ── Wrong qty scan: non-numeric chars were typed (scanner hit wrong barcode) ──
