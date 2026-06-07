@@ -291,7 +291,22 @@ body{font-family:'DM Sans',sans-serif;background:#0d1117;min-height:100vh;font-s
 
   /* Footer */
   .pr-footer{margin-top:10px;font-size:7.5px;color:#94a3b8!important;border-top:1px solid #e2e8f0;padding:4px 18px 0;text-align:center;}
+
+  /* Per-box detail cards */
+  .pr-box-detail-lbl{font-size:7.5px;font-weight:bold;color:#475569!important;text-transform:uppercase;letter-spacing:.05em;padding:4px 10px 2px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;}
+  .pr-box-cards{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:3px;padding:4px 10px 8px;border:1px solid #e2e8f0;border-top:none;}
+  .pr-box-card{border:1px solid #e2e8f0;border-radius:3px;padding:4px 5px;text-align:center;background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .pr-box-card-num{font-size:6.5px;color:#94a3b8!important;text-transform:uppercase;font-weight:bold;letter-spacing:.04em;}
+  .pr-box-card-qty{font-size:11px;font-weight:bold;color:#0f172a!important;line-height:1.2;}
+  .pr-box-card-pn{font-size:6.5px;color:#475569!important;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 }
+
+/* ── PRINT OPTIONS TOGGLE ── */
+.print-opt-row{display:flex;align-items:center;gap:7px;margin-bottom:8px;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:7px;cursor:pointer;}
+.print-opt-row:hover{background:rgba(255,255,255,.06);}
+.print-opt-row input[type=checkbox]{accent-color:#38bdf8;cursor:pointer;width:13px;height:13px;flex-shrink:0;}
+.print-opt-row span{font-size:12px;color:#8b949e;cursor:pointer;user-select:none;line-height:1.4;}
+.print-opt-row:has(input:checked) span{color:#38bdf8;}
 
 /* ── KPI CARDS ── */
 .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:16px;}
@@ -493,6 +508,10 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
         <div style="display:flex;gap:8px;margin-bottom:8px;">
           <button class="btn btn-ghost-blue" style="flex:1;justify-content:center;padding:8px 10px;font-size:12px;" onclick="doExportCSV()">⬇ CSV</button>
         </div>
+        <label class="print-opt-row">
+          <input type="checkbox" id="opt-box-detail" onchange="savePrintOpts()">
+          <span>Show per-box detail in print</span>
+        </label>
         <div style="font-size:11px;color:#6e7681;text-align:center;line-height:1.4;">Complete all pallets before exporting.</div>
       </div>
     </div>
@@ -557,6 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('chk-date').value = now.toISOString().slice(0,10);
   updateMuteButton();
   updateSessionsButton();
+  loadPrintOpts();
   loadState(); // may restore 0 or more pallets; no auto-add for fresh/empty sessions
   updateDeliverySummary(); // ensures empty-state visibility is correct on init
   // First-ever load → show quick guide. Tap '?' anytime to reopen.
@@ -1783,6 +1803,7 @@ function buildPrintHTML() {
   </div>
   <div class="pr-content">`;
 
+  const showBoxDetail = document.getElementById('opt-box-detail')?.checked;
   const blocks = document.querySelectorAll('.pallet-block');
   let palletIdx = 0;
   let grandPickTotal = 0, grandBoxTotal = 0, grandBoxCount = 0;
@@ -1806,6 +1827,7 @@ function buildPrintHTML() {
     const pnMode = getPNMode(pid);
     let boxTotal = 0, boxCount = 0;
     const boxGroups = [];
+    const boxCards = [];
     let pnOk = null;
     let boxPN = '—';
 
@@ -1823,6 +1845,7 @@ function buildPrintHTML() {
             if (existing) existing.count++;
             else boxGroups.push({ count:1, qty, total:qty });
             boxTotal += qty; boxCount++;
+            boxCards.push({ num: boxCards.length + 1, qty, pn });
           }
         });
         // Recalculate totals for grouped entries
@@ -1837,7 +1860,10 @@ function buildPrintHTML() {
         const qtyMap = new Map();
         document.querySelectorAll(`#box-rows-${pid} .box-row input`).forEach(inp => {
           const qty = parseInt(inp?.value) || 0;
-          if (qty > 0) qtyMap.set(qty, (qtyMap.get(qty) || 0) + 1);
+          if (qty > 0) {
+            qtyMap.set(qty, (qtyMap.get(qty) || 0) + 1);
+            boxCards.push({ num: boxCards.length + 1, qty, pn: '' });
+          }
         });
         qtyMap.forEach((count, qty) => {
           boxGroups.push({ count, qty, total: count * qty });
@@ -1852,6 +1878,9 @@ function buildPrintHTML() {
         const count = parseInt(a?.value) || 0, qty = parseInt(c?.value) || 0;
         if (count > 0 || qty > 0) boxGroups.push({ count, qty, total: count * qty });
         boxTotal += count * qty; boxCount += count;
+        if (count > 0 && qty > 0) {
+          for (let i = 0; i < count; i++) boxCards.push({ num: boxCards.length + 1, qty, pn: '' });
+        }
       });
       if (delivPN !== '—' && boxPN !== '—') pnOk = delivPN === boxPN;
     }
@@ -1875,6 +1904,19 @@ function buildPrintHTML() {
         ).join('')
       : `<tr><td colspan="3" style="color:#94a3b8;font-style:italic;text-align:center;">No data entered</td></tr>`;
 
+    const boxCardsHtml = (showBoxDetail && boxCards.length)
+      ? `<div class="pr-box-detail-lbl">Per-Box Detail &mdash; ${boxCards.length} box${boxCards.length !== 1 ? 'es' : ''}</div>
+    <div class="pr-box-cards">${
+      boxCards.map(c =>
+        `<div class="pr-box-card">
+          <div class="pr-box-card-num">B${c.num}</div>
+          <div class="pr-box-card-qty">${c.qty.toLocaleString()}</div>
+          ${c.pn ? `<div class="pr-box-card-pn">${esc(c.pn)}</div>` : ''}
+        </div>`
+      ).join('')
+    }</div>`
+      : '';
+
     html += `
     <div class="pr-pallet-hdr">
       <span class="pr-pallet-hdr-title">PALLET ${palletIdx} &nbsp;&mdash;&nbsp; ${esc(ptype)} (${esc(dims)} cm) &nbsp;|&nbsp; ${esc(weight)} kg &nbsp;|&nbsp; ${esc(height)} cm</span>
@@ -1884,6 +1926,7 @@ function buildPrintHTML() {
       <span>Pick PN: <b>${esc(delivPN)}</b> &nbsp;|&nbsp; Box PN: <b>${esc(boxPN)}</b></span>
       <span class="${pnClass}">${pnLabel}</span>
     </div>
+    ${boxCardsHtml}
     <div class="pr-breakdown-lbl">Box Breakdown by Quantity</div>
     <table class="pr-table pr-breakdown-tbl">
       <tr><th>No. of Boxes</th><th>Pcs / Box</th><th>Subtotal (pcs)</th></tr>
@@ -1939,6 +1982,16 @@ function buildPrintHTML() {
   </div>`;
 
   return html;
+}
+
+/* ══ PRINT OPTIONS ═════════════════════════════════════ */
+function savePrintOpts() {
+  localStorage.setItem('arrowPackingPrintBoxDetailV1', document.getElementById('opt-box-detail')?.checked ? '1' : '0');
+}
+function loadPrintOpts() {
+  const v = localStorage.getItem('arrowPackingPrintBoxDetailV1');
+  const el = document.getElementById('opt-box-detail');
+  if (el && v !== null) el.checked = v === '1';
 }
 
 /* ══ PRINT ══════════════════════════════════════════════ */

@@ -94,13 +94,15 @@ Three output paths, all read live DOM (not the localStorage state):
 
 The PDF builder duplicates the box-counting logic of the print builder. If you change counting semantics in one, change both.
 
+Per-pallet block order in `buildPrintHTML`: pallet-hdr → pn-line → per-box cards (conditional, `showBoxDetail`) → breakdown table → summary table. Pre-compute conditional HTML as a variable before the `html +=` template literal rather than appending separately after.
+
 ## Constants you'll touch often
 
 - `PTYPE`: pallet code → dimensions in cm (e.g. `EP:'120×80'`).
 - `HEIGHT_LIMITS`: `{ europe: 180, export: 160 }`. Drives the "exceeds max" warning on the height input.
 - `STORAGE_BASE` / `SESSION_PREFIX`: `'arrowPackingV1'` / `'arrowPackingV1:'` — bump the `V1` suffix if you change the serialized shape in a backwards-incompatible way (also requires migrating existing `:default`, `:s_xxx` keys).
 - `STORAGE_VERSION`: numeric guard inside the saved JSON; `restoreState` refuses to load when the file's version differs.
-- `WELCOME_KEY`, `MUTE_KEY`: global (not per-session) UI preferences in localStorage.
+- `WELCOME_KEY`, `MUTE_KEY`, `'arrowPackingPrintBoxDetailV1'`: global (not per-session) UI preferences in localStorage. Adding a new global pref? Create `loadXxxOpts()` / `saveXxxOpts()` and call `loadXxxOpts()` in DOMContentLoaded.
 
 ## UI language
 
