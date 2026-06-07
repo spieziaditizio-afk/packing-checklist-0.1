@@ -378,6 +378,11 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
 .pallet-tab.active .tab-badge{background:rgba(56,189,248,.2);color:#38bdf8;}
 .pallet-tab.tab-ok{border-color:rgba(16,185,129,.4);}.pallet-tab.tab-ok.active{border-bottom-color:#0d1117;}.pallet-tab.tab-ok .tab-badge{background:rgba(16,185,129,.15);color:#34d399;}
 .pallet-tab.tab-err{border-color:rgba(239,68,68,.4);}.pallet-tab.tab-err.active{border-bottom-color:#0d1117;}.pallet-tab.tab-err .tab-badge{background:rgba(239,68,68,.15);color:#f87171;}
+.tab-info{display:flex;flex-direction:column;gap:1px;line-height:1.2;}
+.tab-stats{font-size:9px;color:#4b5563;font-weight:400;letter-spacing:.01em;}
+.pallet-tab.active .tab-stats{color:#6e7681;}
+.pallet-tab.tab-ok .tab-stats{color:#34d399;opacity:.8;}
+.pallet-tab.tab-err .tab-stats{color:#f87171;opacity:.8;}
 .tab-add-btn{padding:5px 12px;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;color:#38bdf8;background:transparent;border:1.5px dashed rgba(56,189,248,.3);border-radius:7px;cursor:pointer;transition:all .15s;margin-left:6px;white-space:nowrap;position:relative;bottom:-1px;}
 .tab-add-btn:hover{background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.6);}
 </style>
@@ -640,7 +645,7 @@ function addPalletTab(pid) {
   tab.className = 'pallet-tab';
   tab.dataset.tabPid = pid;
   tab.onclick = () => switchTab(pid);
-  tab.innerHTML = `<span class="tab-badge">${pid}</span><span class="tab-label">Pallet</span>`;
+  tab.innerHTML = `<span class="tab-badge">${pid}</span><span class="tab-info"><span class="tab-label">Pallet</span><span class="tab-stats"></span></span>`;
   tabs.insertBefore(tab, addBtn);
 }
 
@@ -1676,6 +1681,8 @@ function updatePalletSummary(pid) {
     tab.classList.remove('tab-ok', 'tab-err');
     if (status === 'match') tab.classList.add('tab-ok');
     else if (status === 'mismatch') tab.classList.add('tab-err');
+    const statsEl = tab.querySelector('.tab-stats');
+    if (statsEl) statsEl.textContent = boxTotal > 0 ? `${boxTotal.toLocaleString()} pcs · ${boxCount} bx` : '';
   }
 
   const hdrBadge = document.getElementById(`hdr-status-${pid}`);
