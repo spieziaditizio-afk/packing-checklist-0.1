@@ -271,7 +271,7 @@ body{font-family:'DM Sans',sans-serif;background:#0d1117;min-height:100vh;font-s
   .pr-consol-tbl td{text-align:center;font-size:8.5px;padding:3px 6px;border:1px solid #e2e8f0;}
 
   /* Totals highlight box */
-  .pr-totals-box{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:1px solid #cbd5e1;border-top:none;padding:8px 10px;display:grid!important;grid-template-columns:repeat(5,1fr);}
+  .pr-totals-box{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:1px solid #cbd5e1;border-top:none;padding:8px 10px;display:grid!important;grid-template-columns:repeat(6,1fr);}
   .pr-total-cell{text-align:center;padding:0 4px;}
   .pr-total-lbl{font-size:7px;font-weight:bold;color:#64748b!important;text-transform:uppercase;letter-spacing:.04em;}
   .pr-total-val{font-size:13px;font-weight:bold;color:#0f172a!important;margin-top:2px;}
@@ -363,6 +363,10 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
 .sum-lbl{font-size:10px;color:#8b949e;}
 .sum-val{font-size:18px;font-weight:700;color:#e6edf3;letter-spacing:-.02em;font-family:'DM Mono',monospace;}
 #sb-status-box{margin-top:8px;padding:9px 12px;border-radius:8px;background:transparent;border:1px solid #30363d;display:flex;align-items:center;justify-content:space-between;transition:all .3s;}
+.ds-pallet-divider{font-size:9px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.07em;margin:8px 0 4px;padding-top:8px;border-top:1px solid #21262d;}
+.ds-pallet-row{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px;color:#8b949e;}
+.ds-pallet-id{font-family:'DM Mono',monospace;font-weight:700;color:#6e7681;width:20px;flex-shrink:0;}
+.ds-pallet-stats{flex:1;}
 
 /* ── MAIN PALLET AREA ── */
 #app{flex:1;display:flex;flex-direction:column;overflow:hidden;max-width:none;margin:0;padding:0;}
@@ -492,6 +496,9 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
         <div class="sum-row" id="kpi-boxes"><span class="sum-lbl">Total Boxes</span><span class="sum-val" id="ds-boxes">0</span></div>
         <div class="sum-row" id="kpi-pick"><span class="sum-lbl">Pick Total (pcs)</span><span class="sum-val" id="ds-pick">0</span></div>
         <div class="sum-row" id="kpi-box"><span class="sum-lbl">Verified (pcs)</span><span class="sum-val" id="ds-box">0</span></div>
+        <div class="sum-row" id="kpi-weight"><span class="sum-lbl">Total Weight (kg)</span><span class="sum-val" id="ds-weight">0</span></div>
+        <div class="ds-pallet-divider" id="ds-pallet-divider" style="display:none;">Per Pallet</div>
+        <div id="ds-pallet-list"></div>
         <div id="sb-status-box">
           <span style="font-size:9px;color:#8b949e;letter-spacing:.08em;text-transform:uppercase;">Status</span>
           <span class="sum-val" id="ds-status" style="font-size:14px;color:#6e7681;">— Waiting</span>
@@ -1711,43 +1718,63 @@ function updateDeliverySummary() {
   const emptyEl = document.getElementById('empty-state');
   if (emptyEl) emptyEl.style.display = blocks.length === 0 ? '' : 'none';
 
-  let totalPick = 0, totalBox = 0, totalBoxes = 0;
+  let totalPick = 0, totalBox = 0, totalBoxes = 0, totalWeight = 0;
   let allMatch = true, anyMismatch = false;
+  const palletRows = [];
 
   blocks.forEach(b => {
     const pid = b.dataset.pid;
     document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach(i => {
       totalPick += parseInt(i.value) || 0;
     });
+    let palletBoxTotal = 0, palletBoxCount = 0;
     const mode = getBoxMode(pid);
     if (mode === 'scan') {
       if (getPNMode(pid) === 'per-box') {
         document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).forEach(row => {
           const qty = parseInt(row.querySelectorAll('input')[1]?.value) || 0;
-          if (qty > 0) { totalBox += qty; totalBoxes++; }
+          if (qty > 0) { palletBoxTotal += qty; palletBoxCount++; }
         });
       } else {
         document.querySelectorAll(`#box-rows-${pid} .box-row`).forEach(row => {
           const qty = parseInt(row.querySelector('input')?.value) || 0;
-          if (qty > 0) { totalBox += qty; totalBoxes++; }
+          if (qty > 0) { palletBoxTotal += qty; palletBoxCount++; }
         });
       }
     } else {
       document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(row => {
         const [a, c] = row.querySelectorAll('input');
         const count = parseInt(a?.value)||0, qty = parseInt(c?.value)||0;
-        totalBox += count * qty; totalBoxes += count;
+        palletBoxTotal += count * qty; palletBoxCount += count;
       });
     }
+    totalBox += palletBoxTotal; totalBoxes += palletBoxCount;
+    totalWeight += parseFloat(document.getElementById(`weight-${pid}`)?.value) || 0;
+
     const st = document.getElementById(`v-status-${pid}`)?.textContent || '';
     if (st !== '✓ MATCH') allMatch = false;
     if (st === '✗ MISMATCH') anyMismatch = true;
+    palletRows.push({ boxTotal: palletBoxTotal, boxCount: palletBoxCount, status: st });
   });
 
   document.getElementById('ds-pallets').textContent = blocks.length;
   document.getElementById('ds-boxes').textContent   = totalBoxes.toLocaleString();
   document.getElementById('ds-pick').textContent    = totalPick.toLocaleString();
   document.getElementById('ds-box').textContent     = totalBox.toLocaleString();
+  document.getElementById('ds-weight').textContent  = totalWeight ? totalWeight.toLocaleString(undefined, { maximumFractionDigits: 1 }) : '0';
+
+  const dividerEl = document.getElementById('ds-pallet-divider');
+  const listEl = document.getElementById('ds-pallet-list');
+  if (dividerEl) dividerEl.style.display = palletRows.length ? '' : 'none';
+  if (listEl) {
+    listEl.innerHTML = palletRows.map((r, i) => {
+      const dot = r.status === '✓ MATCH' ? '<span style="color:#34d399;">✓</span>'
+                : r.status === '✗ MISMATCH' ? '<span style="color:#f87171;">✗</span>'
+                : '<span style="color:#6e7681;">●</span>';
+      const stats = r.boxTotal > 0 ? `${r.boxTotal.toLocaleString()} pcs · ${r.boxCount} bx` : '—';
+      return `<div class="ds-pallet-row"><span class="ds-pallet-id">P${i + 1}</span><span class="ds-pallet-stats">${stats}</span>${dot}</div>`;
+    }).join('');
+  }
 
   const stEl     = document.getElementById('ds-status');
   const statusBox = document.getElementById('sb-status-box');
@@ -1813,7 +1840,7 @@ function buildPrintHTML() {
   const showBoxDetail = document.getElementById('opt-box-detail')?.checked;
   const blocks = document.querySelectorAll('.pallet-block');
   let palletIdx = 0;
-  let grandPickTotal = 0, grandBoxTotal = 0, grandBoxCount = 0;
+  let grandPickTotal = 0, grandBoxTotal = 0, grandBoxCount = 0, grandWeight = 0;
   let allOk = true, anyErr = false;
   const consolidado = [];
 
@@ -1824,6 +1851,7 @@ function buildPrintHTML() {
     const dims   = PTYPE[ptype] || '—';
     const weight = document.getElementById(`weight-${pid}`)?.value || '—';
     const height = document.getElementById(`height-${pid}`)?.value || '—';
+    grandWeight += parseFloat(weight) || 0;
 
     let pickTotal = 0;
     document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach(inp => {
@@ -1976,6 +2004,7 @@ function buildPrintHTML() {
       <div class="pr-total-cell"><div class="pr-total-lbl">Total Boxes</div><div class="pr-total-val">${grandBoxCount.toLocaleString()}</div></div>
       <div class="pr-total-cell"><div class="pr-total-lbl">Target (pcs)</div><div class="pr-total-val">${grandPickTotal.toLocaleString()}</div></div>
       <div class="pr-total-cell"><div class="pr-total-lbl">Verified (pcs)</div><div class="pr-total-val">${grandBoxTotal.toLocaleString()}</div></div>
+      <div class="pr-total-cell"><div class="pr-total-lbl">Total Weight (kg)</div><div class="pr-total-val">${grandWeight ? grandWeight.toLocaleString(undefined, { maximumFractionDigits: 1 }) : '0'}</div></div>
       <div class="pr-total-cell"><div class="pr-total-lbl">Overall Status</div><div class="pr-total-val ${overallSt}">${overallLbl}</div></div>
     </div>
     <div class="pr-sig">
@@ -2057,7 +2086,7 @@ function doExportPDF() {
 
   const blocks = document.querySelectorAll('.pallet-block');
   let palletIdx = 0;
-  let grandPickTotal = 0, grandBoxTotal = 0, grandBoxCount = 0;
+  let grandPickTotal = 0, grandBoxTotal = 0, grandBoxCount = 0, grandWeight = 0;
   let allOk = true, anyErr = false;
   const consolidado = [];
 
@@ -2068,6 +2097,7 @@ function doExportPDF() {
     const dims   = PTYPE[ptype] || '—';
     const weight = document.getElementById('weight-' + pid)?.value || '—';
     const height = document.getElementById('height-' + pid)?.value || '—';
+    grandWeight += parseFloat(weight) || 0;
 
     // Pick label total
     let pickTotal = 0;
@@ -2236,7 +2266,7 @@ function doExportPDF() {
 
   // ── Grand totals box ───────────────────────────────────────────────
   doc.setFillColor(241,245,249); doc.setDrawColor(203,213,225);
-  doc.rect(M, y, CW, 16, 'FD');
+  doc.rect(M, y, CW, 23, 'FD');
   const totals = [
     ['PALLETS',         String(blocks.length),              M+5],
     ['TOTAL BOXES',     grandBoxCount.toLocaleString(),     M+42],
@@ -2254,7 +2284,14 @@ function doExportPDF() {
   doc.text('OVERALL STATUS', stX, y+5);
   doc.setFontSize(11); doc.setTextColor(overallColor[0], overallColor[1], overallColor[2]); doc.setFont(undefined,'bold');
   doc.text(overallSt, stX, y+13);
-  y += 22;
+
+  doc.setDrawColor(203,213,225);
+  doc.line(M+3, y+16, M+CW-3, y+16);
+  doc.setFontSize(7); doc.setTextColor(100,116,139); doc.setFont(undefined,'bold');
+  doc.text('TOTAL WEIGHT (KG)', M+5, y+21);
+  doc.setFontSize(11); doc.setTextColor(15,23,42); doc.setFont(undefined,'bold');
+  doc.text(grandWeight ? grandWeight.toLocaleString(undefined, { maximumFractionDigits: 1 }) : '0', M+55, y+21);
+  y += 29;
 
   // ── Signature ──────────────────────────────────────────────────────
   if (y > 258) { doc.addPage(); y = 14; }
