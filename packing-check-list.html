@@ -398,6 +398,7 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
 .ds-pallet-divider{font-size:9px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.07em;margin:8px 0 4px;padding-top:8px;border-top:1px solid var(--border-subtle);}
 .ds-pallet-row{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px;color:var(--text-secondary);}
 .ds-pallet-id{font-family:'DM Mono',monospace;font-weight:700;color:var(--text-muted);width:20px;flex-shrink:0;}
+.ds-pallet-type-chip{font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:var(--text-secondary);background:var(--border-subtle);border-radius:4px;padding:1px 5px;flex-shrink:0;}
 .ds-pallet-stats{flex:1;}
 
 /* ── MAIN PALLET AREA ── */
@@ -1805,7 +1806,7 @@ function updateDeliverySummary() {
     const st = document.getElementById(`v-status-${pid}`)?.textContent || '';
     if (st !== '✓ MATCH') allMatch = false;
     if (st === '✗ MISMATCH') anyMismatch = true;
-    palletRows.push({ boxTotal: palletBoxTotal, boxCount: palletBoxCount, status: st });
+    palletRows.push({ ptype: getPType(pid) || '—', boxTotal: palletBoxTotal, boxCount: palletBoxCount, status: st });
   });
 
   document.getElementById('ds-pallets').textContent = blocks.length;
@@ -1823,7 +1824,7 @@ function updateDeliverySummary() {
                 : r.status === '✗ MISMATCH' ? '<span style="color:var(--status-error-text);">✗</span>'
                 : '<span style="color:var(--text-muted);">●</span>';
       const stats = r.boxTotal > 0 ? `${r.boxTotal.toLocaleString()} pcs · ${r.boxCount} bx` : '—';
-      return `<div class="ds-pallet-row"><span class="ds-pallet-id">P${i + 1}</span><span class="ds-pallet-stats">${stats}</span>${dot}</div>`;
+      return `<div class="ds-pallet-row"><span class="ds-pallet-id">P${i + 1}</span><span class="ds-pallet-type-chip">${esc(r.ptype)}</span><span class="ds-pallet-stats">${stats}</span>${dot}</div>`;
     }).join('');
   }
 
