@@ -239,10 +239,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg-page);min-height:100vh
 
 /* ── PRINT ── */
 @media print{
+  html,body{height:auto!important;overflow:visible!important;display:block!important;}
   body>*:not(#print-root){display:none!important;}
   #print-root{display:block!important;font-family:Arial,sans-serif;font-size:10px;color:#111;}
-  .pr-page{page-break-after:always;padding:0 0 16px;}
-  .pr-page:last-child{page-break-after:auto;}
+  .pr-page{padding:0 0 16px;}
+  .pr-pallet-hdr{page-break-before:auto;}
+  .pr-summary-tbl{page-break-inside:avoid;}
+  .pr-breakdown-tbl{page-break-inside:avoid;}
 
   /* Header banner */
   .pr-header{background:#0a1f36!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:9px 18px;display:flex;justify-content:space-between;align-items:center;}
@@ -473,7 +476,7 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
       <li><b>Pallet</b>Add pallet — pick type (KP/EP/BP/GP/NP/AP), weight (kg), height (cm).</li>
       <li><b>Pick Labels</b>Enter target quantities. Sum of Pick 1, Pick 2… = target pieces per pallet.</li>
       <li><b>Verify</b>Scan boxes (Shared PN or PN per box) — or use Visual mode for N×M groups.</li>
-      <li><b>Export</b>Validation strip green = MATCH. Download PDF / CSV or Print.</li>
+      <li><b>Export</b>Validation strip green = MATCH. Press Print — choose Print or Save as PDF in the browser dialog.</li>
     </ol>
     <button class="splash-cta" onclick="closeWelcome()">START VERIFYING →</button>
     <div class="splash-footer">Auto-saved · Multi-session via 📑 · Tap ? to reopen this guide</div>
@@ -544,25 +547,19 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
       </div>
     </div>
 
-    <!-- PRINT & EXPORT -->
+    <!-- PRINT -->
     <div class="sb-card">
       <div class="sb-card-hdr">
         <div class="card-icon icon-orange">🖨</div>
-        <span class="sb-card-title">Print &amp; Export</span>
+        <span class="sb-card-title">Print</span>
       </div>
       <div class="sb-card-body">
-        <div style="display:flex;gap:8px;margin-bottom:8px;">
-          <button class="btn btn-blue" style="flex:1;justify-content:center;padding:9px 12px;font-size:13px;" onclick="doExportPDF()">⬇ PDF</button>
-          <button class="btn btn-ghost-blue" style="flex:1;justify-content:center;padding:9px 12px;font-size:13px;" onclick="doPrint()">🖨 Print</button>
-        </div>
-        <div style="display:flex;gap:8px;margin-bottom:8px;">
-          <button class="btn btn-ghost-blue" style="flex:1;justify-content:center;padding:8px 10px;font-size:12px;" onclick="doExportCSV()">⬇ CSV</button>
-        </div>
+        <button class="btn btn-ghost-blue" style="width:100%;justify-content:center;padding:9px 12px;font-size:13px;margin-bottom:8px;" onclick="doPrint()">🖨 Print</button>
         <label class="print-opt-row">
           <input type="checkbox" id="opt-box-detail" onchange="savePrintOpts()">
           <span>Show per-box detail in print</span>
         </label>
-        <div style="font-size:11px;color:var(--text-muted);text-align:center;line-height:1.4;">Complete all pallets before exporting.</div>
+        <div style="font-size:11px;color:var(--text-muted);text-align:center;line-height:1.4;">Complete all pallets before printing.</div>
       </div>
     </div>
 
@@ -2029,9 +2026,8 @@ function buildPrintHTML() {
     }</div>`
       : '';
 
-    const palletPageBreak = palletIdx > 1 ? ' style="page-break-before:always;break-before:page;"' : '';
     html += `
-    <div class="pr-pallet-hdr"${palletPageBreak}>
+    <div class="pr-pallet-hdr">
       <span class="pr-pallet-hdr-title">PALLET ${palletIdx} &nbsp;&mdash;&nbsp; ${esc(ptype)} (${esc(dims)} cm) &nbsp;|&nbsp; ${esc(weight)} kg &nbsp;|&nbsp; ${esc(height)} cm</span>
       <span class="pr-badge pr-badge-${st}">${stLbl}</span>
     </div>
@@ -2069,10 +2065,9 @@ function buildPrintHTML() {
       <td class="${c.stCls}">${c.stLbl}</td>
     </tr>`).join('');
 
-  const summaryPageBreak = blocks.length > 1 ? ' style="page-break-before:always;break-before:page;"' : '';
   html += `
   </div>
-  <div${summaryPageBreak} style="padding:0 18px;">
+  <div style="padding:0 18px;">
     <div class="pr-consolidado-hdr">Delivery Summary</div>
     <table class="pr-table pr-consol-tbl">
       <tr><th>Pallet</th><th>Type</th><th>Height</th><th>Weight</th><th>Boxes</th><th>Exp.(pcs)</th><th>Verif.(pcs)</th><th>Status</th></tr>
