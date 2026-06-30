@@ -330,8 +330,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg-page);min-height:100vh
   /* Per-box detail cards */
   .pr-box-detail-lbl{font-size:7.5px;font-weight:bold;color:#475569!important;text-transform:uppercase;letter-spacing:.05em;padding:4px 10px 2px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;}
   .pr-box-cards{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:3px;padding:4px 10px 8px;border:1px solid #e2e8f0;border-top:none;}
-  .pr-box-card{border:1px solid #e2e8f0;border-radius:3px;padding:4px 5px;text-align:center;background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .pr-box-card-num{font-size:6.5px;color:#94a3b8!important;text-transform:uppercase;font-weight:bold;letter-spacing:.04em;}
+  .pr-box-card{border:1px solid #e2e8f0;border-radius:3px;padding:5px 5px;text-align:center;background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   .pr-box-card-qty{font-size:11px;font-weight:bold;color:#0f172a!important;line-height:1.2;}
   .pr-box-card-pn{font-size:6.5px;color:#475569!important;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 }
@@ -2008,7 +2007,7 @@ function buildPrintHTML() {
     const pnClass = pnOk === true ? 'pr-pn-ok' : pnOk === false ? 'pr-pn-err' : 'pr-pn-pending';
 
     const breakdownRows = boxGroups.length
-      ? boxGroups.map(g =>
+      ? [...boxGroups].sort((a,b) => b.qty - a.qty).map(g =>
           `<tr><td>${g.count}</td><td>${g.qty.toLocaleString()}</td><td>${g.total.toLocaleString()}</td></tr>`
         ).join('')
       : `<tr><td colspan="3" style="color:#94a3b8;font-style:italic;text-align:center;">No data entered</td></tr>`;
@@ -2016,9 +2015,8 @@ function buildPrintHTML() {
     const boxCardsHtml = (showBoxDetail && boxCards.length)
       ? `<div class="pr-box-detail-lbl">Per-Box Detail &mdash; ${boxCards.length} box${boxCards.length !== 1 ? 'es' : ''}</div>
     <div class="pr-box-cards">${
-      boxCards.map(c =>
+      [...boxCards].sort((a,b) => b.qty - a.qty).map(c =>
         `<div class="pr-box-card">
-          <div class="pr-box-card-num">B${c.num}</div>
           <div class="pr-box-card-qty">${c.qty.toLocaleString()}</div>
           ${c.pn ? `<div class="pr-box-card-pn">${esc(c.pn)}</div>` : ''}
         </div>`
