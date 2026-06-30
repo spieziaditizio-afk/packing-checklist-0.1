@@ -420,7 +420,11 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
 .pallet-tab.active .tab-stats{color:var(--text-muted);}
 .pallet-tab.tab-ok .tab-stats{color:var(--status-success-text);opacity:.8;}
 .pallet-tab.tab-err .tab-stats{color:var(--status-error-text);opacity:.8;}
-.tab-add-btn{padding:5px 12px;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;color:#38bdf8;background:transparent;border:1.5px dashed rgba(56,189,248,.3);border-radius:7px;cursor:pointer;transition:all .15s;margin-left:6px;white-space:nowrap;position:relative;bottom:-1px;}
+.tab-add-wrap{display:flex;align-items:center;gap:4px;margin-left:6px;flex-shrink:0;position:relative;bottom:-1px;}
+.pallet-count-input{width:40px;padding:4px 5px;font-size:11px;font-family:'DM Mono',monospace;background:var(--bg-card);color:var(--text-secondary);border:1.5px solid var(--border-subtle);border-radius:6px;text-align:center;-moz-appearance:textfield;appearance:textfield;}
+.pallet-count-input::-webkit-inner-spin-button,.pallet-count-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+.pallet-count-input:focus{outline:none;border-color:rgba(56,189,248,.5);}
+.tab-add-btn{padding:5px 12px;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;color:#38bdf8;background:transparent;border:1.5px dashed rgba(56,189,248,.3);border-radius:7px;cursor:pointer;transition:all .15s;white-space:nowrap;}
 .tab-add-btn:hover{background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.6);}
 </style>
 </head>
@@ -466,7 +470,7 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
     <div class="splash-divider"></div>
     <ol class="splash-steps">
       <li><b>Delivery</b>Operator, delivery #, Pick Label PN, destination (Europe / Export).</li>
-      <li><b>Pallet</b>Add pallet — pick type (KP/EP/BP/GP/NP), weight (kg), height (cm).</li>
+      <li><b>Pallet</b>Add pallet — pick type (KP/EP/BP/GP/NP/AP), weight (kg), height (cm).</li>
       <li><b>Pick Labels</b>Enter target quantities. Sum of Pick 1, Pick 2… = target pieces per pallet.</li>
       <li><b>Verify</b>Scan boxes (Shared PN or PN per box) — or use Visual mode for N×M groups.</li>
       <li><b>Export</b>Validation strip green = MATCH. Download PDF / CSV or Print.</li>
@@ -583,7 +587,10 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
       <div class="scan-text">Scanner ready — click a field and scan. Press Enter to auto-advance. Non-numeric characters in quantity fields are stripped automatically.</div>
     </div>
     <div id="pallet-tabs">
-      <button class="tab-add-btn" onclick="addPallet()">＋ Add Pallet</button>
+      <div class="tab-add-wrap">
+        <input type="number" id="pallet-count-input" class="pallet-count-input" min="1" max="20" value="1" title="Number of pallets to add"/>
+        <button class="tab-add-btn" onclick="addMultiplePallets()">＋ Add Pallets</button>
+      </div>
     </div>
     <div id="pallets-wrap"></div>
     <div id="empty-state">
@@ -611,7 +618,7 @@ let palletCounter = 0;
 let activePid = null;
 let destination = 'europe';
 const HEIGHT_LIMITS = { europe: 180, export: 160 };
-const PTYPE = { KP:'60×80', EP:'120×80', BP:'120×100', GP:'125×100', NP:'130×110' };
+const PTYPE = { KP:'60×80', EP:'120×80', BP:'120×100', GP:'125×100', NP:'130×110', AP:'—' };
 
 /* ══ INIT ═══════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
@@ -682,13 +689,18 @@ function addPallet() {
 
 function addPalletTab(pid) {
   const tabs = document.getElementById('pallet-tabs');
-  const addBtn = tabs.querySelector('.tab-add-btn');
+  const addWrap = tabs.querySelector('.tab-add-wrap');
   const tab = document.createElement('button');
   tab.className = 'pallet-tab';
   tab.dataset.tabPid = pid;
   tab.onclick = () => switchTab(pid);
   tab.innerHTML = `<span class="tab-badge">${pid}</span><span class="tab-info"><span class="tab-label">Pallet</span><span class="tab-stats"></span></span>`;
-  tabs.insertBefore(tab, addBtn);
+  tabs.insertBefore(tab, addWrap);
+}
+
+function addMultiplePallets() {
+  const n = Math.max(1, Math.min(20, parseInt(document.getElementById('pallet-count-input')?.value) || 1));
+  for (let i = 0; i < n; i++) addPallet();
 }
 
 function switchTab(pid) {
@@ -1199,14 +1211,17 @@ function onKeyDown(event, el) {
     return;
   }
 
-  // ── Wrong PN: value on a PN field ≠ delivery PN. Applies whether typed or scanned. ──
+  // ── PN field: strip prefix if delivery PN found as suffix, never block on mismatch ──
   const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
   const perboxRow = el.closest('.perbox-row');
   const isPNField = (el.id && el.id.startsWith('box-pn-')) ||
                     (perboxRow && el === perboxRow.querySelectorAll('input')[0]);
-  if (isPNField && delivPN && el.value.trim() && el.value.trim().toUpperCase() !== delivPN) {
-    triggerScanError(el);
-    return;
+  if (isPNField && delivPN && el.value.trim()) {
+    const stripped = stripPNPrefix(el.value.trim(), delivPN);
+    if (stripped !== el.value.trim()) {
+      el.value = stripped;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
   }
 
   if (el.value.trim()) markAccepted(el);
@@ -1588,6 +1603,16 @@ function autoAdvance(el) {
     all[idx + 1].focus();
     all[idx + 1].select();
   }
+}
+
+// If the scanned box PN has a prefix before the delivery PN (e.g. "1PASD123" when PN is "ASD123"),
+// return just the matching suffix. Also normalizes _ → - for separator differences (e.g. ASD123_123 → ASD123-123).
+function stripPNPrefix(scanned, delivPN) {
+  if (!delivPN || !scanned) return scanned;
+  const norm   = scanned.toUpperCase().replace(/_/g, '-');
+  const target = delivPN.toUpperCase().replace(/_/g, '-');
+  if (norm.endsWith(target)) return norm.slice(norm.length - target.length);
+  return scanned;
 }
 
 function handleQtyInput(pid, el) {
@@ -1980,7 +2005,7 @@ function buildPrintHTML() {
     const stCls = st === 'ok' ? 'pr-match' : st === 'err' ? 'pr-mismatch' : 'pr-pending';
     if (st === 'err') anyErr = true;
     if (st !== 'ok')  allOk = false;
-    consolidado.push({ palletIdx, ptype, dims, weight, boxCount, pickTotal, boxTotal, st, stLbl, stCls });
+    consolidado.push({ palletIdx, ptype, dims, weight, height, boxCount, pickTotal, boxTotal, st, stLbl, stCls });
 
     const pnLabel = pnOk === true ? 'PN OK ✓' : pnOk === false ? 'PN MISMATCH ✗' : 'Not verified';
     const pnClass = pnOk === true ? 'pr-pn-ok' : pnOk === false ? 'pr-pn-err' : 'pr-pn-pending';
@@ -2004,8 +2029,9 @@ function buildPrintHTML() {
     }</div>`
       : '';
 
+    const palletPageBreak = palletIdx > 1 ? ' style="page-break-before:always;break-before:page;"' : '';
     html += `
-    <div class="pr-pallet-hdr">
+    <div class="pr-pallet-hdr"${palletPageBreak}>
       <span class="pr-pallet-hdr-title">PALLET ${palletIdx} &nbsp;&mdash;&nbsp; ${esc(ptype)} (${esc(dims)} cm) &nbsp;|&nbsp; ${esc(weight)} kg &nbsp;|&nbsp; ${esc(height)} cm</span>
       <span class="pr-badge pr-badge-${st}">${stLbl}</span>
     </div>
@@ -2036,19 +2062,20 @@ function buildPrintHTML() {
 
   const consolRows = consolidado.map(c => `
     <tr>
-      <td>P${c.palletIdx}</td><td>${esc(c.ptype)}</td><td>${esc(c.dims)} cm</td><td>${esc(c.weight)} kg</td>
+      <td>P${c.palletIdx}</td><td>${esc(c.ptype)}</td><td>${esc(c.height)} cm</td><td>${esc(c.weight)} kg</td>
       <td>${c.boxCount || '—'}</td>
       <td>${c.pickTotal > 0 ? c.pickTotal.toLocaleString() : '—'}</td>
       <td>${c.boxTotal  > 0 ? c.boxTotal.toLocaleString()  : '—'}</td>
       <td class="${c.stCls}">${c.stLbl}</td>
     </tr>`).join('');
 
+  const summaryPageBreak = blocks.length > 1 ? ' style="page-break-before:always;break-before:page;"' : '';
   html += `
   </div>
-  <div style="padding:0 18px;">
+  <div${summaryPageBreak} style="padding:0 18px;">
     <div class="pr-consolidado-hdr">Delivery Summary</div>
     <table class="pr-table pr-consol-tbl">
-      <tr><th>Pallet</th><th>Type</th><th>Dims</th><th>Weight</th><th>Boxes</th><th>Exp.(pcs)</th><th>Verif.(pcs)</th><th>Status</th></tr>
+      <tr><th>Pallet</th><th>Type</th><th>Height</th><th>Weight</th><th>Boxes</th><th>Exp.(pcs)</th><th>Verif.(pcs)</th><th>Status</th></tr>
       ${consolRows}
     </table>
     <div class="pr-totals-box">
@@ -2220,7 +2247,7 @@ function doExportPDF() {
     if (!ready || !(pnOk !== false && qtyOk)) allOk = false;
 
     consolidado.push([
-      'P' + palletIdx, ptype, dims + ' cm', weight + ' kg',
+      'P' + palletIdx, ptype, height + ' cm', weight + ' kg',
       String(boxCount),
       pickTotal > 0 ? pickTotal.toLocaleString() : '—',
       boxTotal  > 0 ? boxTotal.toLocaleString()  : '—',
@@ -2293,7 +2320,7 @@ function doExportPDF() {
 
   doc.autoTable({
     startY: y,
-    head: [['Pallet', 'Type', 'Dims', 'Weight', 'Boxes', 'Exp.(pcs)', 'Verif.(pcs)', 'Status']],
+    head: [['Pallet', 'Type', 'Height', 'Weight', 'Boxes', 'Exp.(pcs)', 'Verif.(pcs)', 'Status']],
     body: consolidado,
     styles: { fontSize:8, cellPadding:2.5 },
     headStyles: { fillColor:[15,41,66], textColor:255, fontStyle:'bold' },
