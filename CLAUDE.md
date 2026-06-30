@@ -84,21 +84,23 @@ The quick-guide splash (`#welcome-splash`) auto-opens on first ever load (`local
 
 ### Outputs
 
-Three output paths, all read live DOM (not the localStorage state):
+Two active output paths (Print UI + legacy code), all read live DOM (not the localStorage state):
 
 | Output | Function | Notes |
 |---|---|---|
-| Browser Print | `doPrint` → `buildPrintHTML` | Opens a hidden iframe with a print-friendly HTML report |
-| PDF download | `doExportPDF` | jsPDF + autoTable, A4. Falls back with alert if jsPDF CDN didn't load |
-| CSV download | `doExportCSV` → `buildExportData` | One row per actual box (empty rows skipped); UTF-8 BOM for Excel |
+| Browser Print | `doPrint` → `buildPrintHTML` | Injects into `#print-root` div (NOT an iframe), then calls `window.print()`. Browser dialog lets user choose printer or Save as PDF. |
+| PDF download | `doExportPDF` | **UI button removed** — function still exists in JS. jsPDF + autoTable, A4. |
+| CSV download | `doExportCSV` → `buildExportData` | **UI button removed** — function still exists in JS. One row per actual box; UTF-8 BOM for Excel. |
 
-The PDF builder duplicates the box-counting logic of the print builder. If you change counting semantics in one, change both.
+`doExportPDF` duplicates box-counting logic from `buildPrintHTML`. If restoring PDF export, sync both.
+
+**Print pagination gotcha:** `html` and `body` both have `height:100%;overflow:hidden` for the app's scroll layout. This clips `#print-root` to viewport height during print, causing only 1 page to output regardless of content. The `@media print` block must override with `html,body{height:auto!important;overflow:visible!important;display:block!important;}`. Do NOT add `page-break-before:always` between pallets — puts each pallet on its own page. Use `page-break-inside:avoid` on tables instead and let the browser auto-paginate.
 
 Per-pallet block order in `buildPrintHTML`: pallet-hdr → pn-line → per-box cards (conditional, `showBoxDetail`) → breakdown table → summary table. Pre-compute conditional HTML as a variable before the `html +=` template literal rather than appending separately after.
 
 ## Constants you'll touch often
 
-- `PTYPE`: pallet code → dimensions in cm (e.g. `EP:'120×80'`).
+- `PTYPE`: pallet code → dimensions in cm (e.g. `EP:'120×80'`). Current types: `KP|EP|BP|GP|NP|AP`. `AP:'—'` (Amphenol supplier pallets — real dims unknown, update when measured).
 - `HEIGHT_LIMITS`: `{ europe: 180, export: 160 }`. Drives the "exceeds max" warning on the height input.
 - `STORAGE_BASE` / `SESSION_PREFIX`: `'arrowPackingV1'` / `'arrowPackingV1:'` — bump the `V1` suffix if you change the serialized shape in a backwards-incompatible way (also requires migrating existing `:default`, `:s_xxx` keys).
 - `STORAGE_VERSION`: numeric guard inside the saved JSON; `restoreState` refuses to load when the file's version differs.
@@ -113,3 +115,4 @@ The UI strings are **English** (finalized in commit `7db6dd7`). The user/operato
 - The file is hand-maintained as one big document; section comments `/* ══ NAME ══ */` are load-bearing for navigation — keep them when adding new function groups.
 - Pallet IDs (`pid`) are interpolated into every element ID (`box-pn-${pid}`, `pick-rows-${pid}`, etc.). Always use template literals against the pallet's `pid`, never hard-code IDs.
 - HTML inserted via template strings; user-controlled values go through `esc()` (l.449) before interpolation in print/PDF paths.
+- **PN prefix stripping**: `stripPNPrefix(scanned, delivPN)` normalizes both values (uppercase, `_`→`-`) and strips any prefix left of the delivery PN if the scanned value ends with it (e.g. `1PASD123` → `ASD123`). Called in `onKeyDown` at Enter/Tab time, never on keystroke. Never blocks on mismatch.
