@@ -97,6 +97,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg-page);min-height:100vh
 .splash-close:hover{background:rgba(var(--overlay-rgb),.08);color:var(--text-primary);}
 .splash-footer{margin-top:14px;font-size:10.5px;color:var(--text-muted);letter-spacing:.04em;}
 
+/* ── PRINT BLOCK MODAL ── */
+#print-block-modal{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;padding:20px;}
+.print-block-list{list-style:none;text-align:left;margin:0 0 22px;padding:0;max-height:40vh;overflow-y:auto;}
+.print-block-list li{padding:10px 14px;color:var(--text-primary);font-size:13px;line-height:1.45;border-radius:9px;margin-bottom:6px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);}
+.print-block-list li b{color:var(--status-error-text);display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+
 /* ── EMPTY STATE (no pallets yet) ── */
 #empty-state{display:none;max-width:480px;margin:56px auto 40px;padding:48px 30px;text-align:center;background:rgba(var(--overlay-rgb),.02);border:1.5px dashed rgba(56,189,248,.18);border-radius:14px;}
 .empty-icon{font-size:54px;line-height:1;margin-bottom:16px;opacity:.65;}
@@ -265,8 +271,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg-page);min-height:100vh
   /* Content wrapper */
   .pr-content{padding:0 18px;}
 
+  /* Pallet separation — black number tab */
+  .pr-pallet-block{display:flex;margin-top:14px;}
+  .pr-pallet-tab{background:#000!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-weight:bold;font-size:20px;min-width:26px;display:flex;align-items:center;justify-content:center;padding:4px;border-radius:3px 0 0 3px;}
+  .pr-pallet-content{flex:1;border:1px solid #999;border-left:none;border-radius:0 3px 3px 0;overflow:hidden;}
+
   /* Pallet header bar */
-  .pr-pallet-hdr{background:#0f2942!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:5px 10px;display:flex;justify-content:space-between;align-items:center;margin-top:10px;border-radius:3px 3px 0 0;}
+  .pr-pallet-hdr{background:#0f2942!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:5px 10px;display:flex;justify-content:space-between;align-items:center;}
   .pr-pallet-hdr-title{font-size:9px;font-weight:bold;color:#fff!important;}
 
   /* Status badges */
@@ -329,10 +340,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg-page);min-height:100vh
 
   /* Per-box detail cards */
   .pr-box-detail-lbl{font-size:7.5px;font-weight:bold;color:#475569!important;text-transform:uppercase;letter-spacing:.05em;padding:4px 10px 2px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;}
-  .pr-box-cards{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:3px;padding:4px 10px 8px;border:1px solid #e2e8f0;border-top:none;}
-  .pr-box-card{border:1px solid #e2e8f0;border-radius:3px;padding:5px 5px;text-align:center;background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .pr-box-card-qty{font-size:11px;font-weight:bold;color:#0f172a!important;line-height:1.2;}
-  .pr-box-card-pn{font-size:6.5px;color:#475569!important;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pr-box-cards{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:3px;padding:4px 10px 8px;border:1px solid #e2e8f0;border-top:none;}
+  .pr-box-card{border:1px solid #e2e8f0;border-radius:3px;padding:3px 4px;text-align:center;background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .pr-box-card-qty{font-size:9.5px;font-weight:bold;color:#0f172a!important;line-height:1.2;}
+  .pr-box-card-pn{font-size:6px;color:#475569!important;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 }
 
 /* ── PRINT OPTIONS TOGGLE ── */
@@ -476,6 +487,18 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
     </ol>
     <button class="splash-cta" onclick="closeWelcome()">START VERIFYING →</button>
     <div class="splash-footer">Auto-saved · Multi-session via 📑 · Tap ? to reopen this guide</div>
+  </div>
+</section>
+
+<section id="print-block-modal">
+  <div class="splash-card">
+    <button class="splash-close" onclick="closePrintBlockModal()" title="Close">✕</button>
+    <div class="splash-icon">⚠️</div>
+    <div class="splash-title" style="color:var(--status-error-text);">NO SE PUEDE IMPRIMIR</div>
+    <div class="splash-sub" style="color:var(--status-error-text);">Faltan datos o hay cantidades que no coinciden</div>
+    <div class="splash-divider" style="background:rgba(239,68,68,.4);"></div>
+    <ul class="print-block-list" id="print-block-list"></ul>
+    <button class="splash-cta" style="background:linear-gradient(135deg,#ef4444,#dc2626);" onclick="closePrintBlockModal()">ENTENDIDO</button>
   </div>
 </section>
 
@@ -1919,8 +1942,11 @@ function buildPrintHTML() {
     grandWeight += parseFloat(weight) || 0;
 
     let pickTotal = 0;
-    document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach(inp => {
-      pickTotal += parseInt(inp?.value) || 0;
+    const pickRowsData = [];
+    document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach((inp, i) => {
+      const qty = parseInt(inp?.value) || 0;
+      pickTotal += qty;
+      if (qty > 0) pickRowsData.push({ label: `Pick ${i + 1}`, qty });
     });
 
     const mode   = getBoxMode(pid);
@@ -2004,6 +2030,15 @@ function buildPrintHTML() {
         ).join('')
       : `<tr><td colspan="3" style="color:#94a3b8;font-style:italic;text-align:center;">No data entered</td></tr>`;
 
+    const pickRowsHtml = `
+    <div class="pr-breakdown-lbl">Pick Label Breakdown</div>
+    <table class="pr-table pr-breakdown-tbl">
+      <tr><th>Pick Label</th><th>Qty</th></tr>
+      ${pickRowsData.length
+        ? pickRowsData.map(p => `<tr><td>${esc(p.label)}</td><td>${p.qty.toLocaleString()}</td></tr>`).join('')
+        : `<tr><td colspan="2" style="color:#94a3b8;font-style:italic;text-align:center;">No data entered</td></tr>`}
+    </table>`;
+
     const boxCardsHtml = (showBoxDetail && boxCards.length)
       ? `<div class="pr-box-detail-lbl">Per-Box Detail &mdash; ${boxCards.length} box${boxCards.length !== 1 ? 'es' : ''}</div>
     <div class="pr-box-cards">${
@@ -2017,29 +2052,35 @@ function buildPrintHTML() {
       : '';
 
     html += `
-    <div class="pr-pallet-hdr">
-      <span class="pr-pallet-hdr-title">PALLET ${palletIdx} &nbsp;&mdash;&nbsp; ${esc(ptype)} (${esc(dims)} cm) &nbsp;|&nbsp; ${esc(weight)} kg &nbsp;|&nbsp; ${esc(height)} cm</span>
-      <span class="pr-badge pr-badge-${st}">${stLbl}</span>
-    </div>
-    <div class="pr-pn-line">
-      <span>Pick PN: <b>${esc(delivPN)}</b> &nbsp;|&nbsp; Box PN: <b>${esc(boxPN)}</b></span>
-      <span class="${pnClass}">${pnLabel}</span>
-    </div>
-    ${boxCardsHtml}
-    <div class="pr-breakdown-lbl">Box Breakdown by Quantity</div>
-    <table class="pr-table pr-breakdown-tbl">
-      <tr><th>No. of Boxes</th><th>Pcs / Box</th><th>Subtotal (pcs)</th></tr>
-      ${breakdownRows}
-    </table>
-    <table class="pr-table pr-summary-tbl">
-      <tr><th>Target (pcs)</th><th>Verified (pcs)</th><th>Total Boxes</th><th>Status</th></tr>
-      <tr>
-        <td>${pickTotal > 0 ? pickTotal.toLocaleString() : '—'}</td>
-        <td>${boxTotal  > 0 ? boxTotal.toLocaleString()  : '—'}</td>
-        <td>${boxCount  || '—'}</td>
-        <td class="${stCls}">${stLbl}</td>
-      </tr>
-    </table>`;
+    <div class="pr-pallet-block">
+      <div class="pr-pallet-tab">${palletIdx}</div>
+      <div class="pr-pallet-content">
+        <div class="pr-pallet-hdr">
+          <span class="pr-pallet-hdr-title">PALLET ${palletIdx} &nbsp;&mdash;&nbsp; ${esc(ptype)} (${esc(dims)} cm) &nbsp;|&nbsp; ${esc(weight)} kg &nbsp;|&nbsp; ${esc(height)} cm</span>
+          <span class="pr-badge pr-badge-${st}">${stLbl}</span>
+        </div>
+        <div class="pr-pn-line">
+          <span>Pick PN: <b>${esc(delivPN)}</b> &nbsp;|&nbsp; Box PN: <b>${esc(boxPN)}</b></span>
+          <span class="${pnClass}">${pnLabel}</span>
+        </div>
+        ${pickRowsHtml}
+        ${boxCardsHtml}
+        <div class="pr-breakdown-lbl">Box Breakdown by Quantity</div>
+        <table class="pr-table pr-breakdown-tbl">
+          <tr><th>No. of Boxes</th><th>Pcs / Box</th><th>Subtotal (pcs)</th></tr>
+          ${breakdownRows}
+        </table>
+        <table class="pr-table pr-summary-tbl">
+          <tr><th>Target (pcs)</th><th>Verified (pcs)</th><th>Total Boxes</th><th>Status</th></tr>
+          <tr>
+            <td>${pickTotal > 0 ? pickTotal.toLocaleString() : '—'}</td>
+            <td>${boxTotal  > 0 ? boxTotal.toLocaleString()  : '—'}</td>
+            <td>${boxCount  || '—'}</td>
+            <td class="${stCls}">${stLbl}</td>
+          </tr>
+        </table>
+      </div>
+    </div>`;
   });
 
   // Consolidado General
@@ -2094,8 +2135,80 @@ function loadPrintOpts() {
   if (el && v !== null) el.checked = v === '1';
 }
 
+/* ══ PRINT VALIDATION ═══════════════════════════════════ */
+function validatePrintReady() {
+  const blocks = document.querySelectorAll('.pallet-block');
+  const issues = [];
+  let palletIdx = 0;
+
+  blocks.forEach(b => {
+    palletIdx++;
+    const pid = b.dataset.pid;
+    const noType   = !getPType(pid);
+    const noWeight = !document.getElementById(`weight-${pid}`)?.value;
+    const noHeight = !document.getElementById(`height-${pid}`)?.value;
+
+    let pickTotal = 0;
+    document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach(inp => {
+      pickTotal += parseInt(inp?.value) || 0;
+    });
+
+    const mode = getBoxMode(pid);
+    const pnMode = getPNMode(pid);
+    let boxTotal = 0;
+    if (mode === 'scan') {
+      if (pnMode === 'per-box') {
+        document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).forEach(row => {
+          const inputs = row.querySelectorAll('input');
+          boxTotal += parseInt(inputs[1]?.value) || 0;
+        });
+      } else {
+        document.querySelectorAll(`#box-rows-${pid} .box-row input`).forEach(inp => {
+          boxTotal += parseInt(inp?.value) || 0;
+        });
+      }
+    } else {
+      document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(row => {
+        const [a, c] = row.querySelectorAll('input');
+        const count = parseInt(a?.value) || 0, qty = parseInt(c?.value) || 0;
+        boxTotal += count * qty;
+      });
+    }
+
+    const problems = [];
+    if (noType && noWeight && noHeight && pickTotal === 0 && boxTotal === 0) {
+      problems.push('sin datos cargados');
+    } else {
+      if (noType)   problems.push('falta tipo de pallet');
+      if (noWeight) problems.push('falta peso');
+      if (noHeight) problems.push('falta altura');
+      if (pickTotal === 0) problems.push('falta cantidad de pick label');
+      if (boxTotal === 0)  problems.push('falta verificación de cajas');
+      if (pickTotal > 0 && boxTotal > 0 && pickTotal !== boxTotal) {
+        problems.push(`cantidades no coinciden (Pick: ${pickTotal} · Verificado: ${boxTotal})`);
+      }
+    }
+
+    if (problems.length) issues.push({ palletIdx, problems });
+  });
+
+  return issues;
+}
+function openPrintBlockModal(issues) {
+  const list = document.getElementById('print-block-list');
+  if (list) list.innerHTML = issues.map(i => `<li><b>Pallet ${i.palletIdx}</b>${esc(i.problems.join(' · '))}</li>`).join('');
+  const m = document.getElementById('print-block-modal');
+  if (m) m.style.display = 'flex';
+}
+function closePrintBlockModal() {
+  const m = document.getElementById('print-block-modal');
+  if (m) m.style.display = 'none';
+}
+
 /* ══ PRINT ══════════════════════════════════════════════ */
 function doPrint() {
+  const issues = validatePrintReady();
+  if (issues.length) { openPrintBlockModal(issues); return; }
   const root = document.getElementById('print-root');
   root.innerHTML = buildPrintHTML();
   root.style.display = 'block';
