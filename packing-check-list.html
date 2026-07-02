@@ -494,11 +494,11 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
   <div class="splash-card">
     <button class="splash-close" onclick="closePrintBlockModal()" title="Close">✕</button>
     <div class="splash-icon">⚠️</div>
-    <div class="splash-title" style="color:var(--status-error-text);">NO SE PUEDE IMPRIMIR</div>
-    <div class="splash-sub" style="color:var(--status-error-text);">Faltan datos o hay cantidades que no coinciden</div>
+    <div class="splash-title" style="color:var(--status-error-text);">CANNOT PRINT YET</div>
+    <div class="splash-sub" style="color:var(--status-error-text);">Missing data or quantities don't match</div>
     <div class="splash-divider" style="background:rgba(239,68,68,.4);"></div>
     <ul class="print-block-list" id="print-block-list"></ul>
-    <button class="splash-cta" style="background:linear-gradient(135deg,#ef4444,#dc2626);" onclick="closePrintBlockModal()">ENTENDIDO</button>
+    <button class="splash-cta" style="background:linear-gradient(135deg,#ef4444,#dc2626);" onclick="closePrintBlockModal()">GOT IT</button>
   </div>
 </section>
 
@@ -2030,14 +2030,18 @@ function buildPrintHTML() {
         ).join('')
       : `<tr><td colspan="3" style="color:#94a3b8;font-style:italic;text-align:center;">No data entered</td></tr>`;
 
-    const pickRowsHtml = `
-    <div class="pr-breakdown-lbl">Pick Label Breakdown</div>
-    <table class="pr-table pr-breakdown-tbl">
-      <tr><th>Pick Label</th><th>Qty</th></tr>
-      ${pickRowsData.length
-        ? pickRowsData.map(p => `<tr><td>${esc(p.label)}</td><td>${p.qty.toLocaleString()}</td></tr>`).join('')
-        : `<tr><td colspan="2" style="color:#94a3b8;font-style:italic;text-align:center;">No data entered</td></tr>`}
-    </table>`;
+    const pickRowsHtml = pickRowsData.length
+      ? `<div class="pr-box-detail-lbl">Pick Label Breakdown &mdash; ${pickRowsData.length} label${pickRowsData.length !== 1 ? 's' : ''}</div>
+    <div class="pr-box-cards">${
+      pickRowsData.map(p =>
+        `<div class="pr-box-card">
+          <div class="pr-box-card-qty">${p.qty.toLocaleString()}</div>
+          <div class="pr-box-card-pn">${esc(p.label)}</div>
+        </div>`
+      ).join('')
+    }</div>`
+      : `<div class="pr-breakdown-lbl">Pick Label Breakdown</div>
+    <div style="padding:6px 10px;color:#94a3b8;font-style:italic;font-size:8.5px;border:1px solid #e2e8f0;border-top:none;">No data entered</div>`;
 
     const boxCardsHtml = (showBoxDetail && boxCards.length)
       ? `<div class="pr-box-detail-lbl">Per-Box Detail &mdash; ${boxCards.length} box${boxCards.length !== 1 ? 'es' : ''}</div>
@@ -2177,15 +2181,15 @@ function validatePrintReady() {
 
     const problems = [];
     if (noType && noWeight && noHeight && pickTotal === 0 && boxTotal === 0) {
-      problems.push('sin datos cargados');
+      problems.push('no data entered');
     } else {
-      if (noType)   problems.push('falta tipo de pallet');
-      if (noWeight) problems.push('falta peso');
-      if (noHeight) problems.push('falta altura');
-      if (pickTotal === 0) problems.push('falta cantidad de pick label');
-      if (boxTotal === 0)  problems.push('falta verificación de cajas');
+      if (noType)   problems.push('missing pallet type');
+      if (noWeight) problems.push('missing weight');
+      if (noHeight) problems.push('missing height');
+      if (pickTotal === 0) problems.push('missing pick label quantity');
+      if (boxTotal === 0)  problems.push('missing box verification');
       if (pickTotal > 0 && boxTotal > 0 && pickTotal !== boxTotal) {
-        problems.push(`cantidades no coinciden (Pick: ${pickTotal} · Verificado: ${boxTotal})`);
+        problems.push(`quantities don't match (Pick: ${pickTotal} · Verified: ${boxTotal})`);
       }
     }
 
