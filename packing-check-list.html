@@ -51,6 +51,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg-page);min-height:100vh
 .logo-title{color:var(--text-primary);font-size:17px;font-weight:600;line-height:1.2;}
 .logo-sub{color:rgba(var(--overlay-rgb),.35);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
 .header-right{margin-left:auto;text-align:right;color:rgba(var(--overlay-rgb),.3);font-size:11px;font-family:'DM Mono',monospace;}
+#save-indicator{text-align:right;color:rgba(var(--overlay-rgb),.3);font-size:10px;font-family:'DM Mono',monospace;white-space:nowrap;}
+#save-indicator.warn{color:var(--status-warn-text);}
 .mute-btn{background:rgba(var(--overlay-rgb),.06);border:1px solid rgba(var(--overlay-rgb),.1);color:rgba(var(--overlay-rgb),.75);width:38px;height:38px;border-radius:9px;font-size:18px;line-height:1;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;padding:0;}
 .mute-btn:hover{background:rgba(var(--overlay-rgb),.12);color:var(--text-primary);border-color:rgba(var(--overlay-rgb),.18);}
 .mute-btn.muted{color:rgba(var(--overlay-rgb),.35);background:rgba(var(--overlay-rgb),.03);}
@@ -341,7 +343,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg-page);min-height:100vh
   /* Per-box detail cards */
   .pr-box-detail-lbl{font-size:7.5px;font-weight:bold;color:#475569!important;text-transform:uppercase;letter-spacing:.05em;padding:4px 10px 2px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;}
   .pr-box-cards{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:3px;padding:4px 10px 8px;border:1px solid #e2e8f0;border-top:none;}
-  .pr-box-card{border:1px solid #e2e8f0;border-radius:3px;padding:3px 4px;text-align:center;background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .pr-box-card{border:1px solid #e2e8f0;border-radius:3px;padding:3px 4px;text-align:center;background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;min-height:24px;display:flex;flex-direction:column;justify-content:center;}
   .pr-box-card-qty{font-size:9.5px;font-weight:bold;color:#0f172a!important;line-height:1.2;}
   .pr-box-card-pn{font-size:6px;color:#475569!important;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
@@ -458,6 +460,11 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
       <div class="logo-sub">Packing Checklist · Microsoft Area · Sevenum</div>
     </div>
     <div class="header-right" id="hdr-date"></div>
+    <div id="save-indicator"></div>
+    <button id="new-session-btn" class="topbar-btn" onclick="newSessionInNewTab()" title="Open a new session in another browser tab">
+      <span class="btn-icon">🆕</span>
+      <span class="btn-label">New Session</span>
+    </button>
     <button id="help-btn" class="topbar-btn topbar-btn-icon-only" onclick="showWelcome()" title="Open quick guide">?</button>
     <button id="sessions-btn" class="topbar-btn" onclick="toggleSessionsMenu(event)" title="Switch session / open another delivery">
       <span class="btn-icon">📑</span>
@@ -589,18 +596,6 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
           <span>Show per-box detail in print</span>
         </label>
         <div style="font-size:11px;color:var(--text-muted);text-align:center;line-height:1.4;">Complete all pallets before printing.</div>
-      </div>
-    </div>
-
-    <!-- SESSION -->
-    <div class="sb-card">
-      <div class="sb-card-hdr">
-        <div class="card-icon icon-blue">💾</div>
-        <span class="sb-card-title">Sesión</span>
-      </div>
-      <div class="sb-card-body">
-        <div id="save-indicator" style="font-size:11px;color:var(--text-muted);text-align:center;margin-bottom:8px;letter-spacing:.04em;">Auto-guardado activo</div>
-        <button class="btn btn-ghost-blue" style="width:100%;justify-content:center;padding:8px 10px;font-size:12px;" onclick="resetChecklist()">＋ Nuevo checklist</button>
       </div>
     </div>
 
@@ -1390,6 +1385,7 @@ function populateSessionsMenu() {
   }).join('');
 }
 function newSession() { setActiveSession(makeSessionId()); }
+function newSessionInNewTab() { openSessionInNewTab(makeSessionId()); }
 function switchSession(id) {
   if (id === getSessionId()) {
     const m = document.getElementById('sessions-menu'); if (m) m.style.display = 'none';
@@ -1580,13 +1576,13 @@ function saveState() {
       const t = new Date();
       const hh = String(t.getHours()).padStart(2, '0');
       const mm = String(t.getMinutes()).padStart(2, '0');
-      ind.textContent = `Guardado ${hh}:${mm}`;
-      ind.style.opacity = '1';
+      ind.textContent = `Saved ${hh}:${mm}`;
+      ind.classList.remove('warn');
     }
   } catch (e) {
     if (e && e.name === 'QuotaExceededError') {
       const ind = document.getElementById('save-indicator');
-      if (ind) { ind.textContent = '⚠ Sin espacio'; ind.style.opacity = '1'; }
+      if (ind) { ind.textContent = '⚠ Storage full'; ind.classList.add('warn'); }
     }
   }
 }
@@ -1606,12 +1602,6 @@ function loadState() {
   } catch (e) {
     return false;
   }
-}
-
-function resetChecklist() {
-  if (!confirm('¿Empezar un checklist nuevo? Se borrarán todos los datos actuales.')) return;
-  try { localStorage.removeItem(getStorageKey()); } catch (e) {}
-  location.reload();
 }
 
 function autoAdvance(el) {
@@ -1953,10 +1943,10 @@ function buildPrintHTML() {
 
     let pickTotal = 0;
     const pickRowsData = [];
-    document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach((inp, i) => {
+    document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach(inp => {
       const qty = parseInt(inp?.value) || 0;
       pickTotal += qty;
-      if (qty > 0) pickRowsData.push({ label: `Pick ${i + 1}`, qty });
+      if (qty > 0) pickRowsData.push({ qty });
     });
 
     const mode   = getBoxMode(pid);
@@ -2043,7 +2033,6 @@ function buildPrintHTML() {
     const pickCardsInner = pickRowsData.map(p =>
       `<div class="pr-box-card">
         <div class="pr-box-card-qty">${p.qty.toLocaleString()}</div>
-        <div class="pr-box-card-pn">${esc(p.label)}</div>
       </div>`
     ).join('');
 
