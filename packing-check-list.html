@@ -81,8 +81,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg-page);min-height:100vh
 .session-icon:hover{background:rgba(var(--overlay-rgb),.08);color:var(--text-primary);}
 
 /* ── WELCOME SPLASH ── */
-#welcome-splash{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at top,var(--bg-page) 0%,var(--bg-deep) 100%);display:none;align-items:center;justify-content:center;padding:20px;}
-.splash-card{max-width:560px;width:100%;background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:16px;padding:38px 36px 32px;text-align:center;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.7);}
+#welcome-splash{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at top,var(--bg-page) 0%,var(--bg-deep) 100%);display:none;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+.splash-card{max-width:560px;width:100%;background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:16px;padding:38px 36px 32px;text-align:center;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.7);margin:auto;}
 .splash-icon{font-size:54px;margin-bottom:4px;line-height:1;}
 .splash-title{color:var(--text-primary);font-size:22px;font-weight:900;letter-spacing:.18em;margin:12px 0 4px;}
 .splash-sub{color:#38bdf8;font-size:12px;letter-spacing:.05em;margin-bottom:6px;}
@@ -344,6 +344,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg-page);min-height:100vh
   .pr-box-card{border:1px solid #e2e8f0;border-radius:3px;padding:3px 4px;text-align:center;background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   .pr-box-card-qty{font-size:9.5px;font-weight:bold;color:#0f172a!important;line-height:1.2;}
   .pr-box-card-pn{font-size:6px;color:#475569!important;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  /* Pick Labels (narrow) + Per-Box Detail (wide) side-by-side columns */
+  .pr-detail-cols{display:flex;border:1px solid #e2e8f0;border-top:none;}
+  .pr-pick-col{width:112px;flex-shrink:0;padding:4px 6px 8px;border-right:1px solid #e2e8f0;}
+  .pr-box-col{flex:1;min-width:0;padding:4px 6px 8px;}
+  .pr-detail-col-lbl{font-size:7px;font-weight:bold;color:#475569!important;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;}
+  .pr-pick-cards{display:grid!important;grid-template-columns:repeat(2,1fr);gap:3px;}
+  .pr-box-col .pr-box-cards{border:none;padding:0;}
 }
 
 /* ── PRINT OPTIONS TOGGLE ── */
@@ -479,11 +487,13 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
     <div class="splash-sub">Sevenum NL · Microsoft Area</div>
     <div class="splash-divider"></div>
     <ol class="splash-steps">
-      <li><b>Delivery</b>Operator, delivery #, Pick Label PN, destination (Europe / Export).</li>
-      <li><b>Pallet</b>Add pallet — pick type (KP/EP/BP/GP/NP/AP), weight (kg), height (cm).</li>
-      <li><b>Pick Labels</b>Enter target quantities. Sum of Pick 1, Pick 2… = target pieces per pallet.</li>
-      <li><b>Verify</b>Scan boxes (Shared PN or PN per box) — or use Visual mode for N×M groups.</li>
-      <li><b>Export</b>Validation strip green = MATCH. Press Print — choose Print or Save as PDF in the browser dialog.</li>
+      <li><b>Delivery Info</b>Type your name, the delivery #, and select the destination (Europe ≤180cm / Export ≤160cm).</li>
+      <li><b>Part Number</b>Scan or type the PN from the first — or any — Pick Label. It's checked against every pallet and box.</li>
+      <li><b>Pallet Setup</b>Pick the pallet type (KP/EP/BP/GP/NP/AP), enter weight (kg) and height (cm).</li>
+      <li><b>Pick Labels</b>Scan the piece quantities on the pallet's Pick Labels (Pick 1, Pick 2…) — their sum is the target.</li>
+      <li><b>Box Verification</b>Scan the PN from the first — or any — box label, then scan each box's quantity in sequence.</li>
+      <li><b>More Pallets</b>Add Pallet 2, 3… and repeat Pallet Setup → Pick Labels → Box Verification for each.</li>
+      <li><b>Print</b>Once every pallet is complete and matching, press Print. Missing data or mismatched quantities block the report.</li>
     </ol>
     <button class="splash-cta" onclick="closeWelcome()">START VERIFYING →</button>
     <div class="splash-footer">Auto-saved · Multi-session via 📑 · Tap ? to reopen this guide</div>
@@ -2030,30 +2040,44 @@ function buildPrintHTML() {
         ).join('')
       : `<tr><td colspan="3" style="color:#94a3b8;font-style:italic;text-align:center;">No data entered</td></tr>`;
 
-    const pickRowsHtml = pickRowsData.length
-      ? `<div class="pr-box-detail-lbl">Pick Label Breakdown &mdash; ${pickRowsData.length} label${pickRowsData.length !== 1 ? 's' : ''}</div>
-    <div class="pr-box-cards">${
-      pickRowsData.map(p =>
-        `<div class="pr-box-card">
-          <div class="pr-box-card-qty">${p.qty.toLocaleString()}</div>
-          <div class="pr-box-card-pn">${esc(p.label)}</div>
-        </div>`
-      ).join('')
-    }</div>`
-      : `<div class="pr-breakdown-lbl">Pick Label Breakdown</div>
-    <div style="padding:6px 10px;color:#94a3b8;font-style:italic;font-size:8.5px;border:1px solid #e2e8f0;border-top:none;">No data entered</div>`;
+    const pickCardsInner = pickRowsData.map(p =>
+      `<div class="pr-box-card">
+        <div class="pr-box-card-qty">${p.qty.toLocaleString()}</div>
+        <div class="pr-box-card-pn">${esc(p.label)}</div>
+      </div>`
+    ).join('');
 
-    const boxCardsHtml = (showBoxDetail && boxCards.length)
-      ? `<div class="pr-box-detail-lbl">Per-Box Detail &mdash; ${boxCards.length} box${boxCards.length !== 1 ? 'es' : ''}</div>
-    <div class="pr-box-cards">${
-      [...boxCards].sort((a,b) => b.qty - a.qty).map(c =>
-        `<div class="pr-box-card">
-          <div class="pr-box-card-qty">${c.qty.toLocaleString()}</div>
-          ${c.pn ? `<div class="pr-box-card-pn">${esc(c.pn)}</div>` : ''}
-        </div>`
-      ).join('')
-    }</div>`
+    const boxCardsInner = (showBoxDetail && boxCards.length)
+      ? [...boxCards].sort((a,b) => b.qty - a.qty).map(c =>
+          `<div class="pr-box-card">
+            <div class="pr-box-card-qty">${c.qty.toLocaleString()}</div>
+            ${c.pn ? `<div class="pr-box-card-pn">${esc(c.pn)}</div>` : ''}
+          </div>`
+        ).join('')
       : '';
+
+    // Two side-by-side columns (narrow Pick Labels, wide Per-Box Detail) when both have data;
+    // otherwise fall back to the single full-width sections stacked vertically.
+    const detailColsHtml = (pickRowsData.length && showBoxDetail && boxCards.length)
+      ? `<div class="pr-detail-cols">
+      <div class="pr-pick-col">
+        <div class="pr-detail-col-lbl">Pick Labels &mdash; ${pickRowsData.length}</div>
+        <div class="pr-pick-cards">${pickCardsInner}</div>
+      </div>
+      <div class="pr-box-col">
+        <div class="pr-detail-col-lbl">Per-Box Detail &mdash; ${boxCards.length} box${boxCards.length !== 1 ? 'es' : ''}</div>
+        <div class="pr-box-cards">${boxCardsInner}</div>
+      </div>
+    </div>`
+      : `${pickRowsData.length
+          ? `<div class="pr-box-detail-lbl">Pick Label Breakdown &mdash; ${pickRowsData.length} label${pickRowsData.length !== 1 ? 's' : ''}</div>
+    <div class="pr-box-cards">${pickCardsInner}</div>`
+          : `<div class="pr-breakdown-lbl">Pick Label Breakdown</div>
+    <div style="padding:6px 10px;color:#94a3b8;font-style:italic;font-size:8.5px;border:1px solid #e2e8f0;border-top:none;">No data entered</div>`}
+    ${(showBoxDetail && boxCards.length)
+      ? `<div class="pr-box-detail-lbl">Per-Box Detail &mdash; ${boxCards.length} box${boxCards.length !== 1 ? 'es' : ''}</div>
+    <div class="pr-box-cards">${boxCardsInner}</div>`
+      : ''}`;
 
     html += `
     <div class="pr-pallet-block">
@@ -2067,8 +2091,7 @@ function buildPrintHTML() {
           <span>Pick PN: <b>${esc(delivPN)}</b> &nbsp;|&nbsp; Box PN: <b>${esc(boxPN)}</b></span>
           <span class="${pnClass}">${pnLabel}</span>
         </div>
-        ${pickRowsHtml}
-        ${boxCardsHtml}
+        ${detailColsHtml}
         <div class="pr-breakdown-lbl">Box Breakdown by Quantity</div>
         <table class="pr-table pr-breakdown-tbl">
           <tr><th>No. of Boxes</th><th>Pcs / Box</th><th>Subtotal (pcs)</th></tr>
