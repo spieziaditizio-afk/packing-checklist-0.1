@@ -481,7 +481,7 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
       <span class="btn-label">New Session</span>
     </button>
     <div class="print-menu-wrap">
-      <button id="print-btn" class="topbar-btn topbar-btn-icon-only" onclick="togglePrintMenu(event)" title="Print packing checklist report">🖨</button>
+      <button id="print-btn" class="topbar-btn topbar-btn-icon-only" onclick="togglePrintMenu(event)" title="Print packing checklist report">🖨️</button>
       <div id="print-menu" class="topbar-menu print-menu" style="display:none;">
         <div class="menu-header"><span>Print</span></div>
         <div style="padding:12px 14px;">
@@ -489,7 +489,7 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
             <input type="checkbox" id="opt-box-detail" onchange="savePrintOpts()">
             <span>Show per-box detail in print</span>
           </label>
-          <button class="btn btn-ghost-blue" style="width:100%;justify-content:center;padding:8px 10px;font-size:13px;" onclick="closePrintMenu();doPrint()">🖨 Print</button>
+          <button class="btn btn-ghost-blue" style="width:100%;justify-content:center;padding:8px 10px;font-size:13px;" onclick="closePrintMenu();doPrint()">🖨️ Print</button>
         </div>
       </div>
     </div>
@@ -850,15 +850,6 @@ function buildPalletHTML(pid) {
         </div>
 
         <div id="scan-mode-${pid}">
-          <!-- PN scan mode sub-toggle -->
-          <div class="pn-sw-wrap">
-            <span style="font-size:10px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;">PN scan mode</span>
-            <div class="mode-sw" id="pn-sw-${pid}">
-              <button class="mode-btn active" onclick="setPNMode(${pid},'shared')">Shared PN</button>
-              <button class="mode-btn" onclick="setPNMode(${pid},'per-box')">PN per box</button>
-            </div>
-          </div>
-
           <!-- Shared PN: one PN field + qty per box -->
           <div id="pn-shared-wrap-${pid}">
             <div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Box Quantities — one per box</div>
@@ -980,7 +971,10 @@ function getBoxMode(pid) {
 
 /* ══ PN SCAN MODE ═══════════════════════════════════════ */
 function setPNMode(pid, mode) {
+  // PN scan mode toggle was removed from the UI — Box Verification is always Shared PN now.
+  // Guarded so restoring an older saved session (possibly with pnMode:'per-box') doesn't throw.
   const btns = document.querySelectorAll(`#pn-sw-${pid} .mode-btn`);
+  if (btns.length < 2) return;
   btns[0].classList.toggle('active', mode === 'shared');
   btns[1].classList.toggle('active', mode === 'per-box');
   document.getElementById(`pn-shared-wrap-${pid}`).style.display = mode === 'shared' ? '' : 'none';
