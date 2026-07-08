@@ -152,6 +152,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg-page);min-height:100vh
 .pallet-block{background:var(--bg-surface);border:1.5px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;transition:border-color .25s;}
 .pallet-block.ok{border-color:#10b981;}
 .pallet-block.err{border-color:#ef4444;}
+.pallet-block[data-print-issue="1"]{border-color:#ef4444!important;box-shadow:0 0 0 3px rgba(239,68,68,.25);animation:printIssuePulse 1.4s ease-in-out 2;}
+@keyframes printIssuePulse{0%,100%{box-shadow:0 0 0 3px rgba(239,68,68,.25);}50%{box-shadow:0 0 0 6px rgba(239,68,68,.45);}}
 
 .pallet-hdr{padding:10px 16px;background:linear-gradient(90deg,var(--bg-deep) 0%,var(--bg-page) 100%);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid rgba(56,189,248,.08);}
 .pallet-num{color:var(--text-primary);font-size:13px;font-weight:600;}
@@ -181,6 +183,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg-page);min-height:100vh
 .badge-blue{background:rgba(56,189,248,.15);color:#38bdf8;}
 .badge-green{background:rgba(16,185,129,.15);color:#10b981;}
 .psec-body{padding:12px 16px 14px;}
+
+/* Pick Labels (narrow) + Box Verification (wide) side by side */
+.psec-cols{display:flex;align-items:stretch;}
+.psec-col-pick{width:280px;flex-shrink:0;border-right:1px solid var(--border-subtle);display:flex;flex-direction:column;}
+.psec-col-box{flex:1;min-width:0;display:flex;flex-direction:column;}
+@media (max-width:860px){
+  .psec-cols{flex-direction:column;}
+  .psec-col-pick{width:100%;border-right:none;border-bottom:1px solid var(--border-subtle);}
+}
 
 /* ── SCAN ROWS ── */
 .scan-row{display:flex;gap:9px;align-items:center;margin-bottom:8px;}
@@ -791,79 +802,84 @@ function buildPalletHTML(pid) {
     <div></div>
   </div>
 
-  <!-- PICK LABELS -->
-  <div class="psec-hdr picks">
-    <span class="psec-title">Pick Labels</span>
-    <span class="psec-badge badge-blue" id="pick-badge-${pid}">0 pcs target</span>
-  </div>
-  <div class="psec-body">
-    <div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Pick Label Quantities</div>
-    <div id="pick-rows-${pid}" class="qty-rows-wrap"></div>
-    <button class="btn btn-ghost-blue btn-sm" onclick="addPickRow(${pid})" style="margin-top:2px;">＋ Add pick label</button>
-  </div>
-
-  <!-- BOX VERIFICATION -->
-  <div class="psec-hdr boxes">
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <span class="psec-title">Box Verification</span>
-      <span class="psec-badge badge-green" id="box-badge-${pid}">0 pcs verified · 0 boxes</span>
+  <!-- PICK LABELS + BOX VERIFICATION — side by side -->
+  <div class="psec-cols">
+    <div class="psec-col-pick">
+      <div class="psec-hdr picks">
+        <span class="psec-title">Pick Labels</span>
+        <span class="psec-badge badge-blue" id="pick-badge-${pid}">0 pcs target</span>
+      </div>
+      <div class="psec-body">
+        <div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Pick Label Quantities</div>
+        <div id="pick-rows-${pid}" class="qty-rows-wrap"></div>
+        <button class="btn btn-ghost-blue btn-sm" onclick="addPickRow(${pid})" style="margin-top:2px;">＋ Add pick label</button>
+      </div>
     </div>
-    <div class="mode-sw" id="mode-sw-${pid}">
-      <button class="mode-btn active" onclick="setBoxMode(${pid},'scan')">Scan</button>
-      <button class="mode-btn" onclick="setBoxMode(${pid},'visual')">Visual</button>
-    </div>
-  </div>
-  <div class="psec-body">
 
-    <!-- Shared PN field: shown in Shared-PN scan mode and Visual mode -->
-    <div id="box-pn-wrap-${pid}" style="margin-bottom:12px;">
-      <div class="fg">
-        <label>Part Number — Box Label</label>
-        <div class="scan-row" style="margin-bottom:0;">
-          <input class="fc mono" id="box-pn-${pid}" type="text" placeholder="Scan PN from first box"
-            onkeydown="onKeyDown(event,this)" oninput="onBoxPNInput(${pid},this)"/>
+    <div class="psec-col-box">
+      <div class="psec-hdr boxes">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span class="psec-title">Box Verification</span>
+          <span class="psec-badge badge-green" id="box-badge-${pid}">0 pcs verified · 0 boxes</span>
+        </div>
+        <div class="mode-sw" id="mode-sw-${pid}">
+          <button class="mode-btn active" onclick="setBoxMode(${pid},'scan')">Scan</button>
+          <button class="mode-btn" onclick="setBoxMode(${pid},'visual')">Visual</button>
         </div>
       </div>
-    </div>
+      <div class="psec-body">
 
-    <div id="scan-mode-${pid}">
-      <!-- PN scan mode sub-toggle -->
-      <div class="pn-sw-wrap">
-        <span style="font-size:10px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;">PN scan mode</span>
-        <div class="mode-sw" id="pn-sw-${pid}">
-          <button class="mode-btn active" onclick="setPNMode(${pid},'shared')">Shared PN</button>
-          <button class="mode-btn" onclick="setPNMode(${pid},'per-box')">PN per box</button>
+        <!-- Shared PN field: shown in Shared-PN scan mode and Visual mode -->
+        <div id="box-pn-wrap-${pid}" style="margin-bottom:12px;">
+          <div class="fg">
+            <label>Part Number — Box Label</label>
+            <div class="scan-row" style="margin-bottom:0;">
+              <input class="fc mono" id="box-pn-${pid}" type="text" placeholder="Scan PN from first box"
+                onkeydown="onKeyDown(event,this)" oninput="onBoxPNInput(${pid},this)"/>
+            </div>
+          </div>
+        </div>
+
+        <div id="scan-mode-${pid}">
+          <!-- PN scan mode sub-toggle -->
+          <div class="pn-sw-wrap">
+            <span style="font-size:10px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;">PN scan mode</span>
+            <div class="mode-sw" id="pn-sw-${pid}">
+              <button class="mode-btn active" onclick="setPNMode(${pid},'shared')">Shared PN</button>
+              <button class="mode-btn" onclick="setPNMode(${pid},'per-box')">PN per box</button>
+            </div>
+          </div>
+
+          <!-- Shared PN: one PN field + qty per box -->
+          <div id="pn-shared-wrap-${pid}">
+            <div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Box Quantities — one per box</div>
+            <div id="box-rows-${pid}" class="qty-rows-wrap"></div>
+            <button class="btn btn-ghost-green btn-sm" onclick="addBoxRow(${pid})" style="margin-top:2px;">＋ Add box</button>
+          </div>
+
+          <!-- Per-box PN: PN + qty for each box individually -->
+          <div id="pn-perbox-wrap-${pid}" style="display:none;">
+            <div class="perbox-col-hdr">
+              <span></span><span>Part Number</span><span></span><span>Qty (pcs)</span><span></span><span></span>
+            </div>
+            <div id="perbox-rows-${pid}"></div>
+            <button class="btn btn-ghost-green btn-sm" onclick="addPerBoxRow(${pid})" style="margin-top:4px;">＋ Add box</button>
+          </div>
+        </div>
+
+        <div id="visual-mode-${pid}" style="display:none;">
+          <div class="info-banner">Visual mode: enter quantity groups — e.g. 20 boxes × 10 pcs each.</div>
+          <div style="display:grid;grid-template-columns:90px 18px 110px 1fr 24px;gap:7px;margin-bottom:5px;">
+            <span style="font-size:10px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;">Boxes</span>
+            <span></span>
+            <span style="font-size:10px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;">Pcs each</span>
+            <span style="font-size:10px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;">Subtotal</span>
+            <span></span>
+          </div>
+          <div id="group-rows-${pid}"></div>
+          <button class="btn btn-ghost-green btn-sm" onclick="addGroupRow(${pid})" style="margin-top:2px;">＋ Add group</button>
         </div>
       </div>
-
-      <!-- Shared PN: one PN field + qty per box -->
-      <div id="pn-shared-wrap-${pid}">
-        <div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Box Quantities — one per box</div>
-        <div id="box-rows-${pid}" class="qty-rows-wrap"></div>
-        <button class="btn btn-ghost-green btn-sm" onclick="addBoxRow(${pid})" style="margin-top:2px;">＋ Add box</button>
-      </div>
-
-      <!-- Per-box PN: PN + qty for each box individually -->
-      <div id="pn-perbox-wrap-${pid}" style="display:none;">
-        <div class="perbox-col-hdr">
-          <span></span><span>Part Number</span><span></span><span>Qty (pcs)</span><span></span><span></span>
-        </div>
-        <div id="perbox-rows-${pid}"></div>
-        <button class="btn btn-ghost-green btn-sm" onclick="addPerBoxRow(${pid})" style="margin-top:4px;">＋ Add box</button>
-      </div>
-    </div>
-
-    <div id="visual-mode-${pid}" style="display:none;">
-      <div class="info-banner">Visual mode: enter quantity groups — e.g. 20 boxes × 10 pcs each.</div>
-      <div style="display:grid;grid-template-columns:90px 18px 110px 1fr 24px;gap:7px;margin-bottom:5px;">
-        <span style="font-size:10px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;">Boxes</span>
-        <span></span>
-        <span style="font-size:10px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;">Pcs each</span>
-        <span style="font-size:10px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;">Subtotal</span>
-        <span></span>
-      </div>
-      <div id="group-rows-${pid}"></div>
-      <button class="btn btn-ghost-green btn-sm" onclick="addGroupRow(${pid})" style="margin-top:2px;">＋ Add group</button>
     </div>
   </div>
 
@@ -1794,6 +1810,7 @@ function updatePalletSummary(pid) {
   }
   _lastPalletStatus[pid] = status;
 
+  clearPrintIssueIfResolved(pid);
   updateDeliverySummary();
 }
 
@@ -2152,6 +2169,53 @@ function loadPrintOpts() {
 }
 
 /* ══ PRINT VALIDATION ═══════════════════════════════════ */
+function checkPalletPrintIssues(pid) {
+  const noType   = !getPType(pid);
+  const noWeight = !document.getElementById(`weight-${pid}`)?.value;
+  const noHeight = !document.getElementById(`height-${pid}`)?.value;
+
+  let pickTotal = 0;
+  document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach(inp => {
+    pickTotal += parseInt(inp?.value) || 0;
+  });
+
+  const mode = getBoxMode(pid);
+  const pnMode = getPNMode(pid);
+  let boxTotal = 0;
+  if (mode === 'scan') {
+    if (pnMode === 'per-box') {
+      document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        boxTotal += parseInt(inputs[1]?.value) || 0;
+      });
+    } else {
+      document.querySelectorAll(`#box-rows-${pid} .box-row input`).forEach(inp => {
+        boxTotal += parseInt(inp?.value) || 0;
+      });
+    }
+  } else {
+    document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(row => {
+      const [a, c] = row.querySelectorAll('input');
+      const count = parseInt(a?.value) || 0, qty = parseInt(c?.value) || 0;
+      boxTotal += count * qty;
+    });
+  }
+
+  const problems = [];
+  if (noType && noWeight && noHeight && pickTotal === 0 && boxTotal === 0) {
+    problems.push('no data entered');
+  } else {
+    if (noType)   problems.push('missing pallet type');
+    if (noWeight) problems.push('missing weight');
+    if (noHeight) problems.push('missing height');
+    if (pickTotal === 0) problems.push('missing pick label quantity');
+    if (boxTotal === 0)  problems.push('missing box verification');
+    if (pickTotal > 0 && boxTotal > 0 && pickTotal !== boxTotal) {
+      problems.push(`quantities don't match (Pick: ${pickTotal} · Verified: ${boxTotal})`);
+    }
+  }
+  return problems;
+}
 function validatePrintReady() {
   const blocks = document.querySelectorAll('.pallet-block');
   const issues = [];
@@ -2160,55 +2224,25 @@ function validatePrintReady() {
   blocks.forEach(b => {
     palletIdx++;
     const pid = b.dataset.pid;
-    const noType   = !getPType(pid);
-    const noWeight = !document.getElementById(`weight-${pid}`)?.value;
-    const noHeight = !document.getElementById(`height-${pid}`)?.value;
-
-    let pickTotal = 0;
-    document.querySelectorAll(`#pick-rows-${pid} .pick-row input`).forEach(inp => {
-      pickTotal += parseInt(inp?.value) || 0;
-    });
-
-    const mode = getBoxMode(pid);
-    const pnMode = getPNMode(pid);
-    let boxTotal = 0;
-    if (mode === 'scan') {
-      if (pnMode === 'per-box') {
-        document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`).forEach(row => {
-          const inputs = row.querySelectorAll('input');
-          boxTotal += parseInt(inputs[1]?.value) || 0;
-        });
-      } else {
-        document.querySelectorAll(`#box-rows-${pid} .box-row input`).forEach(inp => {
-          boxTotal += parseInt(inp?.value) || 0;
-        });
-      }
-    } else {
-      document.querySelectorAll(`#group-rows-${pid} .group-row`).forEach(row => {
-        const [a, c] = row.querySelectorAll('input');
-        const count = parseInt(a?.value) || 0, qty = parseInt(c?.value) || 0;
-        boxTotal += count * qty;
-      });
-    }
-
-    const problems = [];
-    if (noType && noWeight && noHeight && pickTotal === 0 && boxTotal === 0) {
-      problems.push('no data entered');
-    } else {
-      if (noType)   problems.push('missing pallet type');
-      if (noWeight) problems.push('missing weight');
-      if (noHeight) problems.push('missing height');
-      if (pickTotal === 0) problems.push('missing pick label quantity');
-      if (boxTotal === 0)  problems.push('missing box verification');
-      if (pickTotal > 0 && boxTotal > 0 && pickTotal !== boxTotal) {
-        problems.push(`quantities don't match (Pick: ${pickTotal} · Verified: ${boxTotal})`);
-      }
-    }
-
-    if (problems.length) issues.push({ palletIdx, problems });
+    const problems = checkPalletPrintIssues(pid);
+    if (problems.length) issues.push({ palletIdx, pid, problems });
   });
 
   return issues;
+}
+function applyPrintIssueHighlight(issues) {
+  const issuePids = new Set(issues.map(i => String(i.pid)));
+  document.querySelectorAll('.pallet-block').forEach(b => {
+    if (issuePids.has(String(b.dataset.pid))) b.dataset.printIssue = '1';
+    else delete b.dataset.printIssue;
+  });
+}
+// Called from updatePalletSummary() so a highlighted pallet's red ring clears
+// itself the moment its data is fixed, without waiting for another Print click.
+function clearPrintIssueIfResolved(pid) {
+  const block = document.querySelector(`.pallet-block[data-pid="${pid}"]`);
+  if (!block || block.dataset.printIssue !== '1') return;
+  if (checkPalletPrintIssues(pid).length === 0) delete block.dataset.printIssue;
 }
 function openPrintBlockModal(issues) {
   const list = document.getElementById('print-block-list');
@@ -2224,6 +2258,7 @@ function closePrintBlockModal() {
 /* ══ PRINT ══════════════════════════════════════════════ */
 function doPrint() {
   const issues = validatePrintReady();
+  applyPrintIssueHighlight(issues);
   if (issues.length) { openPrintBlockModal(issues); return; }
   const root = document.getElementById('print-root');
   root.innerHTML = buildPrintHTML();
