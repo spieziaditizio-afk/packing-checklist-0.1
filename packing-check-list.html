@@ -66,6 +66,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg-page);min-height:100vh
 
 /* ── SESSIONS DROPDOWN ── */
 .topbar-menu{position:absolute;top:60px;right:18px;width:360px;max-height:60vh;overflow-y:auto;background:var(--bg-surface);border:1px solid var(--border);border-radius:11px;box-shadow:0 16px 48px rgba(0,0,0,.6),0 0 0 1px rgba(56,189,248,.06);z-index:200;}
+
+/* ── PRINT DROPDOWN ── */
+.print-menu-wrap{position:relative;}
+.print-menu{position:absolute;top:46px;right:0;left:auto;width:240px;}
 .menu-header{padding:12px 14px 9px;font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;}
 .menu-header-count{color:#38bdf8;font-family:'DM Mono',monospace;}
 .menu-footer{padding:9px;border-top:1px solid var(--border-subtle);background:rgba(0,0,0,.15);}
@@ -476,6 +480,19 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
       <span class="btn-icon">🆕</span>
       <span class="btn-label">New Session</span>
     </button>
+    <div class="print-menu-wrap">
+      <button id="print-btn" class="topbar-btn topbar-btn-icon-only" onclick="togglePrintMenu(event)" title="Print packing checklist report">🖨</button>
+      <div id="print-menu" class="topbar-menu print-menu" style="display:none;">
+        <div class="menu-header"><span>Print</span></div>
+        <div style="padding:12px 14px;">
+          <label class="print-opt-row" style="margin-bottom:10px;">
+            <input type="checkbox" id="opt-box-detail" onchange="savePrintOpts()">
+            <span>Show per-box detail in print</span>
+          </label>
+          <button class="btn btn-ghost-blue" style="width:100%;justify-content:center;padding:8px 10px;font-size:13px;" onclick="closePrintMenu();doPrint()">🖨 Print</button>
+        </div>
+      </div>
+    </div>
     <button id="help-btn" class="topbar-btn topbar-btn-icon-only" onclick="showWelcome()" title="Open quick guide">?</button>
     <button id="sessions-btn" class="topbar-btn" onclick="toggleSessionsMenu(event)" title="Switch session / open another delivery">
       <span class="btn-icon">📑</span>
@@ -594,22 +611,6 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
       </div>
     </div>
 
-    <!-- PRINT -->
-    <div class="sb-card">
-      <div class="sb-card-hdr">
-        <div class="card-icon icon-orange">🖨</div>
-        <span class="sb-card-title">Print</span>
-      </div>
-      <div class="sb-card-body">
-        <button class="btn btn-ghost-blue" style="width:100%;justify-content:center;padding:9px 12px;font-size:13px;margin-bottom:8px;" onclick="doPrint()">🖨 Print</button>
-        <label class="print-opt-row">
-          <input type="checkbox" id="opt-box-detail" onchange="savePrintOpts()">
-          <span>Show per-box detail in print</span>
-        </label>
-        <div style="font-size:11px;color:var(--text-muted);text-align:center;line-height:1.4;">Complete all pallets before printing.</div>
-      </div>
-    </div>
-
   </aside>
 
   <!-- ── MAIN CONTENT ── -->
@@ -681,6 +682,14 @@ document.addEventListener('click', e => {
   const menu = document.getElementById('sessions-menu');
   if (!menu || menu.style.display === 'none') return;
   if (e.target.closest('#sessions-menu') || e.target.closest('#sessions-btn')) return;
+  menu.style.display = 'none';
+});
+
+// Click outside the print menu closes it.
+document.addEventListener('click', e => {
+  const menu = document.getElementById('print-menu');
+  if (!menu || menu.style.display === 'none') return;
+  if (e.target.closest('#print-menu') || e.target.closest('#print-btn')) return;
   menu.style.display = 'none';
 });
 
@@ -1367,6 +1376,16 @@ function toggleSessionsMenu(event) {
   if (menu.style.display !== 'none') { menu.style.display = 'none'; return; }
   populateSessionsMenu();
   menu.style.display = 'block';
+}
+function togglePrintMenu(event) {
+  if (event) event.stopPropagation();
+  const menu = document.getElementById('print-menu');
+  if (!menu) return;
+  menu.style.display = menu.style.display !== 'none' ? 'none' : 'block';
+}
+function closePrintMenu() {
+  const menu = document.getElementById('print-menu');
+  if (menu) menu.style.display = 'none';
 }
 function populateSessionsMenu() {
   const list = document.getElementById('sessions-list');
