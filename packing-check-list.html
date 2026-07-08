@@ -158,6 +158,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg-page);min-height:100vh
 .pallet-block.err{border-color:#ef4444;}
 .pallet-block[data-print-issue="1"]{border-color:#ef4444!important;box-shadow:0 0 0 3px rgba(239,68,68,.25);animation:printIssuePulse 1.4s ease-in-out 2;}
 @keyframes printIssuePulse{0%,100%{box-shadow:0 0 0 3px rgba(239,68,68,.25);}50%{box-shadow:0 0 0 6px rgba(239,68,68,.45);}}
+.fc[data-print-issue-field="1"]{border-color:#ef4444!important;box-shadow:0 0 0 2px rgba(239,68,68,.3);}
 
 .pallet-hdr{padding:10px 16px;background:linear-gradient(90deg,var(--bg-deep) 0%,var(--bg-page) 100%);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid rgba(56,189,248,.08);}
 .pallet-num{color:var(--text-primary);font-size:13px;font-weight:600;}
@@ -801,7 +802,7 @@ function buildPalletHTML(pid) {
     </div>
     <div class="fg">
       <label>Weight (kg)</label>
-      <input class="fc mono" type="number" min="0" step="0.1" id="weight-${pid}" placeholder="e.g. 320" oninput="updateDeliverySummary()"/>
+      <input class="fc mono" type="number" min="0" step="0.1" id="weight-${pid}" placeholder="e.g. 320" oninput="updateDeliverySummary();clearPrintIssueIfResolved(${pid})"/>
     </div>
     <div class="fg">
       <label>Height (cm)</label>
@@ -919,6 +920,7 @@ function selectPType(pid, type) {
   document.querySelectorAll(`#ptype-pills-${pid} .ptype-pill`).forEach(p =>
     p.classList.toggle('selected', p.dataset.type === type)
   );
+  clearPrintIssueIfResolved(pid);
   saveStateDebounced();
 }
 function getPType(pid) {
@@ -930,6 +932,7 @@ function getPType(pid) {
 function onHeightInput(pid, el) {
   updateHeightWarning(pid);
   updateDeliverySummary();
+  clearPrintIssueIfResolved(pid);
 }
 function updateHeightWarning(pid) {
   const el = document.getElementById(`height-${pid}`);
@@ -2214,20 +2217,31 @@ function checkPalletPrintIssues(pid) {
     });
   }
 
+  const heightVal    = parseFloat(document.getElementById(`height-${pid}`)?.value);
+  const heightLimit  = HEIGHT_LIMITS[destination];
+  const heightExceeds = !noHeight && !!heightVal && heightVal > heightLimit;
+
   const problems = [];
+  const badFields = { weight: false, height: false };
   if (noType && noWeight && noHeight && pickTotal === 0 && boxTotal === 0) {
     problems.push('no data entered');
+    badFields.weight = true;
+    badFields.height = true;
   } else {
     if (noType)   problems.push('missing pallet type');
-    if (noWeight) problems.push('missing weight');
-    if (noHeight) problems.push('missing height');
+    if (noWeight) { problems.push('missing weight'); badFields.weight = true; }
+    if (noHeight) { problems.push('missing height'); badFields.height = true; }
+    if (heightExceeds) {
+      problems.push(`height exceeds ${destination === 'europe' ? 'Europe' : 'Export'} max (${heightVal} cm > ${heightLimit} cm)`);
+      badFields.height = true;
+    }
     if (pickTotal === 0) problems.push('missing pick label quantity');
     if (boxTotal === 0)  problems.push('missing box verification');
     if (pickTotal > 0 && boxTotal > 0 && pickTotal !== boxTotal) {
       problems.push(`quantities don't match (Pick: ${pickTotal} · Verified: ${boxTotal})`);
     }
   }
-  return problems;
+  return { problems, badFields };
 }
 function validatePrintReady() {
   const blocks = document.querySelectorAll('.pallet-block');
@@ -2237,8 +2251,8 @@ function validatePrintReady() {
   blocks.forEach(b => {
     palletIdx++;
     const pid = b.dataset.pid;
-    const problems = checkPalletPrintIssues(pid);
-    if (problems.length) issues.push({ palletIdx, pid, problems });
+    const { problems, badFields } = checkPalletPrintIssues(pid);
+    if (problems.length) issues.push({ palletIdx, pid, problems, badFields });
   });
 
   return issues;
@@ -2249,13 +2263,29 @@ function applyPrintIssueHighlight(issues) {
     if (issuePids.has(String(b.dataset.pid))) b.dataset.printIssue = '1';
     else delete b.dataset.printIssue;
   });
+
+  // Reset field-level highlights, then re-apply only to fields still at fault.
+  document.querySelectorAll('[data-print-issue-field="1"]').forEach(el => delete el.dataset.printIssueField);
+  issues.forEach(i => {
+    if (i.badFields?.weight) document.getElementById(`weight-${i.pid}`)?.setAttribute('data-print-issue-field', '1');
+    if (i.badFields?.height) document.getElementById(`height-${i.pid}`)?.setAttribute('data-print-issue-field', '1');
+  });
 }
-// Called from updatePalletSummary() so a highlighted pallet's red ring clears
-// itself the moment its data is fixed, without waiting for another Print click.
+// Called from input handlers so a highlighted pallet/field clears itself the
+// moment its data is fixed, without waiting for another Print click.
 function clearPrintIssueIfResolved(pid) {
   const block = document.querySelector(`.pallet-block[data-pid="${pid}"]`);
-  if (!block || block.dataset.printIssue !== '1') return;
-  if (checkPalletPrintIssues(pid).length === 0) delete block.dataset.printIssue;
+  const weightEl = document.getElementById(`weight-${pid}`);
+  const heightEl = document.getElementById(`height-${pid}`);
+  const hadAnyHighlight = block?.dataset.printIssue === '1'
+    || weightEl?.dataset.printIssueField === '1'
+    || heightEl?.dataset.printIssueField === '1';
+  if (!hadAnyHighlight) return;
+
+  const { problems, badFields } = checkPalletPrintIssues(pid);
+  if (block && problems.length === 0) delete block.dataset.printIssue;
+  if (weightEl && !badFields.weight) delete weightEl.dataset.printIssueField;
+  if (heightEl && !badFields.height) delete heightEl.dataset.printIssueField;
 }
 function openPrintBlockModal(issues) {
   const list = document.getElementById('print-block-list');
@@ -2272,7 +2302,15 @@ function closePrintBlockModal() {
 function doPrint() {
   const issues = validatePrintReady();
   applyPrintIssueHighlight(issues);
-  if (issues.length) { openPrintBlockModal(issues); return; }
+  if (issues.length) {
+    // Jump to the first problem pallet so the highlight is actually visible —
+    // inactive pallet tabs are display:none, so a hidden pallet's red ring/field
+    // highlight would otherwise go unseen.
+    const firstIssuePid = parseInt(issues[0].pid);
+    if (firstIssuePid !== activePid) switchTab(firstIssuePid);
+    openPrintBlockModal(issues);
+    return;
+  }
   const root = document.getElementById('print-root');
   root.innerHTML = buildPrintHTML();
   root.style.display = 'block';
