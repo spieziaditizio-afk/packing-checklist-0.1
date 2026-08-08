@@ -1228,6 +1228,10 @@ function triggerScanError(el) {
     el.value = '';
     el.style.borderColor = '';
     el.focus();
+    // Field cleared post-scan-error — refresh badges/totals so a stale qty
+    // (e.g. the digits stripped from a bad scan) doesn't linger on screen.
+    const pid = el.closest('.pallet-block')?.dataset.pid;
+    if (pid) updatePalletSummary(pid);
     saveStateDebounced();
   }, 460);
 }
@@ -2046,8 +2050,9 @@ function buildPrintHTML() {
 
     grandPickTotal += pickTotal; grandBoxTotal += boxTotal; grandBoxCount += boxCount;
     const qtyOk = pickTotal > 0 && pickTotal === boxTotal;
-    const ready = pickTotal > 0 && boxTotal > 0;
-    const st    = ready ? ((pnOk !== false && qtyOk) ? 'ok' : 'err') : 'pending';
+    // pnOk === null means the box PN was never verified — that must NOT read as "ok".
+    const ready = pickTotal > 0 && boxTotal > 0 && pnOk !== null;
+    const st    = ready ? ((pnOk === true && qtyOk) ? 'ok' : 'err') : 'pending';
     const stLbl = st === 'ok' ? '✓ MATCH' : st === 'err' ? '✗ MISMATCH' : '⏳ PENDING';
     const stCls = st === 'ok' ? 'pr-match' : st === 'err' ? 'pr-mismatch' : 'pr-pending';
     if (st === 'err') anyErr = true;
@@ -2217,16 +2222,40 @@ function checkPalletPrintIssues(pid) {
     });
   }
 
+  // PN verification — null means "not enough info to judge yet" and must NOT
+  // be treated as OK (that was the bug: an un-scanned box PN silently printed
+  // as a false "✓ MATCH" report). Mirrors the same shared/per-box logic used
+  // by updatePalletSummary/buildPrintHTML/doExportPDF.
+  const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
+  let pnOk = null;
+  if (mode === 'scan' && pnMode === 'per-box') {
+    const perboxRows = [...document.querySelectorAll(`#perbox-rows-${pid} .perbox-row`)];
+    if (delivPN && perboxRows.length > 0) {
+      let allFilled = true, anyMismatch = false;
+      perboxRows.forEach(row => {
+        const pn = (row.querySelectorAll('input')[0]?.value || '').trim().toUpperCase();
+        if (!pn) { allFilled = false; return; }
+        if (pn !== delivPN) anyMismatch = true;
+      });
+      if (anyMismatch) pnOk = false;
+      else if (allFilled) pnOk = true;
+    }
+  } else {
+    const boxPN = (document.getElementById(`box-pn-${pid}`)?.value || '').trim().toUpperCase();
+    if (delivPN && boxPN) pnOk = delivPN === boxPN;
+  }
+
   const heightVal    = parseFloat(document.getElementById(`height-${pid}`)?.value);
   const heightLimit  = HEIGHT_LIMITS[destination];
   const heightExceeds = !noHeight && !!heightVal && heightVal > heightLimit;
 
   const problems = [];
-  const badFields = { weight: false, height: false };
+  const badFields = { weight: false, height: false, boxPN: false };
   if (noType && noWeight && noHeight && pickTotal === 0 && boxTotal === 0) {
     problems.push('no data entered');
     badFields.weight = true;
     badFields.height = true;
+    badFields.boxPN = true;
   } else {
     if (noType)   problems.push('missing pallet type');
     if (noWeight) { problems.push('missing weight'); badFields.weight = true; }
@@ -2239,6 +2268,10 @@ function checkPalletPrintIssues(pid) {
     if (boxTotal === 0)  problems.push('missing box verification');
     if (pickTotal > 0 && boxTotal > 0 && pickTotal !== boxTotal) {
       problems.push(`quantities don't match (Pick: ${pickTotal} · Verified: ${boxTotal})`);
+    }
+    if (pickTotal > 0 && boxTotal > 0) {
+      if (pnOk === null) { problems.push('box part number not verified'); badFields.boxPN = true; }
+      else if (pnOk === false) { problems.push('box part number mismatch'); badFields.boxPN = true; }
     }
   }
   return { problems, badFields };
@@ -2269,6 +2302,7 @@ function applyPrintIssueHighlight(issues) {
   issues.forEach(i => {
     if (i.badFields?.weight) document.getElementById(`weight-${i.pid}`)?.setAttribute('data-print-issue-field', '1');
     if (i.badFields?.height) document.getElementById(`height-${i.pid}`)?.setAttribute('data-print-issue-field', '1');
+    if (i.badFields?.boxPN)  document.getElementById(`box-pn-${i.pid}`)?.setAttribute('data-print-issue-field', '1');
   });
 }
 // Called from input handlers so a highlighted pallet/field clears itself the
@@ -2277,15 +2311,18 @@ function clearPrintIssueIfResolved(pid) {
   const block = document.querySelector(`.pallet-block[data-pid="${pid}"]`);
   const weightEl = document.getElementById(`weight-${pid}`);
   const heightEl = document.getElementById(`height-${pid}`);
+  const boxPNEl = document.getElementById(`box-pn-${pid}`);
   const hadAnyHighlight = block?.dataset.printIssue === '1'
     || weightEl?.dataset.printIssueField === '1'
-    || heightEl?.dataset.printIssueField === '1';
+    || heightEl?.dataset.printIssueField === '1'
+    || boxPNEl?.dataset.printIssueField === '1';
   if (!hadAnyHighlight) return;
 
   const { problems, badFields } = checkPalletPrintIssues(pid);
   if (block && problems.length === 0) delete block.dataset.printIssue;
   if (weightEl && !badFields.weight) delete weightEl.dataset.printIssueField;
   if (heightEl && !badFields.height) delete heightEl.dataset.printIssueField;
+  if (boxPNEl && !badFields.boxPN) delete boxPNEl.dataset.printIssueField;
 }
 function openPrintBlockModal(issues) {
   const list = document.getElementById('print-block-list');
@@ -2441,10 +2478,11 @@ function doExportPDF() {
     grandPickTotal += pickTotal; grandBoxTotal += boxTotal; grandBoxCount += boxCount;
 
     const qtyOk    = pickTotal > 0 && pickTotal === boxTotal;
-    const ready    = pickTotal > 0 && boxTotal > 0;
-    const palletSt = ready ? ((pnOk !== false && qtyOk) ? 'OK' : 'MISMATCH') : 'PENDING';
-    if (ready && !(pnOk !== false && qtyOk)) anyErr = true;
-    if (!ready || !(pnOk !== false && qtyOk)) allOk = false;
+    // pnOk === null means the box PN was never verified — that must NOT read as "ok".
+    const ready    = pickTotal > 0 && boxTotal > 0 && pnOk !== null;
+    const palletSt = ready ? ((pnOk === true && qtyOk) ? 'OK' : 'MISMATCH') : 'PENDING';
+    if (ready && !(pnOk === true && qtyOk)) anyErr = true;
+    if (!ready || !(pnOk === true && qtyOk)) allOk = false;
 
     consolidado.push([
       'P' + palletIdx, ptype, height + ' cm', weight + ' kg',
