@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=1280"/>
-<title>Packing Checklist — Arrow Electronics</title>
+<title>Outbound Checklist — Arrow Electronics</title>
 <script>(function(){try{if(localStorage.getItem('arrowPackingThemeV1')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -108,6 +108,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg-page);min-height:100vh
 .print-block-list{list-style:none;text-align:left;margin:0 0 22px;padding:0;max-height:40vh;overflow-y:auto;}
 .print-block-list li{padding:10px 14px;color:var(--text-primary);font-size:13px;line-height:1.45;border-radius:9px;margin-bottom:6px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);}
 .print-block-list li b{color:var(--status-error-text);display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+
+/* ── RANDOM PN AUDIT MODAL ── */
+#audit-modal{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;padding:20px;}
+.audit-card{max-width:480px;}
+.audit-scan-fg{text-align:left;margin-bottom:12px;}
+.audit-summary{font-size:12.5px;font-weight:600;color:var(--text-secondary);text-align:left;margin-bottom:8px;}
+.audit-log{max-height:220px;overflow-y:auto;text-align:left;border:1px solid var(--border-subtle);border-radius:9px;margin-bottom:16px;}
+.audit-log-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;font-family:'DM Mono',monospace;font-size:12.5px;border-bottom:1px solid var(--border-subtle);}
+.audit-log-row:last-child{border-bottom:none;}
+.audit-log-row .audit-log-badge{font-weight:700;letter-spacing:.04em;font-size:11px;}
+.audit-log-row.match{color:var(--text-primary);}
+.audit-log-row.match .audit-log-badge{color:#10b981;}
+.audit-log-row.mismatch{color:var(--text-primary);background:rgba(239,68,68,.08);}
+.audit-log-row.mismatch .audit-log-badge{color:#ef4444;}
+.audit-log-row.reference{color:var(--text-secondary);}
+.audit-log-row.reference .audit-log-badge{color:#38bdf8;}
+.audit-log-empty{padding:16px;text-align:center;color:var(--text-secondary);font-size:12.5px;}
+.audit-actions{display:flex;gap:10px;}
+.audit-close-btn{width:auto;flex:1;}
 
 /* ── EMPTY STATE (no pallets yet) ── */
 #empty-state{display:none;max-width:480px;margin:56px auto 40px;padding:48px 30px;text-align:center;background:rgba(var(--overlay-rgb),.02);border:1.5px dashed rgba(56,189,248,.18);border-radius:14px;}
@@ -473,7 +492,7 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
     <div class="logo-icon">📦</div>
     <div>
       <div class="logo-title">Arrow Electronics</div>
-      <div class="logo-sub">Packing Checklist · Microsoft Area · Sevenum</div>
+      <div class="logo-sub">Outbound Checklist · Sevenum</div>
     </div>
     <div class="header-right" id="hdr-date"></div>
     <div id="save-indicator"></div>
@@ -482,7 +501,7 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
       <span class="btn-label">New Session</span>
     </button>
     <div class="print-menu-wrap">
-      <button id="print-btn" class="topbar-btn topbar-btn-icon-only" onclick="togglePrintMenu(event)" title="Print packing checklist report">🖨️</button>
+      <button id="print-btn" class="topbar-btn topbar-btn-icon-only" onclick="togglePrintMenu(event)" title="Print outbound checklist report">🖨️</button>
       <div id="print-menu" class="topbar-menu print-menu" style="display:none;">
         <div class="menu-header"><span>Print</span></div>
         <div style="padding:12px 14px;">
@@ -494,6 +513,10 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
         </div>
       </div>
     </div>
+    <button id="audit-btn" class="topbar-btn" onclick="openAuditModal()" title="Randomly audit box PNs against each other or the Pick Label PN">
+      <span class="btn-icon">🎲</span>
+      <span class="btn-label">Audit PN</span>
+    </button>
     <button id="help-btn" class="topbar-btn topbar-btn-icon-only" onclick="showWelcome()" title="Open quick guide">?</button>
     <button id="sessions-btn" class="topbar-btn" onclick="toggleSessionsMenu(event)" title="Switch session / open another delivery">
       <span class="btn-icon">📑</span>
@@ -519,8 +542,8 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
   <div class="splash-card">
     <button class="splash-close" onclick="closeWelcome()" title="Close">✕</button>
     <div class="splash-icon">📦</div>
-    <div class="splash-title">ARROW PACKING CHECKLIST</div>
-    <div class="splash-sub">Sevenum NL · Microsoft Area</div>
+    <div class="splash-title">ARROW OUTBOUND CHECKLIST</div>
+    <div class="splash-sub">Sevenum NL</div>
     <div class="splash-divider"></div>
     <ol class="splash-steps">
       <li><b>Delivery Info</b>Type your name, the delivery #, and select the destination (Europe ≤180cm / Export ≤160cm).</li>
@@ -545,6 +568,28 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
     <div class="splash-divider" style="background:rgba(239,68,68,.4);"></div>
     <ul class="print-block-list" id="print-block-list"></ul>
     <button class="splash-cta" style="background:linear-gradient(135deg,#ef4444,#dc2626);" onclick="closePrintBlockModal()">GOT IT</button>
+  </div>
+</section>
+
+<!-- ── RANDOM PN AUDIT ── -->
+<section id="audit-modal">
+  <div class="splash-card audit-card">
+    <button class="splash-close" onclick="closeAuditModal()" title="Close">✕</button>
+    <div class="splash-icon">🎲</div>
+    <div class="splash-title">RANDOM PN AUDIT</div>
+    <div class="splash-sub" id="audit-ref-line">No Pick Label PN — first scan sets the reference</div>
+    <div class="splash-divider"></div>
+    <div class="fg audit-scan-fg">
+      <label>Scan Box PN</label>
+      <input class="fc mono" id="audit-scan-input" type="text" placeholder="Scan a random box's PN"
+        onkeydown="onAuditScanKeyDown(event)" oninput="uppercaseInPlace(this)"/>
+    </div>
+    <div id="audit-summary" class="audit-summary">0 scanned</div>
+    <div id="audit-log" class="audit-log"></div>
+    <div class="audit-actions">
+      <button class="btn btn-ghost-blue" onclick="clearAuditLog()">Clear</button>
+      <button class="splash-cta audit-close-btn" onclick="closeAuditModal()">CLOSE</button>
+    </div>
   </div>
 </section>
 
@@ -1017,6 +1062,7 @@ function removePerBoxRow(pid, btn) {
   saveStateDebounced();
 }
 function onPerBoxPNInput(pid, el) {
+  uppercaseInPlace(el);
   const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
   const boxPN = el.value.trim().toUpperCase();
   if (delivPN && boxPN) {
@@ -1458,6 +1504,118 @@ function closeWelcome() {
   try { localStorage.setItem(WELCOME_KEY, '1'); } catch (e) {}
 }
 
+/* ══ RANDOM PN AUDIT ═════════════════════════════════════
+   Free-form spot-check tool: the operator physically grabs random boxes from
+   anywhere in the delivery (any pallet) and scans them here, one after another.
+   Every scan is checked against the Pick Label PN if one is set; otherwise the
+   FIRST scan of the session becomes the reference and every later scan is
+   checked against it — since all boxes of an order must share one PN. Ephemeral:
+   never touches pallet data, never persisted, resets every time it's opened. */
+let _auditLog = [];        // { n, pn, status: 'reference'|'match'|'mismatch' }
+let _auditReference = null; // { value } — set from the first scan when there's no Pick Label PN
+
+function openAuditModal() {
+  _auditLog = [];
+  _auditReference = null;
+  renderAuditLog();
+  updateAuditRefLine();
+  const modal = document.getElementById('audit-modal');
+  if (modal) modal.style.display = 'flex';
+  const input = document.getElementById('audit-scan-input');
+  if (input) {
+    input.value = '';
+    setTimeout(() => input.focus(), 50);
+  }
+}
+
+function closeAuditModal() {
+  const modal = document.getElementById('audit-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function clearAuditLog() {
+  _auditLog = [];
+  _auditReference = null;
+  updateAuditRefLine();
+  renderAuditLog();
+  const input = document.getElementById('audit-scan-input');
+  if (input) { input.value = ''; input.focus(); }
+}
+
+function updateAuditRefLine() {
+  const line = document.getElementById('audit-ref-line');
+  if (!line) return;
+  const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
+  if (delivPN) {
+    line.textContent = `Order PN: ${delivPN}`;
+  } else if (_auditReference) {
+    line.textContent = `Reference (first scan): ${_auditReference.value}`;
+  } else {
+    line.textContent = 'No Pick Label PN — first scan sets the reference';
+  }
+}
+
+function onAuditScanKeyDown(event) {
+  const isAdvance = event.key === 'Enter' || (event.key === 'Tab' && !event.shiftKey);
+  if (!isAdvance) return;
+  event.preventDefault();
+  const el = event.target;
+  const raw = el.value.trim().toUpperCase();
+  if (!raw) return;
+
+  const delivPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
+  if (delivPN) {
+    const pn = stripPNPrefix(raw, delivPN);
+    logAuditScan(pn, pn === delivPN ? 'match' : 'mismatch');
+  } else if (!_auditReference) {
+    _auditReference = { value: raw };
+    logAuditScan(raw, 'reference');
+  } else {
+    const pn = stripPNPrefix(raw, _auditReference.value);
+    logAuditScan(pn, pn === _auditReference.value ? 'match' : 'mismatch');
+  }
+
+  updateAuditRefLine();
+  el.value = '';
+}
+
+function logAuditScan(pn, status) {
+  _auditLog.push({ n: _auditLog.length + 1, pn, status });
+  renderAuditLog();
+  const el = document.getElementById('audit-scan-input');
+  if (status === 'mismatch') {
+    beepError();
+    el.classList.remove('scan-wrong');
+    void el.offsetWidth;
+    el.classList.add('scan-wrong');
+    setTimeout(() => el.classList.remove('scan-wrong'), 500);
+  } else {
+    beepOk();
+    el.classList.remove('scan-flash-ok');
+    void el.offsetWidth;
+    el.classList.add('scan-flash-ok');
+    setTimeout(() => el.classList.remove('scan-flash-ok'), 750);
+  }
+}
+
+function renderAuditLog() {
+  const wrap = document.getElementById('audit-log');
+  const summary = document.getElementById('audit-summary');
+  if (!wrap || !summary) return;
+  if (_auditLog.length === 0) {
+    wrap.innerHTML = '<div class="audit-log-empty">No scans yet — scan a random box PN to start.</div>';
+    summary.textContent = '0 scanned';
+    return;
+  }
+  wrap.innerHTML = _auditLog.slice().reverse().map(entry => {
+    const badge = entry.status === 'reference' ? 'REF' : (entry.status === 'match' ? 'MATCH' : 'MISMATCH');
+    return `<div class="audit-log-row ${entry.status}"><span>#${entry.n} ${esc(entry.pn)}</span><span class="audit-log-badge">${badge}</span></div>`;
+  }).join('');
+  const matches = _auditLog.filter(e => e.status === 'match').length;
+  const mismatches = _auditLog.filter(e => e.status === 'mismatch').length;
+  summary.textContent = `${_auditLog.length} scanned · ${matches} match · ${mismatches} mismatch`;
+}
+
 function serializeState() {
   const delivPNEl = document.getElementById('delivery-pn');
   const state = {
@@ -1652,6 +1810,17 @@ function autoAdvance(el) {
   }
 }
 
+// PN fields must display in uppercase (the Zebra sometimes sends lowercase depending on symbology config).
+// Writes the uppercased value back into the field in place, preserving cursor position.
+function uppercaseInPlace(el) {
+  if (!el) return;
+  const upper = el.value.toUpperCase();
+  if (upper === el.value) return;
+  const start = el.selectionStart, end = el.selectionEnd;
+  el.value = upper;
+  try { el.setSelectionRange(start, end); } catch(e) {}
+}
+
 // If the scanned box PN has a prefix before the delivery PN (e.g. "1PASD123" when PN is "ASD123"),
 // return just the matching suffix. Also normalizes _ → - for separator differences (e.g. ASD123_123 → ASD123-123).
 function stripPNPrefix(scanned, delivPN) {
@@ -1678,6 +1847,7 @@ function handleQtyInput(pid, el) {
 
 function onDeliveryPNInput() {
   const elDPN = document.getElementById('delivery-pn');
+  uppercaseInPlace(elDPN);
   const delivPN = (elDPN?.value || '').trim().toUpperCase();
   document.querySelectorAll('.pallet-block').forEach(b => {
     const pid = b.dataset.pid;
@@ -1701,6 +1871,7 @@ function onDeliveryPNInput() {
 }
 
 function onBoxPNInput(pid, el) {
+  uppercaseInPlace(el);
   const pickPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
   const boxPN = el.value.trim().toUpperCase();
   if (pickPN && boxPN) {
@@ -1947,7 +2118,7 @@ function buildPrintHTML() {
   <div class="pr-header">
     <div>
       <div class="pr-header-title">Arrow Electronics</div>
-      <div class="pr-header-sub">Warehouse Packing Checklist &nbsp;&middot;&nbsp; Microsoft Area &nbsp;&middot;&nbsp; Sevenum NL</div>
+      <div class="pr-header-sub">Warehouse Outbound Checklist &nbsp;&middot;&nbsp; Sevenum NL</div>
     </div>
     <div class="pr-header-right">
       <div class="pr-header-deliv">Delivery #${esc(delivNum)}</div>
@@ -2173,7 +2344,7 @@ function buildPrintHTML() {
       </div>
     </div>
   </div>
-  <div class="pr-footer">Arrow WH Packing Checklist &nbsp;&middot;&nbsp; Generated: ${esc(now)} &nbsp;&middot;&nbsp; Microsoft Area Sevenum</div>
+  <div class="pr-footer">Arrow WH Outbound Checklist &nbsp;&middot;&nbsp; Generated: ${esc(now)} &nbsp;&middot;&nbsp; Sevenum</div>
   </div>`;
 
   return html;
@@ -2377,7 +2548,7 @@ function doExportPDF() {
   doc.setFontSize(13); doc.setFont(undefined,'bold');
   doc.text('Arrow Electronics', M, 10);
   doc.setFontSize(8); doc.setFont(undefined,'normal');
-  doc.text('Warehouse Packing Checklist  -  Microsoft Area  -  Sevenum NL', M, 16);
+  doc.text('Warehouse Outbound Checklist  -  Sevenum NL', M, 16);
   doc.setFontSize(9); doc.setFont(undefined,'bold');
   doc.text('Delivery #' + delivNum, PAGE_W - M, 10, { align:'right' });
   doc.setFontSize(8); doc.setFont(undefined,'normal');
@@ -2623,9 +2794,9 @@ function doExportPDF() {
 
   // ── Footer ─────────────────────────────────────────────────────────
   doc.setFontSize(7); doc.setTextColor(148,163,184); doc.setFont(undefined,'normal');
-  doc.text('Arrow WH Packing Checklist  -  Generated: ' + now + '  -  Microsoft Area Sevenum', PAGE_W/2, y, { align:'center' });
+  doc.text('Arrow WH Outbound Checklist  -  Generated: ' + now + '  -  Sevenum', PAGE_W/2, y, { align:'center' });
 
-  doc.save('packing-' + delivNum + '-' + new Date().toISOString().slice(0,10) + '.pdf');
+  doc.save('outbound-' + delivNum + '-' + new Date().toISOString().slice(0,10) + '.pdf');
 }
 
 /* ══ DATA EXPORT (CSV) ══════════════════════════════════ */
@@ -2782,7 +2953,7 @@ function _exportFilename(ext) {
   const t = new Date();
   const pad = n => String(n).padStart(2, '0');
   const stamp = `${t.getFullYear()}${pad(t.getMonth() + 1)}${pad(t.getDate())}-${pad(t.getHours())}${pad(t.getMinutes())}`;
-  return `packing-${delivNum}-${stamp}.${ext}`;
+  return `outbound-${delivNum}-${stamp}.${ext}`;
 }
 
 function _csvEscape(v) {

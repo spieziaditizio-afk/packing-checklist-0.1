@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A single-file (~2200 lines) HTML web app for verifying packing checklists at Arrow Electronics' Sevenum NL warehouse (Microsoft Dept). The operator scans/types delivery info, pallets and per-box quantities, then exports a print/PDF/CSV report.
+A single-file (~2200 lines) HTML web app for outbound checklist verification at Arrow Electronics' Sevenum NL warehouse — pre-shipment prep of pallets before an order ships. The operator scans/types delivery info, pallets and per-box quantities, then exports a print/PDF/CSV report.
 
-`packing-check-list.html` is the whole app. There is no build step, no `node_modules`, no framework. Opens directly in Chrome (double-click or `start packing-check-list.html`). External deps load via CDN at runtime:
+`outbound-checklist.html` is the whole app (renamed from `packing-check-list.html`; internal `localStorage` keys still use the legacy `arrowPacking*` prefix — see Constants). There is no build step, no `node_modules`, no framework. Opens directly in Chrome (double-click or `start outbound-checklist.html`). External deps load via CDN at runtime:
 
 - jsPDF + jspdf-autotable (PDF export)
 - Google Fonts (DM Sans / DM Mono)
@@ -76,6 +76,10 @@ Each in-progress delivery is its own "session", keyed by `localStorage['arrowPac
 
 The serialized shape includes per-input tag state (`scanned` / `typed` / `wait`) so the green/amber/gray badges survive reloads. When adding a new field, both `serializeState` and `restoreState` must handle it — they are mirror functions.
 
+### Random PN Audit tool
+
+`/* ══ RANDOM PN AUDIT ══ */` — standalone spot-check modal (`#audit-modal`, opened via the 🎲 Audit PN button in `.top-bar-inner`). The operator scans random boxes from anywhere in the delivery in sequence; each scan is checked against the Pick Label PN (`#delivery-pn`) if set, otherwise the session's first scan becomes the reference. Deliberately ephemeral — never reads/writes pallet DOM state, not persisted, resets every time it's opened. Reuses `stripPNPrefix`, `beepOk`/`beepError`, and the `scan-flash-ok`/`scan-wrong` CSS classes rather than duplicating scan-feedback logic.
+
 ### Audio & welcome splash
 
 `/* ══ AUDIO FEEDBACK ══ */` defines all sounds via Web Audio (no files). Every sound funnels through `_tone(freq, opts)`, which is gated by `isMuted()` (persisted to `localStorage['arrowPackingMutedV1']`). The mute toggle 🔊/🔇 lives in the topbar. Status-transition chimes (`chimeMatch`, `chimeMismatch`, `fanfareComplete`, `warnHeight`) fire on rising edges only — tracked via `_lastPalletStatus`, `_lastDeliveryDone`, `_lastHeightExceed` maps so chimes don't fire on every keystroke or on initial state load.
@@ -102,7 +106,7 @@ Per-pallet block order in `buildPrintHTML`: pallet-hdr → pn-line → per-box c
 
 - `PTYPE`: pallet code → dimensions in cm (e.g. `EP:'120×80'`). Current types: `KP|EP|BP|GP|NP|AP`. `AP:'—'` (Amphenol supplier pallets — real dims unknown, update when measured).
 - `HEIGHT_LIMITS`: `{ europe: 180, export: 160 }`. Drives the "exceeds max" warning on the height input.
-- `STORAGE_BASE` / `SESSION_PREFIX`: `'arrowPackingV1'` / `'arrowPackingV1:'` — bump the `V1` suffix if you change the serialized shape in a backwards-incompatible way (also requires migrating existing `:default`, `:s_xxx` keys).
+- `STORAGE_BASE` / `SESSION_PREFIX`: `'arrowPackingV1'` / `'arrowPackingV1:'` — bump the `V1` suffix if you change the serialized shape in a backwards-incompatible way (also requires migrating existing `:default`, `:s_xxx` keys). Kept the `arrowPacking` name even after the app was renamed to "Outbound Checklist" — renaming it would orphan every operator's saved session.
 - `STORAGE_VERSION`: numeric guard inside the saved JSON; `restoreState` refuses to load when the file's version differs.
 - `WELCOME_KEY`, `MUTE_KEY`, `'arrowPackingPrintBoxDetailV1'`: global (not per-session) UI preferences in localStorage. Adding a new global pref? Create `loadXxxOpts()` / `saveXxxOpts()` and call `loadXxxOpts()` in DOMContentLoaded.
 
@@ -116,3 +120,4 @@ The UI strings are **English** (finalized in commit `7db6dd7`). The user/operato
 - Pallet IDs (`pid`) are interpolated into every element ID (`box-pn-${pid}`, `pick-rows-${pid}`, etc.). Always use template literals against the pallet's `pid`, never hard-code IDs.
 - HTML inserted via template strings; user-controlled values go through `esc()` (l.449) before interpolation in print/PDF paths.
 - **PN prefix stripping**: `stripPNPrefix(scanned, delivPN)` normalizes both values (uppercase, `_`→`-`) and strips any prefix left of the delivery PN if the scanned value ends with it (e.g. `1PASD123` → `ASD123`). Called in `onKeyDown` at Enter/Tab time, never on keystroke. Never blocks on mismatch.
+- **PN uppercase-on-input**: `uppercaseInPlace(el)` rewrites a PN field's value to uppercase in place (cursor position preserved) on every `oninput` — called from `onDeliveryPNInput`, `onBoxPNInput`, `onPerBoxPNInput`, and the audit modal's scan input. Any new PN field needs the same call (the Zebra sometimes sends lowercase depending on symbology config).
