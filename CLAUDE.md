@@ -108,7 +108,8 @@ Per-pallet block order in `buildPrintHTML`: pallet-hdr → pn-line → per-box c
 - `HEIGHT_LIMITS`: `{ europe: 180, export: 160 }`. Drives the "exceeds max" warning on the height input.
 - `STORAGE_BASE` / `SESSION_PREFIX`: `'arrowPackingV1'` / `'arrowPackingV1:'` — bump the `V1` suffix if you change the serialized shape in a backwards-incompatible way (also requires migrating existing `:default`, `:s_xxx` keys). Kept the `arrowPacking` name even after the app was renamed to "Outbound Checklist" — renaming it would orphan every operator's saved session.
 - `STORAGE_VERSION`: numeric guard inside the saved JSON; `restoreState` refuses to load when the file's version differs.
-- `WELCOME_KEY`, `MUTE_KEY`, `'arrowPackingPrintBoxDetailV1'`: global (not per-session) UI preferences in localStorage. Adding a new global pref? Create `loadXxxOpts()` / `saveXxxOpts()` and call `loadXxxOpts()` in DOMContentLoaded.
+- `WELCOME_KEY`, `MUTE_KEY`, `'arrowPackingPrintBoxDetailV1'`, `OPERATOR_KEY`: global (not per-session) UI preferences in localStorage. Adding a new global pref? Create `loadXxxOpts()` / `saveXxxOpts()` and call `loadXxxOpts()` in DOMContentLoaded.
+- `OPERATOR_KEY` (`'arrowPackingOperatorNameV1'`): remembers whatever name was last typed into Operator, independent of session — since a plain webpage can't read the signed-in Windows/AD identity, this is what stands in for "auto-fill from the Windows session": each person's own Windows/Edge login has its own browser storage, so their name comes back automatically without ever contacting AD. `loadRememberedOperator()` (called in DOMContentLoaded, before `loadState()`) prefills the field; a session's own saved operator (restored by `restoreState`) still wins over it when present. `rememberOperatorName()` fires on every Operator `oninput`.
 
 ## UI language
 

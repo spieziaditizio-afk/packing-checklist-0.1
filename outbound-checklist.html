@@ -492,7 +492,7 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
     <div class="logo-icon">📦</div>
     <div>
       <div class="logo-title">Arrow Electronics</div>
-      <div class="logo-sub">Outbound Checklist · Sevenum</div>
+      <div class="logo-sub">Special Operations Area · Sevenum</div>
     </div>
     <div class="header-right" id="hdr-date"></div>
     <div id="save-indicator"></div>
@@ -506,7 +506,7 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
         <div class="menu-header"><span>Print</span></div>
         <div style="padding:12px 14px;">
           <label class="print-opt-row" style="margin-bottom:10px;">
-            <input type="checkbox" id="opt-box-detail" onchange="savePrintOpts()">
+            <input type="checkbox" id="opt-box-detail" checked onchange="savePrintOpts()">
             <span>Show per-box detail in print</span>
           </label>
           <button class="btn btn-ghost-blue" style="width:100%;justify-content:center;padding:8px 10px;font-size:13px;" onclick="closePrintMenu();doPrint()">🖨️ Print</button>
@@ -556,6 +556,7 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
     </ol>
     <button class="splash-cta" onclick="closeWelcome()">START VERIFYING →</button>
     <div class="splash-footer">Auto-saved · Multi-session via 📑 · Tap ? to reopen this guide</div>
+    <div class="splash-footer" style="margin-top:4px;opacity:.6;">Developed by Antonio Spiezia</div>
   </div>
 </section>
 
@@ -608,7 +609,7 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
         <div class="form-row-2">
           <div class="fg">
             <label>Operator</label>
-            <input class="fc" id="operator" type="text" placeholder="Your name" oninput="updateDeliverySummary()"/>
+            <input class="fc" id="operator" type="text" placeholder="Your name" oninput="updateDeliverySummary();rememberOperatorName(this)"/>
           </div>
           <div class="fg">
             <label>Delivery No.</label>
@@ -709,6 +710,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateThemeButton();
   updateSessionsButton();
   loadPrintOpts();
+  loadRememberedOperator();
   loadState(); // may restore 0 or more pallets; no auto-add for fresh/empty sessions
   updateDeliverySummary(); // ensures empty-state visibility is correct on init
   // First-ever load → show quick guide. Tap '?' anytime to reopen.
@@ -1171,6 +1173,21 @@ function setMuted(v) {
   updateMuteButton();
 }
 function toggleMute() { setMuted(!isMuted()); }
+
+/* ══ REMEMBERED OPERATOR ═══════════════════════════════
+   Not per-session: tied to the Windows/Edge login the app is opened
+   under, so each operator's own name comes back automatically without
+   reading any Windows/AD identity (browsers can't do that). */
+const OPERATOR_KEY = 'arrowPackingOperatorNameV1';
+function loadRememberedOperator() {
+  const el = document.getElementById('operator');
+  const v = localStorage.getItem(OPERATOR_KEY);
+  if (el && v) el.value = v;
+}
+function rememberOperatorName(el) {
+  const v = (el.value || '').trim();
+  if (v) localStorage.setItem(OPERATOR_KEY, v);
+}
 function updateMuteButton() {
   const btn = document.getElementById('mute-toggle');
   if (!btn) return;
@@ -2118,7 +2135,7 @@ function buildPrintHTML() {
   <div class="pr-header">
     <div>
       <div class="pr-header-title">Arrow Electronics</div>
-      <div class="pr-header-sub">Warehouse Outbound Checklist &nbsp;&middot;&nbsp; Sevenum NL</div>
+      <div class="pr-header-sub">Warehouse Outbound Checklist &nbsp;&middot;&nbsp; Special Operations Area &nbsp;&middot;&nbsp; Sevenum NL</div>
     </div>
     <div class="pr-header-right">
       <div class="pr-header-deliv">Delivery #${esc(delivNum)}</div>
@@ -2344,7 +2361,7 @@ function buildPrintHTML() {
       </div>
     </div>
   </div>
-  <div class="pr-footer">Arrow WH Outbound Checklist &nbsp;&middot;&nbsp; Generated: ${esc(now)} &nbsp;&middot;&nbsp; Sevenum</div>
+  <div class="pr-footer">Arrow WH Outbound Checklist &nbsp;&middot;&nbsp; Generated: ${esc(now)} &nbsp;&middot;&nbsp; Sevenum &nbsp;&middot;&nbsp; App developed by Antonio Spiezia</div>
   </div>`;
 
   return html;
