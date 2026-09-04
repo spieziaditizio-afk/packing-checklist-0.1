@@ -280,116 +280,132 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg-page);min-height:100vh
 .info-banner{padding:8px 12px;background:rgba(56,189,248,.07);border:1.5px solid rgba(56,189,248,.18);border-radius:9px;font-size:12px;color:#7dd3fc;font-weight:500;margin-bottom:10px;}
 .warn-banner{padding:8px 12px;background:rgba(245,158,11,.07);border:1.5px solid rgba(245,158,11,.22);border-radius:9px;font-size:12px;color:var(--status-warn-text);font-weight:500;}
 
-/* ── PRINT ── */
+/* ── PRINT ──
+   Most of the report's own styling below is NOT gated behind @media print.
+   #print-root is display:none by default (inline style, see the element's
+   markup), so none of this ever shows on screen during normal app use — but
+   leaving it always-on lets applyPrintPagination() (below, in <script>) make
+   #print-root visible off-screen for a moment before window.print() and
+   measure real pallet-block heights against real print typography, so it can
+   predict where the browser will actually break pages. Only the handful of
+   rules that reshape the *live app page itself* for printing stay inside
+   @media print, since those would break the normal on-screen layout if left
+   active all the time. */
+@page{size:A4 portrait;margin:10mm;}
 @media print{
   html,body{height:auto!important;overflow:visible!important;display:block!important;}
   body>*:not(#print-root){display:none!important;}
-  #print-root{display:block!important;font-family:Arial,sans-serif;font-size:10px;color:#111;}
-  .pr-page{padding:0 0 16px;}
-  .pr-pallet-hdr{page-break-before:auto;}
-  .pr-summary-tbl{page-break-inside:avoid;}
-  .pr-breakdown-tbl{page-break-inside:avoid;}
-
-  /* Header banner */
-  .pr-header{background:#0a1f36!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:9px 18px;display:flex;justify-content:space-between;align-items:center;}
-  .pr-header-title{font-size:13px;font-weight:bold;color:#fff!important;}
-  .pr-header-sub{font-size:8px;color:rgba(255,255,255,.7)!important;margin-top:2px;}
-  .pr-header-right{text-align:right;}
-  .pr-header-deliv{font-size:12px;font-weight:bold;color:#fff!important;}
-  .pr-header-date{font-size:8px;color:rgba(255,255,255,.7)!important;margin-top:2px;}
-
-  /* Metadata strip */
-  .pr-meta-strip{display:grid!important;grid-template-columns:1fr 1fr 1fr 1fr;background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-bottom:1px solid #e2e8f0;padding:0;margin-bottom:10px;}
-  .pr-meta-cell{padding:5px 10px;border-right:1px solid #e2e8f0;}
-  .pr-meta-cell:last-child{border-right:none;}
-  .pr-meta-lbl{font-size:7px;font-weight:bold;color:#64748b!important;text-transform:uppercase;letter-spacing:.05em;}
-  .pr-meta-val{font-size:9px;color:#0f172a!important;margin-top:1px;font-weight:500;}
-
-  /* Content wrapper */
-  .pr-content{padding:0 18px;}
-
-  /* Pallet separation — black number tab */
-  .pr-pallet-block{display:flex;margin-top:14px;}
-  .pr-pallet-tab{background:#000!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-weight:bold;font-size:20px;min-width:26px;display:flex;align-items:center;justify-content:center;padding:4px;border-radius:3px 0 0 3px;}
-  .pr-pallet-content{flex:1;border:1px solid #999;border-left:none;border-radius:0 3px 3px 0;overflow:hidden;}
-
-  /* Pallet header bar */
-  .pr-pallet-hdr{background:#0f2942!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:5px 10px;display:flex;justify-content:space-between;align-items:center;}
-  .pr-pallet-hdr-title{font-size:9px;font-weight:bold;color:#fff!important;}
-
-  /* Status badges */
-  .pr-badge{font-size:8px;font-weight:bold;padding:2px 7px;border-radius:8px;}
-  .pr-badge-ok{background:#dcfce7!important;color:#15803d!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .pr-badge-err{background:#fee2e2!important;color:#dc2626!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .pr-badge-pending{background:#f1f5f9!important;color:#64748b!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-
-  /* PN verification line */
-  .pr-pn-line{font-size:8.5px;color:#475569!important;padding:3px 10px;background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;display:flex;justify-content:space-between;}
-  .pr-pn-ok{color:#15803d!important;font-weight:bold;}
-  .pr-pn-err{color:#dc2626!important;font-weight:bold;}
-  .pr-pn-pending{color:#94a3b8!important;}
-
-  /* Pick labels breakdown line */
-
-  /* Breakdown label */
-  .pr-breakdown-lbl{font-size:7.5px;font-weight:bold;color:#475569!important;text-transform:uppercase;letter-spacing:.05em;padding:4px 10px 2px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;}
-
-  /* Tables base */
-  .pr-table{width:100%;border-collapse:collapse;}
-  .pr-table th,.pr-table td{padding:4px 8px;border:1px solid #e2e8f0;font-size:9px;}
-  .pr-table th{font-weight:bold;}
-
-  /* Breakdown table — green header, centered */
-  .pr-breakdown-tbl th{background:#15803d!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;text-align:center;border-color:#15803d;}
-  .pr-breakdown-tbl td{text-align:center;color:#0f172a!important;}
-
-  /* Pallet summary row — navy header */
-  .pr-summary-tbl{margin-top:2px;}
-  .pr-summary-tbl th{background:#0f2942!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;text-align:center;border-color:#0f2942;font-size:8px;}
-  .pr-summary-tbl td{background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-weight:bold;text-align:center;font-size:10px;}
-
-  /* Consolidado section */
-  .pr-consolidado-hdr{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:1px solid #cbd5e1;padding:5px 10px;font-size:10px;font-weight:bold;color:#0a1f36!important;margin-top:12px;}
-  .pr-consol-tbl th{background:#0f2942!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;text-align:center;border-color:#0f2942;font-size:8px;padding:3px 6px;}
-  .pr-consol-tbl td{text-align:center;font-size:8.5px;padding:3px 6px;border:1px solid #e2e8f0;}
-
-  /* Totals highlight box */
-  .pr-totals-box{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:1px solid #cbd5e1;border-top:none;padding:8px 10px;display:grid!important;grid-template-columns:repeat(6,1fr);}
-  .pr-total-cell{text-align:center;padding:0 4px;}
-  .pr-total-lbl{font-size:7px;font-weight:bold;color:#64748b!important;text-transform:uppercase;letter-spacing:.04em;}
-  .pr-total-val{font-size:13px;font-weight:bold;color:#0f172a!important;margin-top:2px;}
-  .pr-total-val.ok{color:#15803d!important;}
-  .pr-total-val.err{color:#dc2626!important;}
-
-  /* Signatures */
-  .pr-sig{display:block!important;margin-top:16px;padding:0 18px;max-width:220px;}
-  .pr-sig-box{border-top:1.5px solid #334155;padding-top:4px;}
-  .pr-sig-lbl{font-size:7.5px;font-weight:bold;color:#64748b!important;text-transform:uppercase;letter-spacing:.05em;}
-  .pr-sig-name{font-size:9px;color:#0f172a!important;margin-top:3px;}
-
-  /* Status colors */
-  .pr-match{color:#15803d!important;font-weight:bold;}
-  .pr-mismatch{color:#dc2626!important;font-weight:bold;}
-  .pr-pending{color:#64748b!important;}
-
-  /* Footer */
-  .pr-footer{margin-top:10px;font-size:7.5px;color:#94a3b8!important;border-top:1px solid #e2e8f0;padding:4px 18px 0;text-align:center;}
-
-  /* Per-box detail cards */
-  .pr-box-detail-lbl{font-size:7.5px;font-weight:bold;color:#475569!important;text-transform:uppercase;letter-spacing:.05em;padding:4px 10px 2px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;}
-  .pr-box-cards{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:3px;padding:4px 10px 8px;border:1px solid #e2e8f0;border-top:none;}
-  .pr-box-card{border:1px solid #e2e8f0;border-radius:3px;padding:3px 4px;text-align:center;background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;min-height:24px;display:flex;flex-direction:column;justify-content:center;}
-  .pr-box-card-qty{font-size:9.5px;font-weight:bold;color:#0f172a!important;line-height:1.2;}
-  .pr-box-card-pn{font-size:6px;color:#475569!important;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-
-  /* Pick Labels (narrow) + Per-Box Detail (wide) side-by-side columns */
-  .pr-detail-cols{display:flex;border:1px solid #e2e8f0;border-top:none;}
-  .pr-pick-col{width:112px;flex-shrink:0;padding:4px 6px 8px;border-right:1px solid #e2e8f0;}
-  .pr-box-col{flex:1;min-width:0;padding:4px 6px 8px;}
-  .pr-detail-col-lbl{font-size:7px;font-weight:bold;color:#475569!important;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;}
-  .pr-pick-cards{display:grid!important;grid-template-columns:repeat(2,1fr);gap:3px;}
-  .pr-box-col .pr-box-cards{border:none;padding:0;}
+  #print-root{display:block!important;}
 }
+#print-root{font-family:Arial,sans-serif;font-size:10px;color:#111;}
+.pr-page{padding:0 0 16px;}
+.pr-summary-tbl{page-break-inside:avoid;break-inside:avoid;}
+.pr-breakdown-tbl{page-break-inside:avoid;break-inside:avoid;}
+
+/* Header banner */
+.pr-header{background:#0a1f36!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:9px 18px;display:flex;justify-content:space-between;align-items:center;}
+.pr-header-title{font-size:13px;font-weight:bold;color:#fff!important;}
+.pr-header-sub{font-size:8px;color:rgba(255,255,255,.7)!important;margin-top:2px;}
+.pr-header-right{text-align:right;}
+.pr-header-deliv{font-size:12px;font-weight:bold;color:#fff!important;}
+.pr-header-date{font-size:8px;color:rgba(255,255,255,.7)!important;margin-top:2px;}
+
+/* Metadata strip */
+.pr-meta-strip{display:grid!important;grid-template-columns:1fr 1fr 1fr 1fr;background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-bottom:1px solid #e2e8f0;padding:0;margin-bottom:10px;}
+.pr-meta-cell{padding:5px 10px;border-right:1px solid #e2e8f0;}
+.pr-meta-cell:last-child{border-right:none;}
+.pr-meta-lbl{font-size:7px;font-weight:bold;color:#64748b!important;text-transform:uppercase;letter-spacing:.05em;}
+.pr-meta-val{font-size:9px;color:#0f172a!important;margin-top:1px;font-weight:500;}
+
+/* Content wrapper */
+.pr-content{padding:0 18px;}
+
+/* Pallet separation — black number tab. page-break-inside:avoid keeps a
+   pallet's whole card (header/PN line/detail/tables) together on one page —
+   see applyPrintPagination() for what happens when a pallet doesn't fit. */
+.pr-pallet-block{display:flex;margin-top:14px;page-break-inside:avoid;break-inside:avoid;}
+.pr-pallet-block.pr-force-break{page-break-before:always!important;break-before:page!important;}
+.pr-pallet-tab{background:#000!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-weight:bold;font-size:20px;min-width:26px;display:flex;align-items:center;justify-content:center;padding:4px;border-radius:3px 0 0 3px;}
+.pr-pallet-content{flex:1;border:1px solid #999;border-left:none;border-radius:0 3px 3px 0;overflow:hidden;}
+
+/* Pallet header bar */
+.pr-pallet-hdr{background:#0f2942!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:5px 10px;display:flex;justify-content:space-between;align-items:center;}
+.pr-pallet-hdr-title{font-size:9px;font-weight:bold;color:#fff!important;}
+
+/* Status badges */
+.pr-badge{font-size:8px;font-weight:bold;padding:2px 7px;border-radius:8px;}
+.pr-badge-ok{background:#dcfce7!important;color:#15803d!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+.pr-badge-err{background:#fee2e2!important;color:#dc2626!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+.pr-badge-pending{background:#f1f5f9!important;color:#64748b!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+
+/* PN verification line */
+.pr-pn-line{font-size:8.5px;color:#475569!important;padding:3px 10px;background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;display:flex;justify-content:space-between;}
+.pr-pn-ok{color:#15803d!important;font-weight:bold;}
+.pr-pn-err{color:#dc2626!important;font-weight:bold;}
+.pr-pn-pending{color:#94a3b8!important;}
+
+/* Breakdown label */
+.pr-breakdown-lbl{font-size:7.5px;font-weight:bold;color:#475569!important;text-transform:uppercase;letter-spacing:.05em;padding:4px 10px 2px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;}
+
+/* Tables base */
+.pr-table{width:100%;border-collapse:collapse;}
+.pr-table th,.pr-table td{padding:4px 8px;border:1px solid #e2e8f0;font-size:9px;}
+.pr-table th{font-weight:bold;}
+
+/* Breakdown table — green header, centered */
+.pr-breakdown-tbl th{background:#15803d!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;text-align:center;border-color:#15803d;}
+.pr-breakdown-tbl td{text-align:center;color:#0f172a!important;}
+
+/* Pallet summary row — navy header */
+.pr-summary-tbl{margin-top:2px;}
+.pr-summary-tbl th{background:#0f2942!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;text-align:center;border-color:#0f2942;font-size:8px;}
+.pr-summary-tbl td{background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-weight:bold;text-align:center;font-size:10px;}
+
+/* Gap notice — shown when a pallet is pushed to the next page and leaves a
+   large blank area at the bottom of the current one (see PRINT_GAP_RATIO) */
+.pr-gap-note{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;padding:10px;border:1.5px dashed #cbd5e1;border-radius:4px;color:#64748b!important;font-size:9px;font-style:italic;text-align:center;}
+
+/* Consolidado section */
+.pr-consolidado-hdr{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:1px solid #cbd5e1;padding:5px 10px;font-size:10px;font-weight:bold;color:#0a1f36!important;margin-top:12px;}
+.pr-consol-tbl th{background:#0f2942!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;text-align:center;border-color:#0f2942;font-size:8px;padding:3px 6px;}
+.pr-consol-tbl td{text-align:center;font-size:8.5px;padding:3px 6px;border:1px solid #e2e8f0;}
+
+/* Totals highlight box */
+.pr-totals-box{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:1px solid #cbd5e1;border-top:none;padding:8px 10px;display:grid!important;grid-template-columns:repeat(6,1fr);}
+.pr-total-cell{text-align:center;padding:0 4px;}
+.pr-total-lbl{font-size:7px;font-weight:bold;color:#64748b!important;text-transform:uppercase;letter-spacing:.04em;}
+.pr-total-val{font-size:13px;font-weight:bold;color:#0f172a!important;margin-top:2px;}
+.pr-total-val.ok{color:#15803d!important;}
+.pr-total-val.err{color:#dc2626!important;}
+
+/* Signatures */
+.pr-sig{display:block!important;margin-top:16px;padding:0 18px;max-width:220px;}
+.pr-sig-box{border-top:1.5px solid #334155;padding-top:4px;}
+.pr-sig-lbl{font-size:7.5px;font-weight:bold;color:#64748b!important;text-transform:uppercase;letter-spacing:.05em;}
+.pr-sig-name{font-size:9px;color:#0f172a!important;margin-top:3px;}
+
+/* Status colors */
+.pr-match{color:#15803d!important;font-weight:bold;}
+.pr-mismatch{color:#dc2626!important;font-weight:bold;}
+.pr-pending{color:#64748b!important;}
+
+/* Footer */
+.pr-footer{margin-top:10px;font-size:7.5px;color:#94a3b8!important;border-top:1px solid #e2e8f0;padding:4px 18px 0;text-align:center;}
+
+/* Per-box detail cards */
+.pr-box-detail-lbl{font-size:7.5px;font-weight:bold;color:#475569!important;text-transform:uppercase;letter-spacing:.05em;padding:4px 10px 2px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;}
+.pr-box-cards{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:3px;padding:4px 10px 8px;border:1px solid #e2e8f0;border-top:none;}
+.pr-box-card{border:1px solid #e2e8f0;border-radius:3px;padding:3px 4px;text-align:center;background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;min-height:24px;display:flex;flex-direction:column;justify-content:center;}
+.pr-box-card-qty{font-size:9.5px;font-weight:bold;color:#0f172a!important;line-height:1.2;}
+.pr-box-card-pn{font-size:6px;color:#475569!important;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* Pick Labels (narrow) + Per-Box Detail (wide) side-by-side columns */
+.pr-detail-cols{display:flex;border:1px solid #e2e8f0;border-top:none;}
+.pr-pick-col{width:112px;flex-shrink:0;padding:4px 6px 8px;border-right:1px solid #e2e8f0;}
+.pr-box-col{flex:1;min-width:0;padding:4px 6px 8px;}
+.pr-detail-col-lbl{font-size:7px;font-weight:bold;color:#475569!important;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;}
+.pr-pick-cards{display:grid!important;grid-template-columns:repeat(2,1fr);gap:3px;}
+.pr-box-col .pr-box-cards{border:none;padding:0;}
 
 /* ── PRINT OPTIONS TOGGLE ── */
 .print-opt-row{display:flex;align-items:center;gap:7px;margin-bottom:8px;padding:7px 10px;background:rgba(var(--overlay-rgb),.03);border:1px solid rgba(var(--overlay-rgb),.07);border-radius:7px;cursor:pointer;}
@@ -496,9 +512,9 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
     </div>
     <div class="header-right" id="hdr-date"></div>
     <div id="save-indicator"></div>
-    <button id="new-session-btn" class="topbar-btn" onclick="newSessionInNewTab()" title="Open a new session in another browser tab">
+    <button id="new-session-btn" class="topbar-btn" onclick="startNewOrder()" title="Save this order and start a new blank one">
       <span class="btn-icon">🆕</span>
-      <span class="btn-label">New Session</span>
+      <span class="btn-label">New Order</span>
     </button>
     <div class="print-menu-wrap">
       <button id="print-btn" class="topbar-btn topbar-btn-icon-only" onclick="togglePrintMenu(event)" title="Print outbound checklist report">🖨️</button>
@@ -532,7 +548,7 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
     </div>
     <div id="sessions-list"></div>
     <div class="menu-footer">
-      <button onclick="newSession()">+ New session (this tab)</button>
+      <button onclick="startNewOrder()">+ New Order</button>
     </div>
   </div>
 </div>
@@ -697,10 +713,11 @@ let palletCounter = 0;
 let activePid = null;
 let destination = 'europe';
 const HEIGHT_LIMITS = { europe: 180, export: 160 };
-const PTYPE = { KP:'60×80', EP:'120×80', BP:'120×100', GP:'125×100', NP:'130×110', AP:'—' };
+const PTYPE = { KP:'60×80', EP:'120×80', BP:'120×100', GP:'125×100', NP:'130×110', AP:'140×105' };
 
 /* ══ INIT ═══════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
+  ensureFreshSessionOnBareOpen();
   migrateLegacyState();
   const now = new Date();
   document.getElementById('hdr-date').textContent =
@@ -1397,6 +1414,16 @@ function getSessionId() {
   const m = location.hash.match(/[#&]s=([a-z0-9_-]+)/i);
   return m ? m[1] : 'default';
 }
+// A bare open (double-clicked file, fresh tab with no #s=... in the URL) always
+// starts a brand-new blank order — it never silently resumes whatever was left
+// in ':default'. An explicit link (bookmarked #s=default or #s=<id>) still
+// resumes that exact session, since that's a deliberate choice, not a bare open.
+// Uses replaceState (not location.hash=) so it doesn't trigger the hashchange
+// reload listener — this must run before anything else reads the session id.
+function ensureFreshSessionOnBareOpen() {
+  if (/[#&]s=[a-z0-9_-]+/i.test(location.hash)) return;
+  history.replaceState(null, '', location.pathname + location.search + '#s=' + makeSessionId());
+}
 function getStorageKey() { return SESSION_PREFIX + getSessionId(); }
 function setActiveSession(id) {
   // Triggers hashchange listener → full reload to swap loaded state cleanly.
@@ -1483,8 +1510,13 @@ function populateSessionsMenu() {
       </div>`;
   }).join('');
 }
-function newSession() { setActiveSession(makeSessionId()); }
-function newSessionInNewTab() { openSessionInNewTab(makeSessionId()); }
+function startNewOrder() {
+  // Flush immediately — don't rely on the 400ms autosave debounce catching
+  // the last keystrokes before we navigate away to a blank session.
+  if (_saveTimer) { clearTimeout(_saveTimer); _saveTimer = null; }
+  saveState();
+  setActiveSession(makeSessionId());
+}
 function switchSession(id) {
   if (id === getSessionId()) {
     const m = document.getElementById('sessions-menu'); if (m) m.style.display = 'none';
@@ -2524,6 +2556,59 @@ function closePrintBlockModal() {
 }
 
 /* ══ PRINT ══════════════════════════════════════════════ */
+// A4 content box, matching the @page rule in <style> (210×297mm minus a
+// 10mm margin on every side) converted to CSS px at the standard 96dpi ratio
+// — the same ratio the browser's print engine uses for @page, so measuring
+// against these numbers predicts real page breaks closely enough to act on.
+// Keep PRINT_PAGE_MARGIN_MM in sync with @page's margin if either changes.
+const PRINT_PAGE_WIDTH_MM  = 210;
+const PRINT_PAGE_HEIGHT_MM = 297;
+const PRINT_PAGE_MARGIN_MM = 10;
+const MM_TO_PX = 96 / 25.4;
+const PRINT_CONTENT_WIDTH_PX  = (PRINT_PAGE_WIDTH_MM  - PRINT_PAGE_MARGIN_MM * 2) * MM_TO_PX;
+const PRINT_CONTENT_HEIGHT_PX = (PRINT_PAGE_HEIGHT_MM - PRINT_PAGE_MARGIN_MM * 2) * MM_TO_PX;
+// A pallet pushed to the next page counts as leaving "a lot" of blank space
+// behind it once more than this fraction of the current page is still empty.
+const PRINT_GAP_RATIO = 0.25;
+
+// Simulates the browser's own page-break-inside:avoid pagination (predicting
+// where each pallet block will land) so we can force explicit breaks that
+// match it exactly, and drop a "continues on next page" note into any gap
+// left behind that's big enough to otherwise look like a printing error.
+// `root` must already be display:block and laid out at print width — see
+// doPrint(), which measures off-screen before the real print pass.
+function applyPrintPagination(root) {
+  root.querySelectorAll('.pr-gap-note').forEach(n => n.remove());
+  root.querySelectorAll('.pr-pallet-block').forEach(b => b.classList.remove('pr-force-break'));
+
+  const header = root.querySelector('.pr-header');
+  const metaStrip = root.querySelector('.pr-meta-strip');
+  const blocks = [...root.querySelectorAll('.pr-pallet-block')];
+  if (!blocks.length) return;
+
+  // Header/meta-strip only render once, at the top of page 1 — see buildPrintHTML().
+  const headerHeight = (header?.getBoundingClientRect().height || 0)
+    + (metaStrip?.getBoundingClientRect().height || 0);
+
+  let remaining = PRINT_CONTENT_HEIGHT_PX - headerHeight;
+  blocks.forEach((block, i) => {
+    const marginTop = parseFloat(getComputedStyle(block).marginTop) || 0;
+    const blockHeight = block.getBoundingClientRect().height + marginTop;
+
+    if (i > 0 && blockHeight > remaining) {
+      if (remaining > PRINT_CONTENT_HEIGHT_PX * PRINT_GAP_RATIO) {
+        const note = document.createElement('div');
+        note.className = 'pr-gap-note';
+        note.textContent = `↷ Pallet ${i + 1} continues on next page`;
+        block.parentElement.insertBefore(note, block);
+      }
+      block.classList.add('pr-force-break');
+      remaining = PRINT_CONTENT_HEIGHT_PX;
+    }
+    remaining -= blockHeight;
+  });
+}
+
 function doPrint() {
   const issues = validatePrintReady();
   applyPrintIssueHighlight(issues);
@@ -2538,7 +2623,13 @@ function doPrint() {
   }
   const root = document.getElementById('print-root');
   root.innerHTML = buildPrintHTML();
-  root.style.display = 'block';
+  // Lay the report out off-screen at the real print width first, so
+  // applyPrintPagination() measures against real print typography/wrapping
+  // instead of the app's on-screen width — then drop the width/position
+  // overrides for the actual print pass, which sizes naturally to the page.
+  root.style.cssText = `display:block;position:fixed;left:-10000px;top:0;width:${PRINT_CONTENT_WIDTH_PX}px;`;
+  applyPrintPagination(root);
+  root.style.cssText = 'display:block;';
   window.print();
   root.style.display = 'none';
 }
