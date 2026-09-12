@@ -1510,17 +1510,19 @@ function onKeyDown(event, el) {
     }
   }
 
-  // If last box row → auto-add new box row and focus it
+  // If last box row → auto-add new box row; jump to the next pallet's scan entry
+  // field if this scan just completed the pallet's target, else focus the new row.
   if (pid && el.closest('.box-row')) {
     const wrap = document.getElementById(`box-rows-${pid}`);
     if (el.closest('.box-row') === wrap.lastElementChild) {
       const newRow = addBoxRow(pid);
-      newRow.querySelector('input').focus();
+      if (!focusNextPalletIfComplete(pid)) newRow.querySelector('input').focus();
       return;
     }
   }
 
-  // If qty field (2nd input) of last per-box row → auto-add new perbox row
+  // If qty field (2nd input) of last per-box row → auto-add new perbox row; same
+  // cross-pallet jump as above once the target is reached.
   if (pid && el.closest('.perbox-row')) {
     const row = el.closest('.perbox-row');
     const inputs = row.querySelectorAll('input');
@@ -1528,7 +1530,7 @@ function onKeyDown(event, el) {
     const wrap = document.getElementById(`perbox-rows-${pid}`);
     if (isQtyField && row === wrap.lastElementChild) {
       const newRow = addPerBoxRow(pid);
-      newRow.querySelector('input').focus();
+      if (!focusNextPalletIfComplete(pid)) newRow.querySelector('input').focus();
       return;
     }
   }
@@ -2008,6 +2010,50 @@ function autoAdvance(el) {
   }
 }
 
+// Where box-scanning should resume for a pallet: the shared Box PN field (Scan +
+// Shared PN), the first row's PN field (Scan + PN-per-box), or the first group's
+// count field (Visual). Returns null if that section has no rows yet.
+function getPalletScanEntryField(pid) {
+  const mode = getBoxMode(pid);
+  if (mode === 'scan') {
+    if (getPNMode(pid) === 'per-box') {
+      const firstRow = document.querySelector(`#perbox-rows-${pid} .perbox-row`);
+      return firstRow ? firstRow.querySelectorAll('input')[0] : null;
+    }
+    return document.getElementById(`box-pn-${pid}`);
+  }
+  const firstGroupRow = document.querySelector(`#group-rows-${pid} .group-row`);
+  return firstGroupRow ? firstGroupRow.querySelectorAll('input')[0] : null;
+}
+
+// Cross-pallet auto-advance: once a pallet's Box Verification total reaches its Pick
+// Label target, switch straight to the next pallet's tab and focus its scan entry field
+// so the operator can keep scanning boxes without walking back to the computer to click
+// the next tab. Reads the totals that updatePalletSummary already stamped onto the
+// pallet block's dataset (never re-counts). Pallets are single-tab views (only the
+// active one has display !== 'none'), so "next" is taken from DOM/tab order, not
+// visibility, and the target tab must be switched in *before* focusing its field
+// (a hidden field can't take focus).
+function focusNextPalletIfComplete(pid) {
+  const block = document.querySelector(`.pallet-block[data-pid="${pid}"]`);
+  const pickTotal = parseInt(block?.dataset.pickTotal) || 0;
+  const boxTotal  = parseInt(block?.dataset.boxTotal) || 0;
+  if (pickTotal <= 0 || boxTotal < pickTotal) return false;
+
+  const blocks = [...document.querySelectorAll('.pallet-block')];
+  const idx = blocks.findIndex(b => b.dataset.pid === String(pid));
+  if (idx < 0 || idx >= blocks.length - 1) return false;
+
+  const nextPid = parseInt(blocks[idx + 1].dataset.pid, 10);
+  const entry = getPalletScanEntryField(nextPid);
+  if (!entry) return false;
+
+  switchTab(nextPid);
+  entry.focus();
+  entry.select();
+  return true;
+}
+
 // PN fields must display in uppercase (the Zebra sometimes sends lowercase depending on symbology config).
 // Writes the uppercased value back into the field in place, preserving cursor position.
 function uppercaseInPlace(el) {
@@ -2166,6 +2212,14 @@ function updatePalletSummary(pid) {
   }
   document.getElementById(`box-badge-${pid}`).textContent = `${boxTotal.toLocaleString()} pcs verified · ${boxCount} boxes`;
   updatePalletProgress(pid, boxTotal, pickTotal);
+
+  // Exposed for onKeyDown's cross-pallet auto-advance (focusNextPalletIfComplete) so it
+  // can read live target/verified totals without re-walking the DOM or duplicating this count.
+  const palletBlockEl = document.querySelector(`.pallet-block[data-pid="${pid}"]`);
+  if (palletBlockEl) {
+    palletBlockEl.dataset.pickTotal = pickTotal;
+    palletBlockEl.dataset.boxTotal = boxTotal;
+  }
 
   // PN
   const pickPN = (document.getElementById('delivery-pn')?.value || '').trim().toUpperCase();
