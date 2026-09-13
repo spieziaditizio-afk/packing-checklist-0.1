@@ -45,7 +45,7 @@ Each **pallet** has: type (`KP|EP|BP|GP|NP` → dimensions via `PTYPE` map), wei
 
 1. **Pick Labels** = target quantities. Sum of `Pick 1`, `Pick 2`… rows = target pieces for the pallet. Recently renamed from "PL" / "Expected".
 2. **Box Verification** = actual verified quantities. Operator picks a mode in the section header:
-   - **Scan mode** with sub-toggle `Shared PN` (one PN field + per-box qty rows) vs `PN per box` (PN+qty pair per row).
+   - **Scan mode** — one shared PN field + per-box qty rows. (The old `Shared PN` / `PN per box` sub-toggle was **removed from the UI**; `setPNMode` is now guarded and returns early, and `getPNMode` always reports `shared` for new sessions. The `per-box` code paths — `#perbox-rows-*`, `addPerBoxRow`, the per-box branches in every aggregator — are kept only so an older saved session that still carries `pnMode:'per-box'` restores without throwing. Don't build new features on them.)
    - **Visual mode** = quantity groups (N boxes × M pcs each). For fast entry of many small uniform boxes — no per-box scan.
 
 The validation strip at the bottom of each pallet aggregates: `Pick PN | Box PN | PN Check | Target (pcs) | Verified (pcs) | Boxes` + a status badge.
@@ -68,9 +68,21 @@ onKeyDown
   ├── wrong-scan check (el._wrongScan flag set by handleQtyInput when PO format /\d[a-zA-Z]/ detected)
   ├── wrong-PN check (value on a PN field ≠ delivery PN, applies whether typed or scanned)
   ├── markAccepted(el) — beep + transient green flash (only visible feedback that input was registered)
-  ├── auto-add new pick-row / box-row / perbox-row when on the LAST row → focus new row, return
+  ├── auto-add new pick-row / box-row / perbox-row when on the LAST row
+  │     └── box-row / perbox-row only: focusNextPalletIfComplete(pid, el) decides where the cursor goes
+  │           ├── boxTotal <  pickTotal → returns false → focus the new empty row (keep scanning this pallet)
+  │           ├── boxTotal == pickTotal → switchTab(next) + focus its scan entry field → returns true
+  │           └── boxTotal >  pickTotal → triggerOverTargetStop() → returns true (run STOPS here)
   └── autoAdvance(el) → focuses the next visible input across the whole pallet block
 ```
+
+**Continuous cross-pallet scanning.** `focusNextPalletIfComplete` is what lets an operator scan a whole delivery front to back without walking to the computer to pick each pallet tab. It never re-counts: it reads the `pickTotal` / `boxTotal` that `updatePalletSummary` stamps onto the pallet block's dataset. Because pallets are single-tab views, the *next* pallet is taken from DOM/tab order and its tab must be switched in **before** focusing its field — a hidden input can't take focus.
+
+**Over-target is a hard stop, not a warning.** Reaching the target advances; *exceeding* it must not, or the excess rides silently into the next pallet and only surfaces at print validation several pallets later. `triggerOverTargetStop` deliberately **keeps** the scanned value (the operator needs the real count to find the double-scanned box), so it only flashes the field and hands focus back with the text selected. It also deletes the empty row its caller just appended — otherwise the corrected field would no longer be `lastElementChild`, the next Enter would miss this branch entirely and fall through to plain `autoAdvance`, letting the run continue over target. The red visual state needs no new CSS: the progress bar's existing `p-over` class already renders "⚠ N pcs over target".
+
+Both blocking conditions paint the same centre-screen toast via `showScanToast(title, sub)` — the one place operator-facing scan wording lives. `triggerScanError` (wrong barcode) clears the field; `triggerOverTargetStop` does not. Don't merge them.
+
+**Visual mode has no cross-pallet advance** and therefore no over-target stop — `focusNextPalletIfComplete` is only called from the `.box-row` / `.perbox-row` branches.
 
 There is **no persistent typed-vs-scanned visual state**. The old `markScanned` / `markTyped` / `tagStateOf` / `applyTagState` / scan-tag UI was removed after field testing — the timing heuristic (`< 50ms` between keystrokes) misclassified slower Zebras as typed input, producing visual discrepancies without changing any validation logic. Per-pallet status now relies entirely on the validation strip (`MATCH` / `MISMATCH` / `PENDING`).
 
@@ -117,6 +129,48 @@ Two active output paths (Print UI + legacy code), all read live DOM (not the loc
 Per-pallet block order in `buildPrintHTML`: pallet-hdr → pn-line → per-box cards (conditional, `showBoxDetail`) → breakdown table → summary table. Pre-compute conditional HTML as a variable before the `html +=` template literal rather than appending separately after.
 
 The pallet-hdr line also states which Box Verification mode (Scan / Visual) was used to count that pallet's pieces (`modeLabel`, derived from `getBoxMode(pid)`) — a spot-check reader needs to know whether quantities were scanned or visually counted without opening the app.
+
+## Workflow animation — two files, one scene
+
+`workflow-animation.html` (transport bar: play/pause, scrub, ten step markers) and
+`workflow-scroll.html` (scrollytelling: sticky scene, scrolling step cards) are **two
+presentations of the same composition**. Both are self-contained, open by double-click, and
+carry their own copy of the scene, the `STEPS` registry and the ten step bodies. Design spec:
+`docs/superpowers/specs/2026-09-13-outbound-workflow-animation-design.md`.
+
+**They are duplicated on purpose and must be kept in sync** — same rule as the five
+aggregators in the app. A change to the warehouse geometry, the cone families, a step's
+beats or its caption has to be made in **both** files. Only two things legitimately differ:
+
+| | `workflow-animation.html` | `workflow-scroll.html` |
+|---|---|---|
+| What drives `t` | a `requestAnimationFrame` clock, `DURATIONS` sets the pace | scroll position; `.step{min-height}` sets the pace |
+| Page chrome | `#bar` transport | `#story` cards + `#rail` |
+
+Everything below the driver is identical and should stay that way.
+
+**The architecture that makes both possible:** every actor's position is a pure function of
+`t`, and `seek(t)` replays `reset()` for every step up to the current one before rendering.
+That is why the scroll build needed no changes to any step, why backward scrubbing works, and
+why an MP4 render would also be straightforward (drive `seek(t)` frame by frame — `ffmpeg` is
+installed on this machine).
+
+Three traps, all of which have already bitten once:
+
+1. **`[hidden]` does nothing on SVG elements.** The UA stylesheet's `[hidden]{display:none}`
+   is HTML-only. Both files carry an explicit `[hidden]{display:none!important;}` rule —
+   without it, straps, seals, badges, panels and the step 9 elevation all render permanently.
+2. **Never hide an actor by moving it off-screen.** The `viewBox` is letterboxed, so negative
+   coordinates can still be visible — and the 2.5D projection maps them back into view even
+   when the plan view happened to hide them. `OFFSTAGE` positions are also explicitly hidden,
+   in **both** `setPos` and `applyPallet`.
+3. **`reset()` must clear subsystems, not just hide them.** `STEPS[0].reset` is the root of
+   every seek and resets the app panel, the document panel and the elevation. Hiding a panel
+   leaves its state behind, which then leaks backwards when scrubbing from a later step.
+
+`window.__anim` (`seek`, `state`, `setView`, `domOrder`) is the verification hook both files
+expose. Since `render(t)` is pure, the scene at any instant is assertable — that is how these
+files are tested, there being no test runner in this repo.
 
 ## Constants you'll touch often
 

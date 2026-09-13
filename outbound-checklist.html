@@ -554,6 +554,9 @@ html[data-theme="light"] .brand-logo{filter:none;}
 /* ── SCAN ERROR TOAST ── */
 #scan-err-toast{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#dc2626;color:#fff;padding:24px 44px;border-radius:16px;font-size:24px;font-weight:800;z-index:9999;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.7);pointer-events:none;letter-spacing:.01em;line-height:1.4;}
 #scan-err-toast span{display:block;font-size:13px;font-weight:500;opacity:.9;margin-top:4px;letter-spacing:.05em;}
+/* Title is a <b> only so the two lines are separately addressable from JS —
+   it must not introduce its own weight/style on top of the toast's own. */
+#scan-err-title{font-weight:inherit;font-style:normal;}
 
 /* Desktop only — no responsive breakpoints */
 
@@ -619,7 +622,7 @@ body{height:100%;display:flex;flex-direction:column;overflow:hidden;}
 </head>
 <body>
 
-<div id="scan-err-toast">⚠ WRONG BARCODE<span>Scan again</span></div>
+<div id="scan-err-toast"><b id="scan-err-title">⚠ WRONG BARCODE</b><span id="scan-err-sub">Scan again</span></div>
 
 <div class="top-bar">
   <div class="top-bar-inner">
@@ -1443,15 +1446,25 @@ const _lastHeightExceed  = {};
 const _lastProgressDone  = {};
 
 let _toastTimer = null;
+
+// The big centre-screen red toast, shared by every blocking scan condition.
+// Callers own the beep and the field treatment — this only paints the message,
+// so the two lines stay the single place the operator-facing wording lives.
+function showScanToast(title, sub) {
+  const toast = document.getElementById('scan-err-toast');
+  document.getElementById('scan-err-title').textContent = title;
+  document.getElementById('scan-err-sub').textContent = sub;
+  toast.style.display = 'block';
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function() { toast.style.display = 'none'; }, 2500);
+}
+
 function triggerScanError(el) {
   beepError();
   el.classList.remove('scan-wrong');
   void el.offsetWidth;
   el.classList.add('scan-wrong');
-  const toast = document.getElementById('scan-err-toast');
-  toast.style.display = 'block';
-  if (_toastTimer) clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(function() { toast.style.display = 'none'; }, 2500);
+  showScanToast('⚠ WRONG BARCODE', 'Scan again');
   setTimeout(function() {
     el.classList.remove('scan-wrong', 'scan-flash-ok', 'pn-err');
     el.value = '';
@@ -1516,7 +1529,7 @@ function onKeyDown(event, el) {
     const wrap = document.getElementById(`box-rows-${pid}`);
     if (el.closest('.box-row') === wrap.lastElementChild) {
       const newRow = addBoxRow(pid);
-      if (!focusNextPalletIfComplete(pid)) newRow.querySelector('input').focus();
+      if (!focusNextPalletIfComplete(pid, el)) newRow.querySelector('input').focus();
       return;
     }
   }
@@ -1530,7 +1543,7 @@ function onKeyDown(event, el) {
     const wrap = document.getElementById(`perbox-rows-${pid}`);
     if (isQtyField && row === wrap.lastElementChild) {
       const newRow = addPerBoxRow(pid);
-      if (!focusNextPalletIfComplete(pid)) newRow.querySelector('input').focus();
+      if (!focusNextPalletIfComplete(pid, el)) newRow.querySelector('input').focus();
       return;
     }
   }
@@ -2034,7 +2047,7 @@ function getPalletScanEntryField(pid) {
 // active one has display !== 'none'), so "next" is taken from DOM/tab order, not
 // visibility, and the target tab must be switched in *before* focusing its field
 // (a hidden field can't take focus).
-function focusNextPalletIfComplete(pid) {
+function focusNextPalletIfComplete(pid, el) {
   const block = document.querySelector(`.pallet-block[data-pid="${pid}"]`);
   const pickTotal = parseInt(block?.dataset.pickTotal) || 0;
   const boxTotal  = parseInt(block?.dataset.boxTotal) || 0;
@@ -2042,6 +2055,19 @@ function focusNextPalletIfComplete(pid) {
 
   const blocks = [...document.querySelectorAll('.pallet-block')];
   const idx = blocks.findIndex(b => b.dataset.pid === String(pid));
+
+  // Over target: the operator scanned more pieces than this pallet's Pick Labels
+  // call for. Never roll on to the next pallet carrying the excess — the whole
+  // point of continuous scanning is that nobody is watching the screen, so an
+  // unnoticed overshoot would only surface at print validation, pallets later.
+  // The scanned value is deliberately KEPT (the strip/progress bar then show the
+  // real count, not a sanitized one); we just stop the run and hand focus back
+  // to the offending field so it can be corrected in place.
+  if (boxTotal > pickTotal) {
+    triggerOverTargetStop(el, idx >= 0 ? idx + 1 : null, boxTotal, pickTotal);
+    return true;
+  }
+
   if (idx < 0 || idx >= blocks.length - 1) return false;
 
   const nextPid = parseInt(blocks[idx + 1].dataset.pid, 10);
@@ -2052,6 +2078,42 @@ function focusNextPalletIfComplete(pid) {
   entry.focus();
   entry.select();
   return true;
+}
+
+// Blocking stop for an over-scanned pallet (see focusNextPalletIfComplete). Unlike
+// triggerScanError this deliberately KEEPS the scanned value — the operator needs the
+// real count on screen to work out which box got double-scanned — so it only flashes
+// the field, then hands focus back with the text selected so a corrected re-scan
+// overwrites it in place.
+function triggerOverTargetStop(el, palletNo, boxTotal, pickTotal) {
+  beepError();
+  const over = boxTotal - pickTotal;
+  showScanToast('⚠ OVER TARGET',
+    `${palletNo ? `Pallet ${palletNo} · ` : ''}${boxTotal.toLocaleString()} / ${pickTotal.toLocaleString()} pcs (+${over.toLocaleString()})`);
+  if (!el) return;
+
+  // Our caller appends a fresh empty row before asking us — drop it again so the
+  // offending field is the last row once more. Otherwise the next Enter would miss
+  // the last-row branch entirely and fall through to plain autoAdvance, skipping
+  // this check and letting the run continue over target after all.
+  const row  = el.closest('.box-row, .perbox-row');
+  const wrap = row?.parentElement;
+  const last = wrap?.lastElementChild;
+  if (last && last !== row && [...last.querySelectorAll('input')].every(i => !i.value.trim())) {
+    last.remove();
+    renumber(wrap, 'B');
+  }
+
+  el.classList.remove('scan-wrong', 'scan-flash-ok');
+  void el.offsetWidth;
+  el.classList.add('scan-wrong');
+  setTimeout(function() {
+    el.classList.remove('scan-wrong', 'scan-flash-ok');
+    el.style.borderColor = '';
+    el.focus();
+    el.select();
+  }, 460);
+  saveStateDebounced();
 }
 
 // PN fields must display in uppercase (the Zebra sometimes sends lowercase depending on symbology config).

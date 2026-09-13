@@ -1,0 +1,1191 @@
+<meta charset="UTF-8"/>
+<title>Outbound Workflow — Sevenum</title>
+<!-- Inline so the browser's automatic /favicon.ico request never 404s. That request
+     is not a code error, but it would otherwise pollute the console-clean check that
+     every verification step in the plan relies on. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230d1117'/%3E%3Cpolygon points='16,6 23,22 9,22' fill='%23dc2626'/%3E%3Cellipse cx='16' cy='6' rx='7' ry='2.4' fill='%23f9fafb'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#0d1117; --surface:#161b22; --line:#30363d;
+  --ink:#e6edf3; --muted:#8b949e; --accent:#58a6ff;
+}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+  font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;}
+#wrap{display:flex;flex-direction:column;height:100%;}
+#stage{flex:1;width:100%;display:block;min-height:0;}
+/* The UA stylesheet's [hidden]{display:none} rule applies to HTML elements only —
+   SVG nodes ignore it and keep rendering. Every toggle in this file (straps, seal,
+   number badges, the app panel, the step 9 elevation) uses the hidden attribute, so
+   without this rule they all silently stay visible. */
+[hidden]{display:none!important;}
+#bar{border-top:1px solid var(--line);background:var(--surface);padding:8px 16px 12px;}
+
+#acts{position:relative;height:15px;margin-bottom:3px;}
+.act{position:absolute;font-size:9.5px;letter-spacing:.09em;font-weight:700;
+  color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:2px;
+  box-sizing:border-box;white-space:nowrap;overflow:hidden;opacity:.55;}
+.act.on{color:var(--accent);border-bottom-color:var(--accent);opacity:1;}
+
+#scrub{position:relative;height:26px;background:#0d1117;border:1px solid var(--line);
+  border-radius:4px;cursor:pointer;overflow:hidden;}
+#played{position:absolute;inset:0 auto 0 0;background:rgba(88,166,255,.16);pointer-events:none;}
+#ticks{position:absolute;inset:0;}
+.tick{position:absolute;top:0;bottom:0;background:transparent;color:var(--muted);
+  border:0;border-left:1px solid var(--line);font:inherit;font-size:10px;font-weight:700;
+  cursor:pointer;padding:0;}
+.tick:first-child{border-left:0;}
+.tick:hover{background:rgba(88,166,255,.10);color:var(--ink);}
+.tick.on{background:rgba(88,166,255,.26);color:#fff;}
+
+#row{display:flex;align-items:center;gap:10px;margin-top:8px;}
+#row button{background:#0d1117;color:var(--ink);border:1px solid var(--line);
+  border-radius:4px;width:32px;height:28px;cursor:pointer;font-size:12px;flex:none;}
+#row button:hover{border-color:var(--accent);color:var(--accent);}
+#cap{flex:1;min-width:0;line-height:1.35;}
+#cap-title{display:block;font-size:12.5px;}
+#cap-text{display:block;font-size:11.5px;color:var(--muted);}
+#clock{font-size:11.5px;color:var(--muted);flex:none;font-variant-numeric:tabular-nums;}
+#btn-view{display:flex;flex:none;border:1px solid var(--line);border-radius:4px;overflow:hidden;}
+#btn-view button{width:auto;padding:0 12px;height:26px;border:0;border-radius:0;
+  font-size:11px;font-weight:700;color:var(--muted);background:#0d1117;}
+#btn-view button.on{background:rgba(88,166,255,.20);color:#fff;}
+</style>
+
+<div id="wrap">
+  <svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet">
+    <g id="g-static"></g>
+    <g id="g-actors"></g>
+    <g id="g-panel"></g>
+    <g id="g-elevation"></g>
+    <g id="g-legend"></g>
+  </svg>
+  <div id="bar"></div>
+</div>
+
+<script>
+/* ══ LAYOUT ══════════════════════════════════════════════
+   Every coordinate in the scene comes from here. Nothing downstream
+   hard-codes a position, so the plan can be re-proportioned in one place. */
+const LAYOUT = {
+  aisle:   { x0:40, y:58, h:212, groupW:105, gap:6, rackW:48, rackGap:3, count:10 },
+  cross:   { y0:300, y1:420 },        // the lane the EPT travels
+  drop:    { y:322 },                 // top edge of a pallet parked at an aisle mouth
+  packing: { x:1190, y:300, w:230, h:190 },
+  office:  { x:1440, y:300, w:120, h:110 },
+  staging: { x:1190, y:540, w:320, h:250 },
+  docks:   { x:1520, y:540, w:60,  h:250 },
+  // The lower-left region is deliberately kept clear of the plan: it is where the
+  // app and document panels open in steps 4–7. Sliding them over the warehouse
+  // instead would hide the pallets they are talking about.
+  panel:   { x:60,  y:462, w:1080, h:326 },
+  pallet:  { w:72, h:52 }
+};
+
+/* ══ PALETTE ═════════════════════════════════════════════
+   Both cone families are listed in full because the legend documents the real
+   system, not just the two orders that appear on camera. Yellow appears in both
+   families AND is the vehicle colour — see the spec's risk note. */
+const PALETTE = {
+  // Rack and zone tones are deliberately lighter than the floor. In 2.5D the box()
+  // helper darkens the front and side faces, so a rack that already reads as dark in
+  // plan turns into an unreadable black wall the moment it gains height — and the ten
+  // separate aisles, the one thing this scene must communicate, disappear with it.
+  floor:'#0f141b', rack:'#3a4a61', rackLine:'#56687f',
+  zone:'#19212c',  zoneLine:'#3b4655', lane:'#161d27',
+  ink:'#e6edf3',   muted:'#8b949e',
+  vehicle:'#f5c518',                       // EPT and VNA are both yellow
+  wood:'#8b5e34',  box:'#c9a227', label:'#f9fafb',
+  strap:'#0b0e13', seal:'rgba(255,255,255,.14)',
+  cone:  { blue:'#2563eb', yellow:'#eab308', red:'#dc2626', green:'#16a34a' },
+  disc:  { black:'#111827', white:'#f9fafb', blue:'#2563eb', yellow:'#eab308',
+           red:'#dc2626', purple:'#7c3aed', pink:'#ec4899', orange:'#f97316' }
+};
+
+/* ══ PROJECTION ══════════════════════════════════════════
+   Every position in this file is authored ONCE, in plan coordinates. The view
+   switch only changes how those coordinates reach the screen, so the ten steps,
+   their timings and every assertion about them are identical in both views.
+
+   The 2.5D mode is a CABINET projection, not a true 45° isometric: x stays
+   horizontal and only y skews. A true isometric would swing the whole rack row
+   diagonally, and reading 54 → 35 left to right is the thing this scene most has
+   to get right. Swap the constants below for equal sx/kx to get the full rotation. */
+const PROJ = {
+  plan: { sx:1,   kx:0,   ky:1,   ox:0,  oy:0,   z:0 },
+  // sx*1580 + kx*790 + ox must stay under 1600 or the staging end runs off the right
+  // edge; ky sets how much depth the floor gets, and oy leaves headroom above for the
+  // tallest thing in the scene (a rack, plus a pallet stack standing in front of it).
+  iso:  { sx:.80, kx:.32, ky:.46, ox:30, oy:110, z:1 }
+};
+let VIEW = 'plan';
+const P = () => PROJ[VIEW];
+
+// Absolute: plan point -> screen point.
+const px = (x, y)       => { const p = P(); return x * p.sx + y * p.kx + p.ox; };
+const py = (x, y, z)    => { const p = P(); return y * p.ky + p.oy - (z || 0) * p.z; };
+// Relative: the projection is linear, so a shape built around a local origin can be
+// moved with a plain translate. That is what keeps setPos cheap and lets geometry be
+// built once per view instead of once per frame.
+const lx = (dx, dy)     => { const p = P(); return dx * p.sx + dy * p.kx; };
+const ly = (dx, dy, dz) => { const p = P(); return dy * p.ky - (dz || 0) * p.z; };
+
+const ZS = 0.42;           // px of height per cm, for pallet stacks
+const isIso = () => VIEW === 'iso';
+
+// Actors are parked here when they are not in the scene. Parking alone is NOT enough
+// to hide them: the viewBox is letterboxed horizontally, so a negative coordinate can
+// still land on screen — in plan view this position happened to fall off the top, but
+// the 2.5D projection maps its y back into view. Anything at OFFSTAGE is therefore
+// also explicitly hidden.
+const OFFSTAGE = -300;
+const isOffstage = x => x <= -100;
+
+/* ══ BUILD ═══════════════════════════════════════════════ */
+const SVGNS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs) {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  return n;
+}
+// A rectangular volume in LOCAL coordinates: flat rect in plan, three faces in 2.5D.
+// The two darker faces are derived from the top colour rather than named separately,
+// so a palette change never leaves a box with mismatched sides.
+function box(dx, dy, w, h, z, fill, opts) {
+  opts = opts || {};
+  const g = el('g', {});
+  if (!isIso()) {
+    g.appendChild(el('rect', { x:lx(dx, dy), y:ly(dx, dy, 0), width:w, height:h,
+      rx:opts.rx == null ? 3 : opts.rx, fill:fill,
+      stroke:opts.stroke || 'rgba(0,0,0,.35)' }));
+    return g;
+  }
+  const pt = (ax, ay, az) => lx(ax, ay) + ',' + ly(ax, ay, az);
+  if (!z) {
+    // Flat ground (floor, lanes, zone footprints): the top face alone, which in this
+    // projection is a parallelogram — a plain rect would not line up with anything.
+    g.appendChild(el('polygon', {
+      points:[pt(dx, dy, 0), pt(dx + w, dy, 0), pt(dx + w, dy + h, 0), pt(dx, dy + h, 0)].join(' '),
+      fill:fill, stroke:opts.stroke || 'rgba(0,0,0,.35)' }));
+    return g;
+  }
+  const front = [pt(dx, dy + h, z), pt(dx + w, dy + h, z), pt(dx + w, dy + h, 0), pt(dx, dy + h, 0)];
+  const side  = [pt(dx + w, dy, z), pt(dx + w, dy + h, z), pt(dx + w, dy + h, 0), pt(dx + w, dy, 0)];
+  const top   = [pt(dx, dy, z), pt(dx + w, dy, z), pt(dx + w, dy + h, z), pt(dx, dy + h, z)];
+  g.appendChild(el('polygon', { points:side.join(' '),  fill:shade(fill, -.34), stroke:'rgba(0,0,0,.35)' }));
+  g.appendChild(el('polygon', { points:front.join(' '), fill:shade(fill, -.18), stroke:'rgba(0,0,0,.35)' }));
+  g.appendChild(el('polygon', { points:top.join(' '),   fill:fill,              stroke:'rgba(0,0,0,.35)' }));
+  return g;
+}
+
+// Darken (amt < 0) or lighten a #rrggbb colour. Used only for box faces.
+function shade(hex, amt) {
+  if (hex[0] !== '#' || hex.length !== 7) return hex;
+  const n = parseInt(hex.slice(1), 16);
+  const f = c => Math.max(0, Math.min(255, Math.round(c + 255 * amt)));
+  return '#' + [f(n >> 16 & 255), f(n >> 8 & 255), f(n & 255)]
+    .map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+function text(x, y, str, opts) {
+  opts = opts || {};
+  const n = el('text', { x:x, y:y, fill: opts.fill || PALETTE.muted,
+    'font-size': opts.size || 12, 'text-anchor': opts.anchor || 'middle',
+    'font-weight': opts.weight || 500 });
+  n.textContent = str;
+  return n;
+}
+
+// Racks descend left to right. Aisle i holds rack (54 - 2i) on its left and
+// (53 - 2i) on its right, so the row reads 54, 53, 52 … 36, 35.
+const A = LAYOUT.aisle;
+const aisleCentre = i => A.x0 + i * (A.groupW + A.gap) + A.groupW / 2;
+
+// Low enough that the rack row reads as ten separate blocks rather than one skyline,
+// and that a pallet standing at an aisle mouth is never swallowed by the rack behind it.
+const RACK_Z = 64;
+
+function buildAisles(host) {
+  for (let i = 0; i < A.count; i++) {
+    const gx = A.x0 + i * (A.groupW + A.gap);
+    const leftNo = 54 - 2 * i, rightNo = 53 - 2 * i;
+    const inner = (A.groupW - (A.rackW * 2 + A.rackGap)) / 2;
+    // Aisle mouth marker on the floor, so the drop point reads as deliberate.
+    host.appendChild(box(gx + inner + A.rackW - 6, A.y + A.h, 12,
+      LAYOUT.cross.y0 - (A.y + A.h), 0, 'rgba(88,166,255,.07)', { stroke:'none' }));
+    [[leftNo, gx + inner], [rightNo, gx + inner + A.rackW + A.rackGap]].forEach(pair => {
+      const no = pair[0], rx = pair[1];
+      host.appendChild(box(rx, A.y, A.rackW, A.h, RACK_Z, PALETTE.rack,
+        { stroke:PALETTE.rackLine }));
+      // The number rides on top of its rack in 2.5D and sits above it in plan. It is
+      // the one label that must stay readable in both views.
+      host.appendChild(text(lx(rx + A.rackW / 2, A.y), ly(rx + A.rackW / 2, A.y, RACK_Z) - 8,
+        String(no), { size:13 }));
+    });
+  }
+}
+
+function zone(host, r, label) {
+  host.appendChild(box(r.x, r.y, r.w, r.h, 0, PALETTE.zone,
+    { stroke:PALETTE.zoneLine, rx:6 }));
+  // A zone narrower than its own label (DOCKS) gets the label turned on its side
+  // rather than spilling over the neighbouring zone.
+  const t = text(0, 0, label, { size:13, fill:PALETTE.ink, weight:700 });
+  if (r.w < 90) {
+    t.setAttribute('transform', 'translate(' + lx(r.x + r.w / 2, r.y + r.h / 2) + ', '
+      + ly(r.x + r.w / 2, r.y + r.h / 2, 0) + ') rotate(-90)');
+    t.setAttribute('x', 0); t.setAttribute('y', 4);
+  } else {
+    t.setAttribute('x', lx(r.x + r.w / 2, r.y));
+    t.setAttribute('y', ly(r.x + r.w / 2, r.y, 0) + 20);
+  }
+  host.appendChild(t);
+}
+
+function buildStatic() {
+  const host = document.getElementById('g-static');
+  while (host.firstChild) host.removeChild(host.firstChild);
+  // Built in local coordinates and shifted once, so the same code serves both views.
+  host.setAttribute('transform', 'translate(' + P().ox + ',' + P().oy + ')');
+  host.appendChild(box(0, 0, 1600, 900, 0, PALETTE.floor, { stroke:'none', rx:0 }));
+  const C = LAYOUT.cross;
+  host.appendChild(box(0, C.y0, 1600, C.y1 - C.y0, 0, PALETTE.lane,
+    { stroke:PALETTE.zoneLine, rx:0 }));
+  host.appendChild(text(lx(600, C.y1), ly(600, C.y1, 0) - 10, 'CROSS AISLE', { size:11 }));
+  zone(host, LAYOUT.packing, 'PACKING');
+  zone(host, LAYOUT.office,  'OFFICE');
+  zone(host, LAYOUT.staging, 'STAGING');
+  zone(host, LAYOUT.docks,   'DOCKS');
+  buildAisles(host);        // after the zones so racks overlap the floor, not vice versa
+}
+
+/* ══ ACTORS ══════════════════════════════════════════════
+   Everything here is constructed ONCE at load. Nothing in this section is ever
+   called from render(); frames only toggle attributes on these nodes. */
+
+// The two cone families must differ by SHAPE, not only colour — a viewer three
+// metres from a warehouse screen cannot resolve a hue difference, but can always
+// tell a tall triangle from a flat dome.
+function buildCone(coneColour, discColour) {
+  const g = el('g', { class:'marker' });
+  g.appendChild(el('polygon', { points:'0,-18 7,0 -7,0', fill:coneColour }));
+  g.appendChild(el('rect', { x:-10, y:0, width:20, height:3, rx:1, fill:coneColour }));
+  g.appendChild(el('circle', { cx:0, cy:-6,  r:1.6, fill:'rgba(0,0,0,.45)' }));
+  g.appendChild(el('circle', { cx:0, cy:-12, r:1.3, fill:'rgba(0,0,0,.45)' }));
+  if (discColour) {
+    // 6 cm disc resting on the cone's tip. Drawn wider than the cone's base, which
+    // is true to the real objects (a 20 cm disc against a 30 cm cone) and makes the
+    // stack read as one two-colour marker rather than two separate things.
+    g.appendChild(el('ellipse', { cx:0, cy:-20, rx:11, ry:3.4, fill:discColour,
+      stroke:'rgba(0,0,0,.35)', 'stroke-width':.8 }));
+  }
+  return g;
+}
+
+const NOTE_ORDER = ['type', 'weight', 'height'];
+
+// Geometry is rebuilt on a view switch, never per frame. The pallet's visible state
+// lives in api.state — not in the DOM — so a redraw can re-assert it exactly.
+function drawPallet(api) {
+  const P = LAYOUT.pallet, g = api.g, n = api.nodes = {};
+  while (g.firstChild) g.removeChild(g.firstChild);
+  const cargoZ = Math.round(api.heightCm * ZS);
+
+  if (isIso()) {
+    g.appendChild(box(0, 0, P.w, P.h, 9, PALETTE.wood));
+    const cargo = box(4, 4, P.w - 8, P.h - 8, cargoZ, PALETTE.box);
+    cargo.setAttribute('transform', 'translate(0,' + ly(0, 0, 9) + ')');
+    g.appendChild(cargo);
+  } else {
+    g.appendChild(el('rect', { x:0, y:0, width:P.w, height:P.h, rx:3, fill:PALETTE.wood }));
+    for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++)
+      g.appendChild(el('rect', { x:6 + c * 21, y:6 + r * 21, width:18, height:18, rx:2,
+        fill:PALETTE.box, stroke:'rgba(0,0,0,.35)' }));
+  }
+
+  const topY = isIso() ? ly(0, 0, 9 + cargoZ) : 0;
+  n.pickLabel = el('rect', { x:lx(P.w - 20, 4), y:topY + ly(P.w - 20, 4, 0),
+    width:16, height:11, rx:1.5, fill:PALETTE.label });
+
+  n.strap = el('g', {});
+  [18, 46].forEach(sx => {
+    if (isIso()) n.strap.appendChild(el('rect', { x:lx(sx, 0), y:ly(sx, 0, 9 + cargoZ),
+      width:4, height:cargoZ, fill:PALETTE.strap }));
+    else n.strap.appendChild(el('rect', { x:sx, y:0, width:4, height:P.h, fill:PALETTE.strap }));
+  });
+
+  n.seal = isIso()
+    ? box(2, 2, P.w - 4, P.h - 4, cargoZ + 10, PALETTE.seal, { stroke:'none' })
+    : el('rect', { x:0, y:0, width:P.w, height:P.h, rx:3, fill:PALETTE.seal });
+
+  n.numBadge = el('g', {});
+  n.numBadge.appendChild(el('circle', { cx:lx(12, P.h - 12), cy:topY + ly(12, P.h - 12, 0),
+    r:10, fill:'#0b0e13', stroke:PALETTE.ink }));
+  n.numText = text(lx(12, P.h - 12), topY + ly(12, P.h - 12, 0) + 4, '',
+    { size:12, fill:PALETTE.ink, weight:700 });
+  n.numBadge.appendChild(n.numText);
+
+  // What gets hand-written onto the pick label, shown beside the pallet because the
+  // label itself is a few pixels wide at scene scale.
+  n.note = text(lx(P.w + 10, P.h / 2), topY + ly(P.w + 10, P.h / 2, 0) + 4, '',
+    { size:11, anchor:'start', fill:PALETTE.label });
+
+  n.marker = buildCone(api.cone, api.disc);
+  n.marker.setAttribute('transform', isIso()
+    ? 'translate(' + lx(P.w / 2, P.h / 2) + ',' + ly(P.w / 2, P.h / 2, 9 + cargoZ) + ')'
+    : 'translate(' + (P.w / 2) + ', 6)');
+
+  g.appendChild(n.pickLabel); g.appendChild(n.strap); g.appendChild(n.seal);
+  g.appendChild(n.numBadge);  g.appendChild(n.note);  g.appendChild(n.marker);
+  applyPallet(api);
+}
+
+function applyPallet(api) {
+  const n = api.nodes, s = api.state;
+  n.marker.toggleAttribute('hidden', !s.marker);
+  n.pickLabel.toggleAttribute('hidden', !s.pickLabel);
+  n.strap.toggleAttribute('hidden', !s.strap);
+  n.seal.toggleAttribute('hidden', !s.seal);
+  n.numBadge.toggleAttribute('hidden', api.num == null);
+  n.numText.textContent = api.num == null ? '' : String(api.num);
+  n.note.textContent = NOTE_ORDER.filter(f => api.fields[f] != null)
+    .map(f => api.fields[f]).join('  ·  ');
+  api.g.toggleAttribute('hidden', isOffstage(api.x));
+  api.g.setAttribute('transform',
+    'translate(' + px(api.x, api.y) + ',' + py(api.x, api.y, 0) + ')');
+}
+
+function buildPallet(id, markerCone, markerDisc, heightCm) {
+  const api = {
+    id:id, g:el('g', { 'data-pallet':id }), cone:markerCone, disc:markerDisc,
+    heightCm:heightCm, x:-300, y:-300, num:null, fields:{}, nodes:null,
+    state:{ marker:true, pickLabel:true, strap:false, seal:false },
+    setPos(x, y) { api.x = x; api.y = y;
+      // Must toggle here as well as in applyPallet: a pallet brought back on stage by
+      // setPos alone would otherwise stay hidden from its last offstage parking.
+      api.g.toggleAttribute('hidden', isOffstage(x));
+      api.g.setAttribute('transform',
+        'translate(' + px(x, y) + ',' + py(x, y, 0) + ')'); },
+    // Idempotent on purpose: render() runs every frame and on every seek, so writing
+    // the same field twice must be a no-op rather than appending a duplicate.
+    writeOn(field, value) {
+      if (api.fields[field] === value) return;
+      api.fields[field] = value; applyPallet(api);
+    },
+    clearNote()     { api.fields = {}; applyPallet(api); },
+    setMarker(v)    { api.state.marker = !!v;    applyPallet(api); },
+    setPickLabel(v) { api.state.pickLabel = !!v; applyPallet(api); },
+    setStrap(v)     { api.state.strap = !!v;     applyPallet(api); },
+    setSeal(v)      { api.state.seal = !!v;      applyPallet(api); },
+    setNum(n)       { api.num = n;               applyPallet(api); },
+    redraw()        { drawPallet(api); }
+  };
+  drawPallet(api);
+  return api;
+}
+
+// Order A is a red 30 cm cone WITH a white 6 cm disc stacked on it; Order B is a
+// plain blue cone. Neither uses yellow: yellow is a real cone colour but also the
+// colour of both vehicles, and that is the one pairing a viewer can misread.
+// The heights are the same numbers step 3 writes onto the pick labels. In plan view
+// they are only text; in 2.5D the stacks are visibly different, which is the whole
+// reason that view earns its keep.
+const PALLETS = {
+  A1: buildPallet('A1', PALETTE.cone.red,  PALETTE.disc.white, 165),
+  A2: buildPallet('A2', PALETTE.cone.red,  PALETTE.disc.white, 150),
+  A3: buildPallet('A3', PALETTE.cone.red,  PALETTE.disc.white, 172),
+  B1: buildPallet('B1', PALETTE.cone.blue, null, 158),
+  B2: buildPallet('B2', PALETTE.cone.blue, null, 144)
+};
+Object.keys(PALLETS).forEach(k =>
+  document.getElementById('g-actors').appendChild(PALLETS[k].g));
+
+function drawVehicle(api) {
+  const g = api.g, kind = api.kind;
+  while (g.firstChild) g.removeChild(g.firstChild);
+  const w = kind === 'vna' ? 46 : 38, h = kind === 'vna' ? 30 : 22;
+  const z = kind === 'vna' ? 40 : 22;
+  g.appendChild(box(0, 0, w, h, isIso() ? z : 0, PALETTE.vehicle,
+    { stroke:'rgba(0,0,0,.4)', rx:4 }));
+  const topY = isIso() ? ly(0, 0, z) : 0;
+  g.appendChild(text(lx(w / 2, h / 2), topY + ly(w / 2, h / 2, 0) + 4, kind.toUpperCase(),
+    { size:10, fill:'#1a1a1a', weight:700 }));
+  api.readout = text(lx(w / 2, 0), topY + ly(w / 2, 0, 0) - 8, '',
+    { size:11, fill:PALETTE.ink, weight:700 });
+  g.appendChild(api.readout);
+  api.readout.textContent = api.weight == null ? '' : api.weight + ' kg';
+  api.setPos(api.x, api.y);
+}
+
+function buildVehicle(kind) {
+  const api = {
+    kind:kind, g:el('g', { 'data-vehicle':kind }), x:-300, y:-300, weight:null, readout:null,
+    setPos(x, y) { api.x = x; api.y = y;
+      api.g.toggleAttribute('hidden', isOffstage(x));
+      api.g.setAttribute('transform',
+        'translate(' + px(x, y) + ',' + py(x, y, 0) + ')'); },
+    setWeight(kg) { api.weight = kg;
+      if (api.readout) api.readout.textContent = kg == null ? '' : kg + ' kg'; },
+    redraw() { drawVehicle(api); }
+  };
+  drawVehicle(api);
+  return api;
+}
+const VNA = buildVehicle('vna'), EPT = buildVehicle('ept');
+document.getElementById('g-actors').appendChild(VNA.g);
+document.getElementById('g-actors').appendChild(EPT.g);
+
+// The legend documents the REAL system — all four 30 cm colours and all eight 6 cm
+// colours — not just the two markers that appear on camera.
+function buildLegend() {
+  const host = document.getElementById('g-legend');
+  host.appendChild(text(40, 812, 'ORDER MARKERS — one piece, or two stacked',
+    { size:12, anchor:'start', fill:PALETTE.ink, weight:700 }));
+  host.appendChild(text(40, 843, '30 cm CONES', { size:10, anchor:'start', weight:700 }));
+  Object.keys(PALETTE.cone).forEach((name, i) => {
+    const k = buildCone(PALETTE.cone[name], null);
+    k.setAttribute('transform', `translate(${168 + i * 62}, 872)`);
+    host.appendChild(k);
+    host.appendChild(text(168 + i * 62, 888, name, { size:9 }));
+  });
+  host.appendChild(text(440, 843, '6 cm DISCS', { size:10, anchor:'start', weight:700 }));
+  Object.keys(PALETTE.disc).forEach((name, i) => {
+    // A strong outline, not a faint one: the black disc is a real colour in the set
+    // and would otherwise vanish entirely against the dark floor.
+    host.appendChild(el('ellipse', { cx:560 + i * 62, cy:870, rx:11, ry:3.4,
+      fill:PALETTE.disc[name], stroke:'rgba(255,255,255,.55)', 'stroke-width':1 }));
+    host.appendChild(text(560 + i * 62, 888, name, { size:9 }));
+  });
+}
+buildLegend();
+
+// Real bodies arrive in later steps; defined here so step 1's reset() has something
+// to call. Keeping the stub means no step ever has to know which task it runs after.
+let PANEL_KIND = null, ELEVATION_ON = false;
+function showPanel(visible, kind) {
+  PANEL_KIND = visible ? (kind || 'app') : null;
+  document.getElementById('g-panel').toggleAttribute('hidden', !visible);
+  // APP and DOCS are declared below but only ever *called* after both exist —
+  // every caller runs from a step, and the first step runs at the seek(0) that
+  // closes this script.
+  if (typeof APP  !== 'undefined') APP.card.toggleAttribute('hidden',  PANEL_KIND !== 'app');
+  if (typeof DOCS !== 'undefined') DOCS.card.toggleAttribute('hidden', PANEL_KIND !== 'docs');
+}
+function showElevation(v) {
+  ELEVATION_ON = !!v;
+  document.getElementById('g-elevation').toggleAttribute('hidden', !v);
+  document.getElementById('g-static').toggleAttribute('hidden', !!v);
+  document.getElementById('g-actors').toggleAttribute('hidden', !!v);
+  // The marker legend goes too: in the elevation the markers are gone (they came off
+  // before strapping), so leaving their legend up invites the viewer to look for them.
+  document.getElementById('g-legend').toggleAttribute('hidden', !!v);
+}
+
+/* ══ CLOCK ═══════════════════════════════════════════════ */
+const DURATIONS = [18, 22, 14, 18, 28, 14, 14, 13, 11, 13];   // seconds, sums to 165
+const TITLES = [
+  'Pallets staged at the aisle',      'Weighing and pallet type',
+  'Height, and the row order',        'Loading the order into the app',
+  'Continuous scanning',              'WMS registration and printing',
+  'Assembling the document packet',   'Strapping and sealing',
+  'Delivery labels and packing list', 'Staging for tomorrow’s truck'
+];
+const ACT_NAMES = { 1:'ACT I — FLOOR & VERIFICATION', 2:'ACT II — DOCUMENTS & DISPATCH' };
+
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const lerp  = (a, b, p) => a + (b - a) * p;
+const ease  = p => p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+// Progress of a sub-beat inside a step: 0 before `from`, 1 after `to`, eased between.
+const beat  = (localT, from, to) => ease(clamp((localT - from) / (to - from), 0, 1));
+
+let _acc = 0;
+const STEPS = DURATIONS.map((secs, i) => {
+  const start = _acc; _acc += secs * 1000;
+  return { id:i + 1, act: i < 5 ? 1 : 2, title:TITLES[i], caption:'',
+           start:start, end:_acc, reset:function(){}, render:function(){} };
+});
+const TOTAL_MS = _acc;
+
+let t = 0, playing = false, _raf = null, _last = 0;
+
+function stepIndexAt(ms) {
+  const c = clamp(ms, 0, TOTAL_MS);
+  for (let i = 0; i < STEPS.length; i++) if (c < STEPS[i].end) return i;
+  return STEPS.length - 1;
+}
+
+// Rebuilds the scene from scratch on EVERY seek: each step up to and including the
+// current one re-asserts its opening conditions, then only the current one advances.
+// This is what makes backward scrubbing safe — no actor can be left somewhere no
+// step ever put it.
+// In 2.5D the painter's algorithm decides what is in front of what: an actor further
+// down the plan (larger y) is nearer the viewer and must be drawn last. The order is
+// only re-applied when it actually CHANGES — reordering DOM nodes every frame would
+// undo the whole point of building geometry once.
+let _depthKey = '';
+function sortDepth() {
+  const host = document.getElementById('g-actors');
+  const actors = Object.keys(PALLETS).map(k => PALLETS[k]).concat([VNA, EPT]);
+  actors.sort((a, b) => a.y - b.y);
+  const key = actors.map(a => a.id || a.kind).join(',');
+  if (key === _depthKey) return;
+  _depthKey = key;
+  actors.forEach(a => host.appendChild(a.g));
+}
+
+function seek(ms) {
+  t = clamp(ms, 0, TOTAL_MS);
+  const idx = stepIndexAt(t);
+  for (let i = 0; i <= idx; i++) STEPS[i].reset();
+  STEPS[idx].render(t - STEPS[idx].start);
+  if (isIso()) sortDepth();
+  paintChrome(idx);
+}
+
+function setView(v) {
+  if (v === VIEW) return;
+  VIEW = v;
+  _depthKey = '';
+  buildStatic();
+  Object.keys(PALLETS).forEach(k => PALLETS[k].redraw());
+  VNA.redraw(); EPT.redraw();
+  document.querySelectorAll('#btn-view button').forEach(b =>
+    b.classList.toggle('on', b.dataset.view === VIEW));
+  seek(t);                       // re-apply every position through the new projection
+}
+
+function frame(now) {
+  if (!playing) return;
+  const dt = _last ? now - _last : 0;
+  _last = now;
+  seek(t + dt);
+  if (t >= TOTAL_MS) { pause(); return; }
+  _raf = requestAnimationFrame(frame);
+}
+function play()  { if (playing) return; if (t >= TOTAL_MS) t = 0;
+                   playing = true; _last = 0; _raf = requestAnimationFrame(frame); paintChrome(stepIndexAt(t)); }
+function pause() { playing = false; if (_raf) cancelAnimationFrame(_raf); _raf = null;
+                   paintChrome(stepIndexAt(t)); }
+
+/* ── control bar ── */
+const bar = document.getElementById('bar');
+bar.innerHTML =
+  '<div id="acts"><span class="act" data-act="1"></span><span class="act" data-act="2"></span></div>' +
+  '<div id="scrub"><div id="played"></div><div id="ticks"></div></div>' +
+  '<div id="row">' +
+    '<button id="btn-play" title="Play / pause">&#9654;</button>' +
+    '<button id="btn-restart" title="Restart">&#8634;</button>' +
+    '<div id="cap"><b id="cap-title"></b><span id="cap-text"></span></div>' +
+    '<span id="btn-view"><button data-view="plan" class="on">Plan</button>' +
+    '<button data-view="iso">2.5D</button></span>' +
+    '<span id="clock"></span>' +
+  '</div>';
+bar.querySelectorAll('#btn-view button').forEach(b =>
+  b.onclick = () => setView(b.dataset.view));
+
+(function layoutActs() {
+  const acts = bar.querySelectorAll('.act');
+  [1, 2].forEach(a => {
+    const inAct = STEPS.filter(s => s.act === a);
+    const from = inAct[0].start / TOTAL_MS, to = inAct[inAct.length - 1].end / TOTAL_MS;
+    const nodeEl = acts[a - 1];
+    nodeEl.style.left  = (from * 100) + '%';
+    nodeEl.style.width = ((to - from) * 100) + '%';
+    nodeEl.textContent = ACT_NAMES[a];
+  });
+  const ticks = document.getElementById('ticks');
+  STEPS.forEach((s, i) => {
+    const d = document.createElement('button');
+    d.className = 'tick'; d.dataset.step = s.id;
+    d.style.left = (s.start / TOTAL_MS * 100) + '%';
+    d.style.width = ((s.end - s.start) / TOTAL_MS * 100) + '%';
+    d.textContent = s.id;
+    d.title = s.title;
+    d.onclick = e => { e.stopPropagation(); pause(); seek(s.start); };
+    ticks.appendChild(d);
+  });
+})();
+
+document.getElementById('btn-play').onclick = () => playing ? pause() : play();
+document.getElementById('btn-restart').onclick = () => { pause(); seek(0); };
+document.getElementById('scrub').onclick = e => {
+  const r = e.currentTarget.getBoundingClientRect();
+  pause(); seek((e.clientX - r.left) / r.width * TOTAL_MS);
+};
+
+const mmss = ms => {
+  const s = Math.floor(ms / 1000);
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+};
+function paintChrome(idx) {
+  const s = STEPS[idx];
+  document.getElementById('cap-title').textContent =
+    'STEP ' + s.id + ' — ' + s.title;
+  document.getElementById('cap-text').textContent = s.caption;
+  document.getElementById('clock').textContent = mmss(t) + ' / ' + mmss(TOTAL_MS);
+  document.getElementById('played').style.width = (t / TOTAL_MS * 100) + '%';
+  document.getElementById('btn-play').innerHTML = playing ? '&#10074;&#10074;' : '&#9654;';
+  bar.querySelectorAll('.tick').forEach(n =>
+    n.classList.toggle('on', Number(n.dataset.step) === s.id));
+  bar.querySelectorAll('.act').forEach(n =>
+    n.classList.toggle('on', Number(n.dataset.act) === s.act));
+}
+
+/* ══ STEPS — ACT I ═══════════════════════════════════════ */
+
+// Order A takes aisles 1, 3, 5 and Order B aisles 7, 8, so the EPT's route to
+// packing visibly passes Order B's pallets without stopping. That pass-by is the
+// whole demonstration of what the cone is for.
+const DROP = { A1:{ ai:1 }, A2:{ ai:3 }, A3:{ ai:5 }, B1:{ ai:7 }, B2:{ ai:8 } };
+Object.keys(DROP).forEach(k => {
+  DROP[k].x = aisleCentre(DROP[k].ai) - LAYOUT.pallet.w / 2;
+  DROP[k].y = LAYOUT.drop.y;
+});
+
+// Single source of truth for the order's numbers. Steps 2 and 3 write these onto
+// the pick labels and step 4 reads the SAME constants into the app panel, so the
+// two can never disagree on screen.
+const ORDER_A  = ['A1', 'A2', 'A3'];
+const PTYPES   = { A1:'EP', A2:'EP', A3:'BP' };
+const WEIGHTS  = { A1:420, A2:365, A3:510 };
+const HEIGHTS  = { A1:165, A2:150, A3:172 };   // all under the Europe limit of 180
+const TARGETS  = { A1:250, A2:180, A3:300 };
+const ROW_NO   = { A1:1,   A2:2,   A3:3 };
+
+const EPT_LANE = LAYOUT.cross.y0 + 56;
+const PACK_SLOT = i => ({ x:LAYOUT.packing.x + 20, y:LAYOUT.packing.y + 34 + i * 50 });
+
+function parkOrderBAtDrops() {
+  ['B1', 'B2'].forEach(id => PALLETS[id].setPos(DROP[id].x, DROP[id].y));
+}
+function allPalletsOffstage() {
+  Object.keys(PALLETS).forEach(k => {
+    const p = PALLETS[k];
+    p.setPos(-300, -300); p.setMarker(true); p.setPickLabel(true);
+    p.setStrap(false); p.setSeal(false); p.setNum(null); p.clearNote();
+  });
+  VNA.setPos(-300, -300); EPT.setPos(-300, -300); EPT.setWeight(null);
+}
+
+/* ── Step 1 — the VNA brings each pallet out to its aisle mouth ── */
+STEPS[0].caption = 'The VNA sets each pallet down at the mouth of its aisle, '
+  + 'with the pick label and the order marker on top of the boxes.';
+// Step 1's reset is the root of every seek — seek() always replays it first — so it
+// is the one place that has to return EVERY subsystem to zero, not just the pallets.
+// Hiding a panel is not the same as clearing it: a hidden panel still holds its last
+// active tab, and that leaks backwards when scrubbing from a later step.
+STEPS[0].reset = () => {
+  allPalletsOffstage();
+  showPanel(false); showElevation(false);
+  APP.reset(); DOCS.reset(); ELEV.reset();
+};
+STEPS[0].render = (lt) => {
+  const order = ['A1', 'A2', 'A3', 'B1', 'B2'];
+  const slot = 3400;
+  order.forEach((id, i) => {
+    const p = beat(lt, i * slot, i * slot + 2700);
+    if (p <= 0) return;
+    const d = DROP[id];
+    const fromY = LAYOUT.aisle.y + LAYOUT.aisle.h - 60;
+    PALLETS[id].setPos(d.x, lerp(fromY, d.y, p));
+    if (p < 1) VNA.setPos(d.x - 2, lerp(fromY, d.y, p) - 36);
+    else VNA.setPos(-300, -300);
+  });
+};
+
+/* ── Step 2 — the EPT collects Order A only ── */
+STEPS[1].caption = 'The EPT weighs each pallet and the weight and pallet type are '
+  + 'written on its pick label. Only the red-marked pallets are collected — '
+  + 'the blue ones belong to another order and stay where they are.';
+STEPS[1].reset = () => {
+  allPalletsOffstage();
+  Object.keys(DROP).forEach(id => PALLETS[id].setPos(DROP[id].x, DROP[id].y));
+  EPT.setPos(-300, -300); EPT.setWeight(null);
+};
+STEPS[1].render = (lt) => {
+  const slot = 7300;
+  ORDER_A.forEach((id, i) => {
+    const t0 = i * slot;
+    const travel = beat(lt, t0, t0 + 2200);          // EPT drives to the pallet
+    const weigh  = beat(lt, t0 + 2300, t0 + 4200);   // weight appears, label written
+    const haul   = beat(lt, t0 + 4300, t0 + 7000);   // both travel to packing
+    if (travel <= 0) return;
+
+    const d = DROP[id], slotPos = PACK_SLOT(i);
+    const prevX = i === 0 ? -60 : DROP[ORDER_A[i - 1]].x;
+    const eptX = haul > 0 ? lerp(d.x, slotPos.x, haul) : lerp(prevX, d.x, travel);
+    const eptY = haul > 0 ? lerp(EPT_LANE, slotPos.y, haul) : EPT_LANE;
+    EPT.setPos(eptX - 4, eptY + 60);
+
+    if (weigh > 0) {
+      EPT.setWeight(WEIGHTS[id]);
+      PALLETS[id].writeOn('type', PTYPES[id]);
+      PALLETS[id].writeOn('weight', WEIGHTS[id] + ' kg');
+    }
+    if (haul > 0) PALLETS[id].setPos(lerp(d.x, slotPos.x, haul), lerp(d.y, slotPos.y, haul));
+    if (haul >= 1) EPT.setWeight(null);
+  });
+};
+
+/* ── Step 3 — height, then the row order ── */
+STEPS[2].caption = 'Each pallet is measured, the height goes on the pick label, '
+  + 'and the pallets are numbered in the order of the row.';
+STEPS[2].reset = () => {
+  allPalletsOffstage();
+  parkOrderBAtDrops();
+  ORDER_A.forEach((id, i) => {
+    const s = PACK_SLOT(i);
+    PALLETS[id].setPos(s.x, s.y);
+    PALLETS[id].writeOn('type', PTYPES[id]);
+    PALLETS[id].writeOn('weight', WEIGHTS[id] + ' kg');
+  });
+  EPT.setPos(-300, -300); EPT.setWeight(null);
+};
+STEPS[2].render = (lt) => {
+  ORDER_A.forEach((id, i) => {
+    if (beat(lt, i * 2600, i * 2600 + 2000) >= 1)
+      PALLETS[id].writeOn('height', HEIGHTS[id] + ' cm');
+  });
+  ORDER_A.forEach((id, i) => {
+    if (beat(lt, 8200 + i * 1600, 8200 + i * 1600 + 1200) >= 1)
+      PALLETS[id].setNum(ROW_NO[id]);
+  });
+};
+
+/* ══ APP PANEL ═══════════════════════════════════════════
+   A simplified rendering of outbound-checklist.html. It opens in the reserved
+   lower-left region rather than over the plan, so the pallets it is talking about
+   stay visible beside it. */
+const APP = (function buildAppPanel() {
+  const R = LAYOUT.panel, host = document.getElementById('g-panel');
+  const card = el('g', {});
+  card.appendChild(el('rect', { x:R.x, y:R.y, width:R.w, height:R.h, rx:8,
+    fill:'#161b22', stroke:'#30363d' }));
+  card.appendChild(text(R.x + 18, R.y + 26, 'OUTBOUND CHECKLIST',
+    { size:13, anchor:'start', fill:PALETTE.ink, weight:700 }));
+
+  const fieldNodes = {};
+  [['Delivery No.', 0], ['Destination', 1], ['Part Number', 2]].forEach(pair => {
+    const fx = R.x + 18 + pair[1] * 230;
+    card.appendChild(text(fx, R.y + 58, pair[0].toUpperCase(),
+      { size:9.5, anchor:'start', weight:700 }));
+    card.appendChild(el('rect', { x:fx, y:R.y + 66, width:205, height:30, rx:4,
+      fill:'#0d1117', stroke:'#30363d' }));
+    fieldNodes[pair[0]] = text(fx + 10, R.y + 86, '',
+      { size:13, anchor:'start', fill:PALETTE.ink, weight:700 });
+    card.appendChild(fieldNodes[pair[0]]);
+  });
+
+  const tabs = [], metas = [];
+  ORDER_A.forEach((id, i) => {
+    const tx = R.x + 18 + i * 190;
+    const t = el('rect', { x:tx, y:R.y + 116, width:176, height:44, rx:5,
+      fill:'#0d1117', stroke:'#30363d' });
+    const lbl  = text(tx + 12, R.y + 136, 'Pallet ' + (i + 1),
+      { size:12, anchor:'start', fill:PALETTE.ink, weight:700 });
+    const meta = text(tx + 12, R.y + 152, '', { size:10, anchor:'start' });
+    card.appendChild(t); card.appendChild(lbl); card.appendChild(meta);
+    tabs.push({ box:t, lbl:lbl }); metas.push(meta);
+  });
+
+  card.appendChild(text(R.x + 18, R.y + 194, 'BOX VERIFICATION',
+    { size:9.5, anchor:'start', weight:700 }));
+  const bigCount = text(R.x + 18, R.y + 234, '', { size:30, anchor:'start',
+    fill:PALETTE.ink, weight:700 });
+  const targetTxt = text(R.x + 18, R.y + 256, '', { size:12, anchor:'start' });
+  card.appendChild(bigCount); card.appendChild(targetTxt);
+
+  const barX = R.x + 320, barW = R.w - 340;
+  card.appendChild(el('rect', { x:barX, y:R.y + 214, width:barW, height:16, rx:8,
+    fill:'#0d1117', stroke:'#30363d' }));
+  const fill = el('rect', { x:barX, y:R.y + 214, width:0, height:16, rx:8, fill:'#16a34a' });
+  card.appendChild(fill);
+  const barNote = text(barX, R.y + 252, '', { size:11, anchor:'start' });
+  card.appendChild(barNote);
+
+  // The toast is a faithful copy of the app's #scan-err-toast: same two lines, same
+  // red, same weight. Its text is built from the same numbers the bar shows, so the
+  // two can never disagree.
+  const toast = el('g', {}); toast.setAttribute('hidden', '');
+  // Sits below the tab row on purpose. Centred like the app's own toast, but not so
+  // high that it covers the very pallet tab its message names.
+  const tw = 420, th = 92, tx0 = R.x + R.w / 2 - tw / 2, ty0 = R.y + 186;
+  toast.appendChild(el('rect', { x:tx0, y:ty0, width:tw, height:th, rx:14, fill:'#dc2626' }));
+  const toastTitle = text(tx0 + tw / 2, ty0 + 42, '', { size:24, fill:'#fff', weight:700 });
+  const toastSub   = text(tx0 + tw / 2, ty0 + 68, '', { size:13, fill:'rgba(255,255,255,.92)' });
+  toast.appendChild(toastTitle); toast.appendChild(toastSub);
+
+  card.appendChild(toast);
+  host.appendChild(card);
+
+  const api = {
+    card:card, activeTab:null, verified:{}, toast:null,
+    setField(name, v) { fieldNodes[name].textContent = v; },
+    setMeta(i, str)   { metas[i].textContent = str; },
+    setActiveTab(i) {
+      api.activeTab = i;
+      tabs.forEach((tb, k) => {
+        tb.box.setAttribute('stroke', k === i ? '#58a6ff' : '#30363d');
+        tb.box.setAttribute('fill',   k === i ? 'rgba(88,166,255,.10)' : '#0d1117');
+      });
+      api.paint();
+    },
+    setVerified(i, n) { api.verified[i] = n; api.paint(); },
+    setToast(title, sub) {
+      api.toast = title ? (title + '\n' + sub) : null;
+      toast.toggleAttribute('hidden', !title);
+      toastTitle.textContent = title || ''; toastSub.textContent = sub || '';
+    },
+    paint() {
+      const i = api.activeTab;
+      if (i == null) { bigCount.textContent = ''; targetTxt.textContent = '';
+                       fill.setAttribute('width', 0); barNote.textContent = ''; return; }
+      const id = ORDER_A[i], target = TARGETS[id], v = api.verified[i] || 0;
+      bigCount.textContent  = v.toLocaleString() + ' pcs verified';
+      targetTxt.textContent = 'Pallet ' + (i + 1) + ' target: ' + target.toLocaleString() + ' pcs';
+      const pct = Math.min(v / target, 1.25);
+      fill.setAttribute('width', Math.min(pct, 1) * barW);
+      const over = v > target;
+      fill.setAttribute('fill', over ? '#b91c1c' : v === target ? '#16a34a' : '#2f81f7');
+      barNote.setAttribute('fill', over ? '#ff7b72' : PALETTE.muted);
+      barNote.textContent = over ? '⚠ ' + (v - target).toLocaleString() + ' pcs over target'
+        : v >= target ? 'Target reached — moving to the next pallet'
+        : Math.round(v / target * 100) + '%';
+    },
+    reset() {
+      api.activeTab = null; api.verified = {}; api.setToast(null);
+      Object.keys(fieldNodes).forEach(k => fieldNodes[k].textContent = '');
+      metas.forEach(m => m.textContent = '');
+      tabs.forEach(tb => { tb.box.setAttribute('stroke', '#30363d');
+                           tb.box.setAttribute('fill', '#0d1117'); });
+      api.paint();
+    }
+  };
+  api.reset();
+  return api;
+})();
+
+/* ── Step 4 — loading the order into the app ── */
+STEPS[3].caption = 'The pick labels are collected in row order and the delivery is '
+  + 'entered: number, destination, part number, then each pallet’s type, weight, '
+  + 'height and target quantity.';
+STEPS[3].reset = () => {
+  STEPS[2].reset();
+  ORDER_A.forEach(id => PALLETS[id].writeOn('height', HEIGHTS[id] + ' cm'));
+  ORDER_A.forEach(id => PALLETS[id].setNum(ROW_NO[id]));
+  APP.reset(); showPanel(true, 'app'); showElevation(false);
+};
+STEPS[3].render = (lt) => {
+  if (beat(lt, 800, 1600)  >= 1) APP.setField('Delivery No.', '4500012345');
+  if (beat(lt, 2200, 3000) >= 1) APP.setField('Destination', 'Europe  180 cm');
+  if (beat(lt, 3600, 4400) >= 1) APP.setField('Part Number', 'ASD123');
+  // The panel reads the SAME constants that were written on the pick labels in
+  // steps 2 and 3 — never a retyped copy.
+  ORDER_A.forEach((id, i) => {
+    if (beat(lt, 6000 + i * 2600, 6000 + i * 2600 + 1800) >= 1)
+      APP.setMeta(i, PTYPES[id] + ' · ' + WEIGHTS[id] + ' kg · ' + HEIGHTS[id]
+        + ' cm · target ' + TARGETS[id]);
+  });
+  if (beat(lt, 15000, 16000) >= 1) APP.setActiveTab(0);
+};
+
+/* ── Step 5 — continuous scanning, and the stop ── */
+STEPS[4].caption = 'Scanning runs straight through the row: when a pallet reaches its '
+  + 'target the app moves to the next one by itself. On pallet 3 a scan goes over '
+  + 'target, and the run stops.';
+STEPS[4].reset = () => {
+  STEPS[3].reset();
+  APP.setField('Delivery No.', '4500012345');
+  APP.setField('Destination', 'Europe  180 cm');
+  APP.setField('Part Number', 'ASD123');
+  ORDER_A.forEach((id, i) => APP.setMeta(i, PTYPES[id] + ' · ' + WEIGHTS[id] + ' kg · '
+    + HEIGHTS[id] + ' cm · target ' + TARGETS[id]));
+  APP.setActiveTab(0);
+};
+STEPS[4].render = (lt) => {
+  // Pallet 1: 0 → 250, then the app advances on its own.
+  const p1 = beat(lt, 500, 8000);
+  APP.setActiveTab(0); APP.setVerified(0, Math.round(p1 * TARGETS.A1 / 25) * 25);
+  if (lt < 9000) return;
+
+  // Pallet 2: 0 → 180, advances again.
+  APP.setVerified(0, TARGETS.A1);
+  const p2 = beat(lt, 9500, 15500);
+  APP.setActiveTab(1); APP.setVerified(1, Math.round(p2 * TARGETS.A2 / 20) * 20);
+  if (lt < 16500) return;
+
+  // Pallet 3: climbs to 250 of 300, then one scan of 65 takes it to 315.
+  APP.setVerified(1, TARGETS.A2);
+  APP.setActiveTab(2);
+  const p3 = beat(lt, 17000, 23000);
+  APP.setVerified(2, Math.round(p3 * 250 / 25) * 25);
+  if (lt >= 24000) {
+    APP.setVerified(2, 315);
+    APP.setToast('⚠ OVER TARGET', 'Pallet 3 · 315 / 300 pcs (+15)');
+  } else {
+    APP.setToast(null);
+  }
+};
+
+/* ══ DOCUMENTS PANEL ═════════════════════════════════════ */
+// The clip order is fixed by the process. Never reorder it for visual balance.
+const DOC_ORDER = ['Pick labels (3)', 'Outbound checklist print', 'Packing list copy', 'WBO'];
+const TXN = { A1:'TR-884120', A2:'TR-884121', A3:'TR-884122' };
+
+const DOCS = (function buildDocsPanel() {
+  const R = LAYOUT.panel, host = document.getElementById('g-panel');
+  const card = el('g', {}); card.setAttribute('hidden', '');
+  card.appendChild(el('rect', { x:R.x, y:R.y, width:R.w, height:R.h, rx:8,
+    fill:'#161b22', stroke:'#30363d' }));
+  card.appendChild(text(R.x + 18, R.y + 26, 'WMS  ·  PRINT & DOCUMENTS',
+    { size:13, anchor:'start', fill:PALETTE.ink, weight:700 }));
+
+  card.appendChild(text(R.x + 18, R.y + 56, 'TRANSACTION NO. PER PICK LABEL',
+    { size:9.5, anchor:'start', weight:700 }));
+  const txnNodes = ORDER_A.map((id, i) => {
+    const y = R.y + 78 + i * 30;
+    card.appendChild(el('rect', { x:R.x + 18, y:y - 15, width:250, height:24, rx:4,
+      fill:'#0d1117', stroke:'#30363d' }));
+    card.appendChild(text(R.x + 28, y + 2, 'Pallet ' + (i + 1),
+      { size:11, anchor:'start' }));
+    const n = text(R.x + 258, y + 2, '', { size:11.5, anchor:'end',
+      fill:'#3fb950', weight:700 });
+    card.appendChild(n); return n;
+  });
+
+  card.appendChild(text(R.x + 310, R.y + 56, 'PRINTED', { size:9.5, anchor:'start', weight:700 }));
+  const printed = [
+    { label:'Delivery label  ×3', note:'one per pallet' },
+    { label:'Packing list  ×1',   note:'one per order' },
+    { label:'WBO  ×1',            note:'' }
+  ].map((p, i) => {
+    const y = R.y + 78 + i * 30;
+    const g = el('g', {}); g.setAttribute('hidden', '');
+    g.appendChild(el('rect', { x:R.x + 310, y:y - 15, width:250, height:24, rx:4,
+      fill:'#0d1117', stroke:'#30363d' }));
+    g.appendChild(text(R.x + 320, y + 2, p.label, { size:11, anchor:'start', fill:PALETTE.ink }));
+    if (p.note) g.appendChild(text(R.x + 550, y + 2, p.note, { size:9.5, anchor:'end' }));
+    card.appendChild(g); return g;
+  });
+
+  card.appendChild(text(R.x + 620, R.y + 56, 'CLIPPED PACKET — IN THIS ORDER',
+    { size:9.5, anchor:'start', weight:700 }));
+  const sheets = DOC_ORDER.map((name, i) => {
+    const y = R.y + 72 + i * 34;
+    const g = el('g', {}); g.setAttribute('hidden', '');
+    g.appendChild(el('rect', { x:R.x + 620, y:y, width:330, height:28, rx:3,
+      fill:'#f9fafb', stroke:'#c9d1d9' }));
+    g.appendChild(text(R.x + 634, y + 19, (i + 1) + '.  ' + name,
+      { size:11.5, anchor:'start', fill:'#12181f', weight:700 }));
+    card.appendChild(g); return g;
+  });
+  const clip = el('g', {}); clip.setAttribute('hidden', '');
+  clip.appendChild(el('rect', { x:R.x + 700, y:R.y + 62, width:26, height:52, rx:11,
+    fill:'none', stroke:'#9aa3b0', 'stroke-width':4 }));
+  card.appendChild(clip);
+  const dest = text(R.x + 620, R.y + 238, '', { size:12, anchor:'start',
+    fill:'#58a6ff', weight:700 });
+  card.appendChild(dest);
+  host.appendChild(card);
+
+  const api = {
+    card:card, stack:[], clipped:false, destination:null,
+    setTxn(i, v)     { txnNodes[i].textContent = v; },
+    setPrinted(i, v) { printed[i].toggleAttribute('hidden', !v); },
+    setSheet(i, v) {
+      sheets[i].toggleAttribute('hidden', !v);
+      api.stack = DOC_ORDER.filter((_, k) => !sheets[k].hasAttribute('hidden'));
+    },
+    setClipped(v) { api.clipped = !!v; clip.toggleAttribute('hidden', !v); },
+    setDestination(v) {
+      api.destination = v;
+      dest.textContent = v ? '→  Handed in at the ' + v.toUpperCase() : '';
+    },
+    reset() {
+      txnNodes.forEach(n => n.textContent = '');
+      printed.forEach(p => p.setAttribute('hidden', ''));
+      sheets.forEach((s, i) => api.setSheet(i, false));
+      api.setClipped(false); api.setDestination(null);
+    }
+  };
+  api.reset();
+  return api;
+})();
+
+/* ── Step 6 — WMS registration and printing ── */
+STEPS[5].caption = 'The transaction number of each pick label is registered in the WMS, '
+  + 'then the documents are printed: a delivery label for every pallet, one packing '
+  + 'list for the order, and the WBO.';
+STEPS[5].reset = () => { STEPS[4].reset(); APP.setToast(null); DOCS.reset();
+                         showPanel(true, 'docs'); showElevation(false); };
+STEPS[5].render = (lt) => {
+  ORDER_A.forEach((id, i) => {
+    if (beat(lt, 700 + i * 1500, 700 + i * 1500 + 900) >= 1) DOCS.setTxn(i, TXN[id]);
+  });
+  [0, 1, 2].forEach(i => {
+    if (beat(lt, 6200 + i * 1900, 6200 + i * 1900 + 1100) >= 1) DOCS.setPrinted(i, true);
+  });
+};
+
+/* ── Step 7 — the clipped packet ── */
+STEPS[6].caption = 'The documents are clipped together in a fixed order — pick labels, '
+  + 'outbound checklist print, packing list copy, WBO — and the packet goes to the office.';
+STEPS[6].reset = () => {
+  STEPS[5].reset();
+  ORDER_A.forEach((id, i) => DOCS.setTxn(i, TXN[id]));
+  [0, 1, 2].forEach(i => DOCS.setPrinted(i, true));
+};
+STEPS[6].render = (lt) => {
+  DOC_ORDER.forEach((_, i) => {
+    if (beat(lt, 500 + i * 1700, 500 + i * 1700 + 1000) >= 1) DOCS.setSheet(i, true);
+  });
+  if (beat(lt, 8000, 9000)  >= 1) DOCS.setClipped(true);
+  if (beat(lt, 10500, 11500) >= 1) DOCS.setDestination('office');
+};
+
+/* ══ ELEVATION (step 9 only) ═════════════════════════════
+   Labels and the envelope go on the pallet's short front face. A top-down plan
+   cannot show a vertical face at all — from above, a label on the front and one on
+   the side are the same picture — so drawing step 9 in plan would teach the wrong
+   placement. This is the one step that leaves the plan view. */
+const ELEV = (function buildElevation() {
+  const host = document.getElementById('g-elevation');
+  host.setAttribute('hidden', '');
+  host.appendChild(text(800, 150, 'FRONT FACE OF EACH PALLET',
+    { size:15, fill:PALETTE.ink, weight:700 }));
+  host.appendChild(text(800, 176,
+    'The short (80 cm) face — the one that stays readable once the row is lined up',
+    { size:12 }));
+
+  const W = 210, H = 250, TOP = 250;
+  const units = ORDER_A.map((id, i) => {
+    const x = 340 + i * 380;
+    const g = el('g', {});
+    g.appendChild(el('rect', { x:x, y:TOP + H - 22, width:W, height:22, rx:2, fill:PALETTE.wood }));
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++)
+      g.appendChild(el('rect', { x:x + 8 + c * 66, y:TOP + 6 + r * 56, width:60, height:50,
+        rx:3, fill:PALETTE.box, stroke:'rgba(0,0,0,.35)' }));
+    [x + 40, x + 140].forEach(sx =>
+      g.appendChild(el('rect', { x:sx, y:TOP, width:9, height:H - 22, fill:PALETTE.strap })));
+    g.appendChild(el('rect', { x:x, y:TOP, width:W, height:H - 22, fill:PALETTE.seal }));
+    g.appendChild(text(x + W / 2, TOP + H + 24, 'Pallet ' + (i + 1),
+      { size:13, fill:PALETTE.ink, weight:700 }));
+
+    const label = el('g', {}); label.setAttribute('hidden', '');
+    label.appendChild(el('rect', { x:x + 16, y:TOP + 74, width:84, height:54, rx:3,
+      fill:'#f9fafb', stroke:'#c9d1d9' }));
+    label.appendChild(text(x + 58, TOP + 96, 'DELIVERY', { size:9.5, fill:'#12181f', weight:700 }));
+    label.appendChild(text(x + 58, TOP + 112, '4500012345', { size:10, fill:'#12181f' }));
+    g.appendChild(label);
+
+    const env = el('g', {}); env.setAttribute('hidden', '');
+    env.appendChild(el('rect', { x:x + 110, y:TOP + 74, width:84, height:54, rx:3,
+      fill:'#fde68a', stroke:'#b8860b' }));
+    env.appendChild(el('polyline', { points:`${x+110},${TOP+74} ${x+152},${TOP+104} ${x+194},${TOP+74}`,
+      fill:'none', stroke:'#b8860b', 'stroke-width':1.6 }));
+    env.appendChild(text(x + 152, TOP + 122, 'PACKING LIST', { size:8.5, fill:'#12181f', weight:700 }));
+    g.appendChild(env);
+
+    host.appendChild(g);
+    return { label:label, env:env, id:id };
+  });
+
+  const api = {
+    labels:[], envelopes:[],
+    setLabel(i, v) { units[i].label.toggleAttribute('hidden', !v); api.sync(); },
+    setEnvelope(i, v) { units[i].env.toggleAttribute('hidden', !v); api.sync(); },
+    sync() {
+      api.labels    = units.filter(u => !u.label.hasAttribute('hidden')).map(u => u.id);
+      api.envelopes = units.filter(u => !u.env.hasAttribute('hidden')).map(u => u.id);
+    },
+    reset() { units.forEach((u, i) => { api.setLabel(i, false); api.setEnvelope(i, false); }); }
+  };
+  api.reset();
+  return api;
+})();
+
+/* ── Step 8 — strapping, then sealing ── */
+STEPS[7].caption = 'Each pallet is strapped with black plastic and then sealed with '
+  + 'transparent wrap. Both happen before any label is stuck on.';
+STEPS[7].reset = () => {
+  STEPS[6].reset(); showPanel(false); showElevation(false);
+  ORDER_A.forEach(id => { PALLETS[id].setStrap(false); PALLETS[id].setSeal(false);
+                          PALLETS[id].setMarker(false); });
+};
+STEPS[7].render = (lt) => {
+  ORDER_A.forEach((id, i) => {
+    if (beat(lt, 400 + i * 1500, 400 + i * 1500 + 900)  >= 1) PALLETS[id].setStrap(true);
+    if (beat(lt, 6200 + i * 1500, 6200 + i * 1500 + 900) >= 1) PALLETS[id].setSeal(true);
+  });
+};
+
+/* ── Step 9 — labels, in front elevation ── */
+STEPS[8].caption = 'A delivery label goes on the short front face of every pallet, over '
+  + 'the seal. The packing list envelope goes on the first pallet of the row only.';
+STEPS[8].reset = () => {
+  STEPS[7].reset();
+  ORDER_A.forEach(id => { PALLETS[id].setStrap(true); PALLETS[id].setSeal(true); });
+  ELEV.reset(); showPanel(false); showElevation(true);
+};
+STEPS[8].render = (lt) => {
+  ORDER_A.forEach((id, i) => {
+    if (beat(lt, 900 + i * 1900, 900 + i * 1900 + 1100) >= 1) ELEV.setLabel(i, true);
+  });
+  if (beat(lt, 7600, 8800) >= 1) ELEV.setEnvelope(0, true);   // pallet 1 only
+};
+
+/* ── Step 10 — staging ── */
+STEPS[9].caption = 'The pallets are moved to the staging zone beside the docks and lined '
+  + 'up in row order. They are loaded onto the truck the next day.';
+STEPS[9].reset = () => {
+  STEPS[8].reset();
+  ELEV.reset(); ORDER_A.forEach((id, i) => ELEV.setLabel(i, true)); ELEV.setEnvelope(0, true);
+  showElevation(false); showPanel(false);
+};
+STEPS[9].render = (lt) => {
+  ORDER_A.forEach((id, i) => {
+    const from = PACK_SLOT(i);
+    const to = { x:LAYOUT.staging.x + 30 + i * 90, y:LAYOUT.staging.y + 90 };
+    const p = beat(lt, 600 + i * 1500, 600 + i * 1500 + 3200);
+    PALLETS[id].setPos(lerp(from.x, to.x, p), lerp(from.y, to.y, p));
+  });
+};
+
+/* ══ TEST HOOK ═══════════════════════════════════════════
+   Used by the Playwright verification steps in the implementation plan. Because
+   render(t) is a pure function of t, state() at a given t is fully assertable. */
+function state() {
+  const pallets = {};
+  Object.keys(PALLETS).forEach(k => {
+    const p = PALLETS[k];
+    pallets[p.id] = { x:Math.round(p.x), y:Math.round(p.y),
+      marker:p.state.marker, num:p.num };
+  });
+  return {
+    t: Math.round(t),
+    step: stepIndexAt(t) + 1,
+    playing: playing,
+    view: VIEW,
+    depthOrder: Object.keys(PALLETS).map(k => PALLETS[k]).concat([VNA, EPT])
+      .slice().sort((a, b) => a.y - b.y).map(a => a.id || a.kind),
+    pallets: pallets,
+    vehicles: { vna:{ x:Math.round(VNA.x), y:Math.round(VNA.y) },
+                ept:{ x:Math.round(EPT.x), y:Math.round(EPT.y), weight:EPT.weight } },
+    panel: { kind: PANEL_KIND, activeTab: APP.activeTab,
+             verified: APP.activeTab == null ? null : (APP.verified[APP.activeTab] || 0),
+             target: APP.activeTab == null ? null : TARGETS[ORDER_A[APP.activeTab]],
+             toast: APP.toast },
+    docs: { stack: DOCS.stack.slice(), clipped: DOCS.clipped,
+            destination: DOCS.destination },
+    elevation: { visible: ELEVATION_ON, labels: ELEV.labels.slice(),
+                 envelopes: ELEV.envelopes.slice() }
+  };
+}
+window.__anim = { seek, play, pause, state, totalMs: () => TOTAL_MS, stepAt: stepIndexAt,
+                  durations: () => DURATIONS.slice(), setView, view: () => VIEW,
+                  domOrder: () => [...document.getElementById('g-actors').children]
+                    .map(n => n.getAttribute('data-pallet') || n.getAttribute('data-vehicle')) };
+
+buildStatic();
+seek(0);
+</script>
