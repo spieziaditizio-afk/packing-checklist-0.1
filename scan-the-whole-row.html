@@ -1,0 +1,360 @@
+<title>Scan the Whole Row</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#F6F1E7;
+  --paper-2:#ECE3CF;
+  --ink:#231F18;
+  --muted:#6B6353;
+  --line:#DACEAE;
+  --accent:#C6520F;
+  --accent-soft:#F0DAC2;
+  --steel:#3E5568;
+  --ok:#1F7A4D;
+  --ok-soft:#DCEEE3;
+  --shadow: 0 1px 2px rgba(35,31,24,.05), 0 10px 28px rgba(35,31,24,.06);
+  --screen-bg:#0D1117;
+  --screen-line:#30363D;
+  --screen-ink:#E6EDF3;
+  --screen-muted:#8B949E;
+  /* Literal app red — matches the real product's alert, not a themed token,
+     so it stays the same value in both themes. */
+  --danger:#DC2626;
+  --danger-soft:#F5DCD6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#16130E;
+    --paper-2:#201B13;
+    --ink:#F1E8D7;
+    --muted:#B2A78F;
+    --line:#362F20;
+    --accent:#FF8A4C;
+    --accent-soft:#3B2415;
+    --steel:#8FB0C4;
+    --ok:#3FBE85;
+    --ok-soft:#173225;
+    --danger-soft:#3A1712;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#16130E;
+  --paper-2:#201B13;
+  --ink:#F1E8D7;
+  --muted:#B2A78F;
+  --line:#362F20;
+  --accent:#FF8A4C;
+  --accent-soft:#3B2415;
+  --steel:#8FB0C4;
+  --ok:#3FBE85;
+  --ok-soft:#173225;
+  --danger-soft:#3A1712;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box;}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  padding-inline:max(16px, calc((100% - 760px)/2));
+  padding-block:56px 72px;
+}
+.wrap{max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:38px;}
+
+.mono{font-family:'DM Mono','SFMono-Regular',Consolas,monospace;}
+
+/* ── head ─────────────────────────────────────────── */
+.bulletin-head{display:flex; flex-direction:column; gap:14px;}
+.eyebrow{
+  font-family:'DM Mono',Consolas,monospace; font-size:11.5px; font-weight:500;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--steel);
+}
+.head-row{
+  display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  border-bottom:2px solid var(--ink); padding-bottom:16px;
+}
+h1{
+  font-family:'Oswald',Impact,'Arial Narrow',sans-serif; font-weight:700;
+  font-size:clamp(26px,4.4vw,36px); line-height:1.14; letter-spacing:-.01em;
+  margin:0; text-wrap:balance; max-width:19ch;
+}
+.head-tag{
+  font-family:'DM Mono',Consolas,monospace; font-size:12px; color:var(--muted);
+  white-space:nowrap;
+}
+.lede{font-size:15.5px; line-height:1.68; color:var(--ink); margin:0; max-width:64ch;}
+.lede b{color:var(--accent);}
+
+/* ── section labels ───────────────────────────────── */
+.sec-tag{
+  display:inline-block; font-family:'DM Mono',Consolas,monospace; font-size:10.5px;
+  font-weight:500; letter-spacing:.12em; color:var(--steel); margin-bottom:8px;
+}
+.sec-p{margin:0 0 18px; font-size:14.5px; line-height:1.62; color:var(--muted); max-width:60ch;}
+
+/* ── phase 1: pallet cards ────────────────────────── */
+.row-cards{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+.pallet-card{
+  background:var(--paper-2); border:1px solid var(--line); border-radius:10px;
+  padding:14px 16px 16px; box-shadow:var(--shadow);
+  display:flex; flex-direction:column; gap:6px;
+}
+.pc-tag{
+  font-family:'DM Mono',Consolas,monospace; font-size:10px; font-weight:500;
+  letter-spacing:.1em; color:var(--steel);
+}
+.pc-spec{font-size:13.5px; color:var(--ink); font-weight:500;}
+.pc-target{font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums;}
+.pc-target b{color:var(--ok); font-weight:700;}
+
+/* ── phase 2: diagram ─────────────────────────────── */
+.diagram-scroll{overflow-x:auto; padding-bottom:2px;}
+.diagram-figure{margin:0;}
+.diagram-figure svg{display:block; min-width:620px; width:100%; height:auto;}
+.diagram-figure figcaption{
+  margin-top:10px; font-size:12.5px; line-height:1.55; color:var(--muted); max-width:60ch;
+}
+
+/* ── over-target screen reproduction ──────────────── */
+.app-screen{
+  width:100%; background:var(--screen-bg); border:1px solid var(--screen-line);
+  border-radius:12px; padding:24px 20px 30px; box-shadow:var(--shadow);
+  display:flex; flex-direction:column; align-items:center; gap:20px;
+  margin-bottom:18px;
+}
+.app-crumb{
+  align-self:flex-start; font-family:'DM Mono',Consolas,monospace; font-size:11.5px;
+  color:var(--screen-muted); letter-spacing:.02em;
+}
+.app-toast{
+  background:var(--danger); color:#fff; padding:20px 34px; border-radius:16px;
+  text-align:center; line-height:1.4; box-shadow:0 16px 40px rgba(0,0,0,.55);
+  max-width:92%;
+}
+.app-toast b{display:block; font-size:21px; font-weight:800; letter-spacing:.005em;}
+.app-toast span{
+  display:block; font-size:12.5px; font-weight:500; opacity:.92; margin-top:5px;
+  letter-spacing:.03em; font-variant-numeric:tabular-nums;
+}
+
+.steps{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:12px; counter-reset:step;}
+.steps li{
+  display:grid; grid-template-columns:24px 1fr; gap:12px; align-items:baseline;
+  font-size:13.5px; line-height:1.56; color:var(--muted);
+}
+.steps li::before{
+  counter-increment:step; content:counter(step);
+  font-family:'DM Mono',Consolas,monospace; font-size:11.5px; font-weight:500;
+  color:var(--danger); border:1px solid var(--danger); border-radius:50%;
+  width:20px; height:20px; display:flex; align-items:center; justify-content:center;
+  align-self:start; margin-top:1px;
+}
+.steps strong{color:var(--ink);}
+
+/* ── split ────────────────────────────────────────── */
+.split{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+.split-col{
+  border-radius:10px; padding:18px 20px 20px; box-shadow:var(--shadow);
+  background:var(--paper-2); border:1px solid var(--line);
+}
+.split-col.accent{background:var(--accent-soft); border-color:var(--accent);}
+.split-col h3{
+  font-family:'Oswald',sans-serif; font-weight:600; font-size:15.5px; margin:0 0 10px;
+  letter-spacing:-.005em;
+}
+.split-col.accent h3{color:var(--accent);}
+.split-col ul{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:7px;}
+.split-col li{font-size:13.5px; line-height:1.5; color:var(--muted);}
+
+/* ── companion + footer ───────────────────────────── */
+.companion{
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  padding-block:18px; font-size:13.5px; line-height:1.6; color:var(--muted);
+}
+.companion a{color:var(--accent); font-weight:600; text-decoration:none; border-bottom:1px solid currentColor;}
+.companion a:hover{opacity:.8;}
+.meta{font-family:'DM Mono',Consolas,monospace; font-size:11.5px; letter-spacing:.02em; color:var(--muted);}
+
+@media (max-width:620px){
+  .row-cards{grid-template-columns:1fr;}
+  .split{grid-template-columns:1fr;}
+  h1{max-width:none;}
+}
+</style>
+
+<div class="wrap">
+
+  <header class="bulletin-head">
+    <div class="eyebrow">How it works · Outbound Checklist</div>
+    <div class="head-row">
+      <h1>Scan the whole row</h1>
+      <div class="head-tag mono">Box Verification · Scan mode</div>
+    </div>
+    <p class="lede">
+      Load every pallet in the delivery first — type, weight, height, and each pick
+      label's target. Then start scanning at pallet 1 and don't stop: the app reads
+      every scan in real time and <b>jumps to the next pallet on its own</b> the
+      moment a target is reached. No walking back to the computer between pallets.
+    </p>
+  </header>
+
+  <section class="setup">
+    <span class="sec-tag">PHASE 1 · LOAD THE WHOLE ROW FIRST</span>
+    <p class="sec-p">
+      Before a single box gets scanned, every pallet in the delivery gets its data
+      entered once — this is what the app checks each scan against later.
+    </p>
+    <div class="row-cards">
+      <div class="pallet-card">
+        <span class="pc-tag">PALLET 1</span>
+        <span class="pc-spec">EP · 420 kg · 165 cm</span>
+        <span class="pc-target">target <b>250</b> pcs</span>
+      </div>
+      <div class="pallet-card">
+        <span class="pc-tag">PALLET 2</span>
+        <span class="pc-spec">EP · 365 kg · 150 cm</span>
+        <span class="pc-target">target <b>180</b> pcs</span>
+      </div>
+      <div class="pallet-card">
+        <span class="pc-tag">PALLET 3</span>
+        <span class="pc-spec">BP · 510 kg · 172 cm</span>
+        <span class="pc-target">target <b>300</b> pcs</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="scanrow">
+    <span class="sec-tag">PHASE 2 · THEN SCAN STRAIGHT THROUGH</span>
+    <p class="sec-p">
+      Scan the part number off the first box, then the quantity of every box after
+      it. The app totals the pallet as you go — you never pick which pallet is next.
+    </p>
+    <div class="diagram-scroll">
+      <figure class="diagram-figure">
+        <svg viewBox="0 0 760 172" role="img" aria-label="Diagram of the scan moving through Pallet 1, Pallet 2 and Pallet 3 in a row. Inside each pallet, the part number is scanned once and then every box's quantity. Once a pallet's target is reached, an accent-colored arrow labeled auto-jump, no click needed, carries the scan straight into the next pallet's part-number field. A dashed red branch off Pallet 3 shows the one exception: if a scan goes over target instead of matching it, the row stops there and shows an alert rather than jumping ahead.">
+          <defs>
+            <marker id="arrowAccent" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" style="fill:var(--accent)"/>
+            </marker>
+            <marker id="arrowMuted" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/>
+            </marker>
+            <marker id="arrowDanger" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" style="fill:var(--danger)"/>
+            </marker>
+          </defs>
+
+          <!-- Pallet 1 -->
+          <rect x="20" y="20" width="180" height="78" rx="10" style="fill:var(--paper-2);stroke:var(--line)" stroke-width="1"/>
+          <text x="110" y="38" text-anchor="middle" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.09em;fill:var(--steel)">PALLET 1</text>
+          <rect x="36" y="46" width="44" height="24" rx="12" style="fill:var(--paper);stroke:var(--ink)" stroke-width="1"/>
+          <text x="58" y="62" text-anchor="middle" style="font-family:'DM Mono',monospace;font-size:11px;fill:var(--ink)">PN</text>
+          <line x1="80" y1="58" x2="92" y2="58" style="stroke:var(--muted)" stroke-width="1.4" marker-end="url(#arrowMuted)"/>
+          <rect x="92" y="46" width="64" height="24" rx="12" style="fill:var(--paper);stroke:var(--ink)" stroke-width="1"/>
+          <text x="124" y="62" text-anchor="middle" style="font-family:'DM Mono',monospace;font-size:10.5px;fill:var(--ink)">qty ×n</text>
+          <text x="110" y="88" text-anchor="middle" style="font-family:'DM Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;fill:var(--ok)">✓ target 250</text>
+
+          <!-- auto-jump 1 -->
+          <line x1="204" y1="58" x2="276" y2="58" style="stroke:var(--accent)" stroke-width="2" marker-end="url(#arrowAccent)"/>
+          <text x="240" y="45" text-anchor="middle" style="font-family:'DM Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.06em;fill:var(--accent)">AUTO-JUMP</text>
+          <text x="240" y="75" text-anchor="middle" style="font-family:'DM Sans',sans-serif;font-size:9px;fill:var(--muted)">no click needed</text>
+
+          <!-- Pallet 2 -->
+          <rect x="280" y="20" width="180" height="78" rx="10" style="fill:var(--paper-2);stroke:var(--line)" stroke-width="1"/>
+          <text x="370" y="38" text-anchor="middle" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.09em;fill:var(--steel)">PALLET 2</text>
+          <rect x="296" y="46" width="44" height="24" rx="12" style="fill:var(--paper);stroke:var(--ink)" stroke-width="1"/>
+          <text x="318" y="62" text-anchor="middle" style="font-family:'DM Mono',monospace;font-size:11px;fill:var(--ink)">PN</text>
+          <line x1="340" y1="58" x2="352" y2="58" style="stroke:var(--muted)" stroke-width="1.4" marker-end="url(#arrowMuted)"/>
+          <rect x="352" y="46" width="64" height="24" rx="12" style="fill:var(--paper);stroke:var(--ink)" stroke-width="1"/>
+          <text x="384" y="62" text-anchor="middle" style="font-family:'DM Mono',monospace;font-size:10.5px;fill:var(--ink)">qty ×n</text>
+          <text x="370" y="88" text-anchor="middle" style="font-family:'DM Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;fill:var(--ok)">✓ target 180</text>
+
+          <!-- auto-jump 2 -->
+          <line x1="464" y1="58" x2="536" y2="58" style="stroke:var(--accent)" stroke-width="2" marker-end="url(#arrowAccent)"/>
+          <text x="500" y="45" text-anchor="middle" style="font-family:'DM Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.06em;fill:var(--accent)">AUTO-JUMP</text>
+          <text x="500" y="75" text-anchor="middle" style="font-family:'DM Sans',sans-serif;font-size:9px;fill:var(--muted)">no click needed</text>
+
+          <!-- Pallet 3 -->
+          <rect x="540" y="20" width="180" height="78" rx="10" style="fill:var(--paper-2);stroke:var(--line)" stroke-width="1"/>
+          <text x="630" y="38" text-anchor="middle" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.09em;fill:var(--steel)">PALLET 3</text>
+          <rect x="556" y="46" width="44" height="24" rx="12" style="fill:var(--paper);stroke:var(--ink)" stroke-width="1"/>
+          <text x="578" y="62" text-anchor="middle" style="font-family:'DM Mono',monospace;font-size:11px;fill:var(--ink)">PN</text>
+          <line x1="600" y1="58" x2="612" y2="58" style="stroke:var(--muted)" stroke-width="1.4" marker-end="url(#arrowMuted)"/>
+          <rect x="612" y="46" width="64" height="24" rx="12" style="fill:var(--paper);stroke:var(--ink)" stroke-width="1"/>
+          <text x="644" y="62" text-anchor="middle" style="font-family:'DM Mono',monospace;font-size:10.5px;fill:var(--ink)">qty ×n</text>
+          <text x="630" y="88" text-anchor="middle" style="font-family:'DM Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;fill:var(--ok)">✓ target 300</text>
+
+          <!-- the one exception: a scan that goes OVER target instead of matching it.
+               Shown branching off Pallet 3 only, to keep the main flow above readable
+               as a single clean path — the branch can happen on any pallet, which the
+               caption says explicitly so this doesn't read as Pallet-3-specific. -->
+          <path d="M676,58 Q706,80 690,118" style="fill:none;stroke:var(--danger)" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#arrowDanger)"/>
+          <rect x="650" y="122" width="80" height="38" rx="8" style="fill:var(--danger-soft);stroke:var(--danger)" stroke-width="1.3" stroke-dasharray="3 2"/>
+          <text x="690" y="137" text-anchor="middle" style="font-family:'DM Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.04em;fill:var(--danger)">⚠ STOP</text>
+          <text x="690" y="152" text-anchor="middle" style="font-family:'DM Sans',sans-serif;font-size:9px;fill:var(--danger)">over target</text>
+        </svg>
+        <figcaption>
+          PN once, then every box's quantity — the app jumps straight to the next
+          pallet's PN field the instant a target is reached, all the way to Pallet 3.
+          The one exception, shown branching off in red: if a scan pushes the total
+          <em>past</em> the target instead of matching it, the row stops right there —
+          on any pallet, not just this one — and shows an alert instead of jumping
+          ahead. More on that below.
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="split">
+    <div class="split-col">
+      <h3>You scan</h3>
+      <ul>
+        <li>The part number off the first box of each pallet</li>
+        <li>The quantity of every box after that, one after another</li>
+      </ul>
+    </div>
+    <div class="split-col accent">
+      <h3>The app does the rest</h3>
+      <ul>
+        <li>Totals every scan against that pallet's target, live</li>
+        <li>Switches tabs and focuses the next pallet's scan field on its own</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="overtarget">
+    <span class="sec-tag" style="color:var(--danger)">IF A SCAN GOES OVER TARGET</span>
+    <p class="sec-p">
+      The auto-jump only fires on an exact match. If a scan pushes a pallet's total
+      <em>past</em> its target instead, the row doesn't move on — it stops right
+      there and shows this, in place of the jump:
+    </p>
+    <div class="diagram-scroll">
+      <div class="app-screen">
+        <div class="app-crumb">Pallet 3 · Box Verification · Scan mode</div>
+        <div class="app-toast">
+          <b>⚠ OVER TARGET</b>
+          <span>Pallet 3 · 315 / 300 pcs (+15)</span>
+        </div>
+      </div>
+    </div>
+    <ol class="steps">
+      <li><span><strong>The number isn't cleared.</strong> The real count stays on
+          screen, on purpose, so you can see which box put it over.</span></li>
+      <li><span><strong>Fix the field marked in red.</strong> Right there — no need
+          to jump to another tab or pallet.</span></li>
+      <li><span><strong>Scan again.</strong> As soon as the total matches the
+          target, the auto-jump picks up right where it left off.</span></li>
+    </ol>
+  </section>
+
+  <p class="companion">
+    This page covers the full behavior — the row, the auto-jump, and the over-target
+    stop. For a longer walk-through of just the stop, see the companion
+    <a href="https://claude.ai/code/artifact/4f11ab38-6000-4a7a-bccb-a75d2d030f4b">Over-Target Stop</a> briefing.
+  </p>
+
+  <p class="meta">Questions about this? Ask the Outbound Checklist team.</p>
+
+</div>
