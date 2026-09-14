@@ -881,6 +881,17 @@ document.addEventListener('input', e => {
 // URL hash is the source of truth for active session → reload on hash change.
 window.addEventListener('hashchange', () => location.reload());
 
+// Ctrl+P / Cmd+P must go through doPrint()'s validatePrintReady() gate just
+// like the Print button — otherwise the browser's native print shortcut
+// calls window.print() directly and ships a report with unresolved
+// mismatches or missing data with no warning at all.
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === 'p' || e.key === 'P')) {
+    e.preventDefault();
+    doPrint();
+  }
+});
+
 // Click outside the sessions menu closes it.
 document.addEventListener('click', e => {
   const menu = document.getElementById('sessions-menu');
@@ -2171,6 +2182,23 @@ function onDeliveryPNInput() {
           pnInput.style.borderColor = '';
         }
       });
+    } else {
+      // Shared PN mode: re-validate the pallet's own box-PN field the same
+      // way onBoxPNInput does — otherwise its red border/pn-err styling is
+      // stuck at whatever it was when the box PN was typed, and stays
+      // showing mismatch even after editing the Pick Label PN makes it match.
+      const boxPNEl = document.getElementById(`box-pn-${pid}`);
+      if (boxPNEl) {
+        const boxPN = boxPNEl.value.trim().toUpperCase();
+        if (delivPN && boxPN) {
+          const match = delivPN === boxPN;
+          boxPNEl.classList.toggle('pn-err', !match);
+          boxPNEl.style.borderColor = match ? '#16a34a' : '';
+        } else {
+          boxPNEl.classList.remove('pn-err');
+          boxPNEl.style.borderColor = '';
+        }
+      }
     }
     updatePalletSummary(pid);
   });
@@ -2879,7 +2907,21 @@ const PRINT_PAGE_HEIGHT_MM = 297;
 const PRINT_PAGE_MARGIN_MM = 10;
 const MM_TO_PX = 96 / 25.4;
 const PRINT_CONTENT_WIDTH_PX  = (PRINT_PAGE_WIDTH_MM  - PRINT_PAGE_MARGIN_MM * 2) * MM_TO_PX;
-const PRINT_CONTENT_HEIGHT_PX = (PRINT_PAGE_HEIGHT_MM - PRINT_PAGE_MARGIN_MM * 2) * MM_TO_PX;
+// `@page{size:A4}` is only a hint to the print system — it does not force the
+// physical paper. A printer whose driver/tray defaults to US Letter (a shorter
+// page, 279.4mm vs A4's 297mm) can silently override it, and there is no JS
+// API to read back which paper size actually printed. If that happens, any
+// pallet block our own pagination placed between Letter's cutoff and A4's
+// full height gets physically clipped off the sheet — content goes missing
+// with no warning. So the page-break budget here is deliberately based on
+// Letter's shorter height, not A4's: on a correctly-configured A4 printer
+// this just leaves a bit of extra blank margin at the bottom of some pages,
+// but on a misconfigured Letter one it guarantees every pallet block still
+// lands within the physical sheet. The real fix for the "printed small" part
+// of that failure is still operational — set every printer's default paper
+// size to A4 in its driver — this only prevents the data-loss half of it.
+const PRINT_LETTER_HEIGHT_MM = 279.4;
+const PRINT_CONTENT_HEIGHT_PX = (Math.min(PRINT_PAGE_HEIGHT_MM, PRINT_LETTER_HEIGHT_MM) - PRINT_PAGE_MARGIN_MM * 2) * MM_TO_PX;
 // A pallet pushed to the next page counts as leaving "a lot" of blank space
 // behind it once more than this fraction of the current page is still empty.
 const PRINT_GAP_RATIO = 0.25;
