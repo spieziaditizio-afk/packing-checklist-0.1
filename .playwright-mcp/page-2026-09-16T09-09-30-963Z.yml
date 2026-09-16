@@ -1,0 +1,75 @@
+- generic [active] [ref=f3e1]:
+  - banner [ref=f3e2]:
+    - generic [ref=f3e3]: Outbound Checklist — What's New
+    - heading "Built From Your Feedback" [level=1] [ref=f3e4]
+    - generic [ref=f3e5]: Sevenum NL · Sept 2026
+  - generic [ref=f3e6]:
+    - generic [ref=f3e7]: "1"
+    - generic [ref=f3e8]:
+      - generic [ref=f3e9]: From a scanning mix-up
+      - heading "Over-scans now stop the run" [level=2] [ref=f3e10]
+      - paragraph [ref=f3e11]: "Keep scanning box after box — the app still jumps to the next pallet for you automatically. New: if a scan ever pushes a pallet past its target, everything stops right there with a clear warning, so you can fix the extra box before it slips into the next pallet."
+    - generic [ref=f3e13]:
+      - generic [ref=f3e14]: ⚠ OVER TARGET
+      - generic [ref=f3e15]: Pallet 3 · 52 / 48 pcs (+4)
+  - generic [ref=f3e18]:
+    - generic [ref=f3e19]: "2"
+    - generic [ref=f3e20]:
+      - generic [ref=f3e21]: From a printer running on Letter paper
+      - heading "Printing is more reliable" [level=2] [ref=f3e22]
+      - paragraph [ref=f3e23]: Ctrl+P now checks for missing data or mismatched quantities first — same safety check as clicking Print, no more skipping it by accident. And if a printer's paper size is set to Letter instead of A4, pallets no longer get cut off the bottom of the page.
+    - generic [ref=f3e25]:
+      - generic [ref=f3e26]:
+        - generic [ref=f3e27]: Ctrl
+        - generic [ref=f3e28]: P
+        - generic [ref=f3e29]: Print
+        - generic [ref=f3e30]: ✓ checked
+      - generic [ref=f3e31]:
+        - generic [ref=f3e32]: A4 paper
+        - generic [ref=f3e33]: ✓ fits
+      - generic [ref=f3e34]:
+        - generic [ref=f3e35]: Letter paper
+        - generic [ref=f3e36]: ✓ fits
+  - generic [ref=f3e37]:
+    - generic [ref=f3e38]: "3"
+    - generic [ref=f3e39]:
+      - generic [ref=f3e40]: From "I can't tell which pallet is open"
+      - heading "See which pallet you're on, instantly" [level=2] [ref=f3e41]
+      - paragraph [ref=f3e42]: The pallet tab you're currently working on now stands out with a blue highlight and a slight lift — easy to spot at a glance, even from across the station, instead of blending in with the others.
+    - generic [ref=f3e44]:
+      - generic [ref=f3e45]:
+        - generic [ref=f3e46]: "1"
+        - text: Pallet 1
+      - generic [ref=f3e47]:
+        - generic [ref=f3e48]: "2"
+        - text: Pallet 2
+      - generic [ref=f3e49]:
+        - generic [ref=f3e50]: "3"
+        - text: Pallet 3
+  - generic [ref=f3e52]:
+    - generic [ref=f3e53]: "4"
+    - generic [ref=f3e54]:
+      - generic [ref=f3e55]: From a supplier pallet we hadn't seen before
+      - heading "Custom pallet types now fit right in" [level=2] [ref=f3e56]
+      - paragraph [ref=f3e57]: Got a pallet that isn't KP, EP, BP, GP, NP, or AP? Pick Other, type in a code and its dimensions, and it flows through validation, print, PDF, and CSV exactly like the standard types — no more forcing it into the wrong pill.
+    - generic [ref=f3e59]:
+      - generic [ref=f3e60]:
+        - generic [ref=f3e61]:
+          - text: EP
+          - generic [ref=f3e62]: 120×80
+        - generic [ref=f3e63]:
+          - text: AP
+          - generic [ref=f3e64]: 140×105
+        - generic [ref=f3e65]:
+          - text: Other
+          - generic [ref=f3e66]: custom
+      - generic [ref=f3e67]:
+        - generic [ref=f3e68]:
+          - generic [ref=f3e69]: Code
+          - generic [ref=f3e70]: AMP1
+        - generic [ref=f3e71]:
+          - generic [ref=f3e72]: Dims cm
+          - generic [ref=f3e73]: 140×105
+  - contentinfo [ref=f3e74]:
+    - paragraph [ref=f3e75]: Notice something else that slows you down? Tell your shift lead — that's exactly how these four started.
+    - generic [ref=f3e76]: outbound-checklist.html
