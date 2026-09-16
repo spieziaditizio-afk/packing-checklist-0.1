@@ -1,0 +1,189 @@
+- generic [ref=f4e1]:
+  - generic [ref=f4e3]:
+    - img "Outbound Checklist" [ref=f4e4]
+    - img "Arrow Electronics" [ref=f4e5]
+    - generic [ref=f4e6]:
+      - generic [ref=f4e7]: Arrow Electronics
+      - generic [ref=f4e8]: Special Operations Area · Sevenum
+    - generic [ref=f4e9]: Wed, 16 Sept 2026
+    - generic [ref=f4e106]: Saved 11:47
+    - button "🆕 New Order" [ref=f4e10] [cursor=pointer]:
+      - generic [ref=f4e11]: 🆕
+      - generic [ref=f4e12]: New Order
+    - button [ref=f4e14] [cursor=pointer]:
+      - img "Print" [ref=f4e15]
+    - button "Audit Audit PN" [ref=f4e17] [cursor=pointer]:
+      - img "Audit" [ref=f4e18]
+      - generic [ref=f4e19]: Audit PN
+    - button "?" [ref=f4e20] [cursor=pointer]
+    - button "45000TEST" [ref=f4e107] [cursor=pointer]
+    - button "🔊" [ref=f4e23] [cursor=pointer]
+    - button "🌙" [ref=f4e24] [cursor=pointer]
+  - generic [ref=f4e51]:
+    - complementary [ref=f4e52]:
+      - generic [ref=f4e53]:
+        - generic [ref=f4e54]:
+          - generic [ref=f4e55]: 📋
+          - generic [ref=f4e56]: Delivery Information
+        - generic [ref=f4e57]:
+          - generic [ref=f4e58]:
+            - generic [ref=f4e59]:
+              - generic [ref=f4e60]: Operator
+              - textbox "Your name" [ref=f4e61]: QA Tester
+            - generic [ref=f4e62]:
+              - generic [ref=f4e63]: Delivery No.
+              - textbox "e.g. 45000…" [ref=f4e64]: 45000TEST
+          - generic [ref=f4e66]:
+            - generic [ref=f4e67]: Destination
+            - generic [ref=f4e68]:
+              - button "Europe 180 cm" [ref=f4e69] [cursor=pointer]: Europe180 cm
+              - button "Export 160 cm" [ref=f4e70] [cursor=pointer]: Export160 cm
+          - generic [ref=f4e71]:
+            - generic [ref=f4e72]: Part Number
+            - textbox "Scan PN from pick label" [ref=f4e74]: PN123
+      - generic [ref=f4e75]:
+        - generic [ref=f4e76]:
+          - generic [ref=f4e77]: 📊
+          - generic [ref=f4e78]: Live Summary
+        - generic [ref=f4e79]:
+          - generic [ref=f4e80]:
+            - generic [ref=f4e81]: Pallets
+            - generic [ref=f4e82]: "2"
+          - generic [ref=f4e83]:
+            - generic [ref=f4e84]: Total Boxes
+            - generic [ref=f4e85]: "2"
+          - generic [ref=f4e86]:
+            - generic [ref=f4e87]: Pick Total (pcs)
+            - generic [ref=f4e88]: "9"
+          - generic [ref=f4e89]:
+            - generic [ref=f4e90]: Verified (pcs)
+            - generic [ref=f4e91]: "5"
+          - generic [ref=f4e92]:
+            - generic [ref=f4e93]: Total Weight (kg)
+            - generic [ref=f4e94]: "600"
+          - generic [ref=f4e108]: Per Pallet
+          - generic [ref=f4e109]:
+            - generic [ref=f4e385]:
+              - generic [ref=f4e386]: P1
+              - generic [ref=f4e387]: KP
+              - generic [ref=f4e388]: 5 pcs · 2 bx
+              - generic [ref=f4e389]: ✓
+            - generic [ref=f4e390]:
+              - generic [ref=f4e391]: P2
+              - generic [ref=f4e392]: EP
+              - generic [ref=f4e393]: —
+              - generic [ref=f4e394]: ●
+          - generic [ref=f4e95]:
+            - generic [ref=f4e96]: Status
+            - generic [ref=f4e97]: ● In progress
+    - generic [ref=f4e98]:
+      - generic [ref=f4e99]: Scanner ready — click a field and scan. Press Enter to auto-advance. Non-numeric characters in quantity fields are stripped automatically.
+      - generic [ref=f4e102]:
+        - button "1 Pallet 1 5 pcs · 2 bx" [ref=f4e370] [cursor=pointer]:
+          - generic [ref=f4e116]: "1"
+          - generic [ref=f4e117]:
+            - generic [ref=f4e118]: Pallet 1
+            - generic [ref=f4e354]: 5 pcs · 2 bx
+        - button "2 Pallet 2" [ref=f4e222] [cursor=pointer]:
+          - generic [ref=f4e223]: "2"
+          - generic [ref=f4e224]: Pallet 2
+        - button "＋ Add Pallet" [ref=f4e104] [cursor=pointer]
+      - generic [ref=f4e226]:
+        - generic [ref=f4e227]:
+          - generic [ref=f4e228]: Pallet 2
+          - generic [ref=f4e229]: PENDING
+          - button "✕ Remove" [ref=f4e231] [cursor=pointer]
+        - generic [ref=f4e232]:
+          - generic [ref=f4e233]:
+            - generic [ref=f4e234]: Pallet Type
+            - generic [ref=f4e235]:
+              - button "KP 60×80" [ref=f4e236] [cursor=pointer]:
+                - text: KP
+                - generic [ref=f4e237]: 60×80
+              - button "EP 120×80" [ref=f4e238] [cursor=pointer]:
+                - text: EP
+                - generic [ref=f4e239]: 120×80
+              - button "BP 120×100" [ref=f4e240] [cursor=pointer]:
+                - text: BP
+                - generic [ref=f4e241]: 120×100
+              - button "GP 125×100" [ref=f4e242] [cursor=pointer]:
+                - text: GP
+                - generic [ref=f4e243]: 125×100
+              - button "NP 130×110" [ref=f4e244] [cursor=pointer]:
+                - text: NP
+                - generic [ref=f4e245]: 130×110
+              - button "AP 140×105" [ref=f4e246] [cursor=pointer]:
+                - text: AP
+                - generic [ref=f4e247]: 140×105
+              - button "Other custom" [ref=f4e248] [cursor=pointer]:
+                - text: Other
+                - generic [ref=f4e249]: custom
+          - generic [ref=f4e250]:
+            - generic [ref=f4e251]: Weight (kg)
+            - spinbutton "e.g. 320" [ref=f4e252]: "280"
+          - generic [ref=f4e253]:
+            - generic [ref=f4e254]: Height (cm)
+            - spinbutton "e.g. 150" [ref=f4e255]: "140"
+        - generic [ref=f4e256]:
+          - generic [ref=f4e257]:
+            - generic [ref=f4e258]: Box Progress
+            - generic [ref=f4e259]:
+              - text: 0 / 4 pcs
+              - generic [ref=f4e260]: 0%
+          - generic [ref=f4e262]: 4 pcs to scan
+        - generic [ref=f4e263]:
+          - generic [ref=f4e264]:
+            - generic [ref=f4e265]:
+              - generic [ref=f4e266]: Pick Labels
+              - generic [ref=f4e267]: 4 pcs target
+            - generic [ref=f4e268]:
+              - generic [ref=f4e269]: Pick Label Quantities
+              - generic [ref=f4e270]:
+                - generic [ref=f4e271]:
+                  - generic [ref=f4e272]: Pick 1
+                  - textbox "Qty" [ref=f4e273]: "4"
+                  - button "✕" [ref=f4e274] [cursor=pointer]
+                - generic [ref=f4e381]:
+                  - generic [ref=f4e382]: Pick 2
+                  - textbox "Qty" [ref=f4e383]
+                  - button "✕" [ref=f4e384] [cursor=pointer]
+              - button "＋ Add pick label" [ref=f4e275] [cursor=pointer]
+          - generic [ref=f4e276]:
+            - generic [ref=f4e277]:
+              - generic [ref=f4e278]:
+                - generic [ref=f4e279]: Box Verification
+                - generic [ref=f4e280]: 0 pcs verified · 0 boxes
+              - generic [ref=f4e281]:
+                - button "Scan" [ref=f4e282] [cursor=pointer]
+                - button "Visual" [ref=f4e283] [cursor=pointer]
+            - generic [ref=f4e284]:
+              - generic [ref=f4e286]:
+                - generic [ref=f4e287]: Part Number — Box Label
+                - textbox "Scan PN from first box" [ref=f4e289]: PN123
+              - generic [ref=f4e291]:
+                - generic [ref=f4e292]: Box Quantities — one per box
+                - generic [ref=f4e294]:
+                  - generic [ref=f4e295]: B1
+                  - textbox "Qty" [active] [ref=f4e296]
+                  - button "✕" [ref=f4e297] [cursor=pointer]
+                - button "＋ Add box" [ref=f4e298] [cursor=pointer]
+        - generic [ref=f4e299]:
+          - generic [ref=f4e300]:
+            - generic [ref=f4e301]: Pick PN
+            - generic [ref=f4e302]: PN123
+          - generic [ref=f4e303]:
+            - generic [ref=f4e304]: Box PN
+            - generic [ref=f4e305]: PN123
+          - generic [ref=f4e306]:
+            - generic [ref=f4e307]: PN Check
+            - generic [ref=f4e308]: ✓ MATCH
+          - generic [ref=f4e309]:
+            - generic [ref=f4e310]: Target (pcs)
+            - generic [ref=f4e311]: "4"
+          - generic [ref=f4e312]:
+            - generic [ref=f4e313]: Verified (pcs)
+            - generic [ref=f4e314]: —
+          - generic [ref=f4e315]:
+            - generic [ref=f4e316]: Boxes
+            - generic [ref=f4e317]: —
+          - generic [ref=f4e318]: PENDING

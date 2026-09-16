@@ -1,0 +1,82 @@
+- generic [active] [ref=f5e1]:
+  - banner [ref=f5e2]:
+    - generic [ref=f5e3]: Outbound Checklist — What's New
+    - heading "Built From Your Feedback" [level=1] [ref=f5e4]
+    - generic [ref=f5e5]: Sevenum NL · Sept 2026
+  - generic [ref=f5e6]:
+    - generic [ref=f5e7]: "1"
+    - generic [ref=f5e8]:
+      - generic [ref=f5e9]: From walking back to the computer for every pallet
+      - heading "Scan the Whole Row" [level=2] [ref=f5e10]
+      - paragraph [ref=f5e11]: "Scan every box across every pallet in one continuous run — the app jumps to the next pallet's tab for you automatically, no need to stop and click into each one on the computer. Paired with a new safeguard: if a scan ever pushes a pallet past its target, the run stops right there with a clear warning, so the extra box gets fixed before it slips into the next pallet."
+    - generic [ref=f5e13]:
+      - generic [ref=f5e14]:
+        - generic [ref=f5e15]: 1✓
+        - generic [ref=f5e16]: →
+        - generic [ref=f5e17]: "2"
+        - generic [ref=f5e18]: →
+        - generic [ref=f5e19]: "3"
+      - generic [ref=f5e20]:
+        - generic [ref=f5e21]: ⚠ OVER TARGET
+        - generic [ref=f5e22]: Pallet 3 · 52 / 48 pcs (+4)
+  - generic [ref=f5e25]:
+    - generic [ref=f5e26]: "2"
+    - generic [ref=f5e27]:
+      - generic [ref=f5e28]: From a printer running on Letter paper
+      - heading "Printing is more reliable" [level=2] [ref=f5e29]
+      - paragraph [ref=f5e30]: Ctrl+P now checks for missing data or mismatched quantities first — same safety check as clicking Print, no more skipping it by accident. And if a printer's paper size is set to Letter instead of A4, pallets no longer get cut off the bottom of the page.
+    - generic [ref=f5e32]:
+      - generic [ref=f5e33]:
+        - generic [ref=f5e34]: Ctrl
+        - generic [ref=f5e35]: P
+        - generic [ref=f5e36]: Print
+        - generic [ref=f5e37]: ✓ checked
+      - generic [ref=f5e38]:
+        - generic [ref=f5e39]: A4 paper
+        - generic [ref=f5e40]: ✓ fits
+      - generic [ref=f5e41]:
+        - generic [ref=f5e42]: Letter paper
+        - generic [ref=f5e43]: ✓ fits
+  - generic [ref=f5e44]:
+    - generic [ref=f5e45]: "3"
+    - generic [ref=f5e46]:
+      - generic [ref=f5e47]: From "I can't tell which pallet is open"
+      - heading "See which pallet you're on, instantly" [level=2] [ref=f5e48]
+      - paragraph [ref=f5e49]: The pallet tab you're currently working on now stands out with a blue highlight and a slight lift — easy to spot at a glance, even from across the station, instead of blending in with the others.
+    - generic [ref=f5e51]:
+      - generic [ref=f5e52]:
+        - generic [ref=f5e53]: "1"
+        - text: Pallet 1
+      - generic [ref=f5e54]:
+        - generic [ref=f5e55]: "2"
+        - text: Pallet 2
+      - generic [ref=f5e56]:
+        - generic [ref=f5e57]: "3"
+        - text: Pallet 3
+  - generic [ref=f5e59]:
+    - generic [ref=f5e60]: "4"
+    - generic [ref=f5e61]:
+      - generic [ref=f5e62]: From a supplier pallet we hadn't seen before
+      - heading "Custom pallet types now fit right in" [level=2] [ref=f5e63]
+      - paragraph [ref=f5e64]: Got a pallet that isn't KP, EP, BP, GP, NP, or AP? Pick Other, type in a code and its dimensions, and it flows through validation, print, PDF, and CSV exactly like the standard types — no more forcing it into the wrong pill.
+    - generic [ref=f5e66]:
+      - generic [ref=f5e67]:
+        - generic [ref=f5e68]:
+          - text: EP
+          - generic [ref=f5e69]: 120×80
+        - generic [ref=f5e70]:
+          - text: AP
+          - generic [ref=f5e71]: 140×105
+        - generic [ref=f5e72]:
+          - text: Other
+          - generic [ref=f5e73]: custom
+      - generic [ref=f5e74]:
+        - generic [ref=f5e75]:
+          - generic [ref=f5e76]: Code
+          - generic [ref=f5e77]: AMP1
+        - generic [ref=f5e78]:
+          - generic [ref=f5e79]: Dims cm
+          - generic [ref=f5e80]: 140×105
+  - contentinfo [ref=f5e81]:
+    - paragraph [ref=f5e82]: Notice something else that slows you down? Tell your shift lead — that's exactly how these four started.
+    - generic [ref=f5e83]: outbound-checklist.html
