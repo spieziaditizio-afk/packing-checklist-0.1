@@ -1,0 +1,182 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - img "Outbound Checklist" [ref=e4]
+    - img "Arrow Electronics" [ref=e5]
+    - generic [ref=e6]:
+      - generic [ref=e7]: Arrow Electronics
+      - generic [ref=e8]: Special Operations Area · Sevenum
+    - generic [ref=e9]: Wed, 16 Sept 2026
+    - generic [ref=e106]: Saved 09:30
+    - button "🆕 New Order" [ref=e10] [cursor=pointer]:
+      - generic [ref=e11]: 🆕
+      - generic [ref=e12]: New Order
+    - button [ref=e14] [cursor=pointer]:
+      - img "Print" [ref=e15]
+    - button "Audit Audit PN" [ref=e17] [cursor=pointer]:
+      - img "Audit" [ref=e18]
+      - generic [ref=e19]: Audit PN
+    - button "?" [ref=e20] [cursor=pointer]
+    - button "tablab-test" [ref=e21] [cursor=pointer]
+    - button "🔊" [ref=e23] [cursor=pointer]
+    - button "🌙" [ref=e24] [cursor=pointer]
+  - generic [ref=e51]:
+    - complementary [ref=e52]:
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - generic [ref=e55]: 📋
+          - generic [ref=e56]: Delivery Information
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - generic [ref=e59]:
+              - generic [ref=e60]: Operator
+              - textbox "Your name" [ref=e61]
+            - generic [ref=e62]:
+              - generic [ref=e63]: Delivery No.
+              - textbox "e.g. 45000…" [ref=e64]
+          - generic [ref=e66]:
+            - generic [ref=e67]: Destination
+            - generic [ref=e68]:
+              - button "Europe 180 cm" [ref=e69] [cursor=pointer]: Europe180 cm
+              - button "Export 160 cm" [ref=e70] [cursor=pointer]: Export160 cm
+          - generic [ref=e71]:
+            - generic [ref=e72]: Part Number
+            - textbox "Scan PN from pick label" [ref=e74]
+      - generic [ref=e75]:
+        - generic [ref=e76]:
+          - generic [ref=e77]: 📊
+          - generic [ref=e78]: Live Summary
+        - generic [ref=e79]:
+          - generic [ref=e80]:
+            - generic [ref=e81]: Pallets
+            - generic [ref=e82]: "2"
+          - generic [ref=e83]:
+            - generic [ref=e84]: Total Boxes
+            - generic [ref=e85]: "0"
+          - generic [ref=e86]:
+            - generic [ref=e87]: Pick Total (pcs)
+            - generic [ref=e88]: "0"
+          - generic [ref=e89]:
+            - generic [ref=e90]: Verified (pcs)
+            - generic [ref=e91]: "0"
+          - generic [ref=e92]:
+            - generic [ref=e93]: Total Weight (kg)
+            - generic [ref=e94]: "0"
+          - generic [ref=e107]: Per Pallet
+          - generic [ref=e108]:
+            - generic [ref=e211]:
+              - generic [ref=e212]: P1
+              - generic [ref=e213]: —
+              - generic [ref=e214]: —
+              - generic [ref=e215]: ●
+            - generic [ref=e216]:
+              - generic [ref=e217]: P2
+              - generic [ref=e218]: —
+              - generic [ref=e219]: —
+              - generic [ref=e220]: ●
+          - generic [ref=e95]:
+            - generic [ref=e96]: Status
+            - generic [ref=e97]: — Waiting
+    - generic [ref=e98]:
+      - generic [ref=e99]: Scanner ready — click a field and scan. Press Enter to auto-advance. Non-numeric characters in quantity fields are stripped automatically.
+      - generic [ref=e102]:
+        - button "1 Pallet 1" [ref=e114] [cursor=pointer]:
+          - generic [ref=e115]: "1"
+          - generic [ref=e116]: Pallet 1
+        - button "2 Pallet 2" [ref=e221] [cursor=pointer]:
+          - generic [ref=e222]: "2"
+          - generic [ref=e223]: Pallet 2
+        - button "＋ Add Pallet" [active] [ref=e104] [cursor=pointer]
+      - generic [ref=e225]:
+        - generic [ref=e226]:
+          - generic [ref=e227]: Pallet 2
+          - generic [ref=e228]: PENDING
+          - button "✕ Remove" [ref=e230] [cursor=pointer]
+        - generic [ref=e231]:
+          - generic [ref=e232]:
+            - generic [ref=e233]: Pallet Type
+            - generic [ref=e234]:
+              - button "KP 60×80" [ref=e235] [cursor=pointer]:
+                - text: KP
+                - generic [ref=e236]: 60×80
+              - button "EP 120×80" [ref=e237] [cursor=pointer]:
+                - text: EP
+                - generic [ref=e238]: 120×80
+              - button "BP 120×100" [ref=e239] [cursor=pointer]:
+                - text: BP
+                - generic [ref=e240]: 120×100
+              - button "GP 125×100" [ref=e241] [cursor=pointer]:
+                - text: GP
+                - generic [ref=e242]: 125×100
+              - button "NP 130×110" [ref=e243] [cursor=pointer]:
+                - text: NP
+                - generic [ref=e244]: 130×110
+              - button "AP 140×105" [ref=e245] [cursor=pointer]:
+                - text: AP
+                - generic [ref=e246]: 140×105
+              - button "Other custom" [ref=e247] [cursor=pointer]:
+                - text: Other
+                - generic [ref=e248]: custom
+          - generic [ref=e249]:
+            - generic [ref=e250]: Weight (kg)
+            - spinbutton "e.g. 320" [ref=e251]
+          - generic [ref=e252]:
+            - generic [ref=e253]: Height (cm)
+            - spinbutton "e.g. 150" [ref=e254]
+        - generic [ref=e255]:
+          - generic [ref=e256]:
+            - generic [ref=e257]: Box Progress
+            - generic [ref=e258]:
+              - text: 0 / 0 pcs
+              - generic [ref=e259]: 0%
+          - generic [ref=e261]: Add pick label quantities to set the target
+        - generic [ref=e262]:
+          - generic [ref=e263]:
+            - generic [ref=e264]:
+              - generic [ref=e265]: Pick Labels
+              - generic [ref=e266]: 0 pcs target
+            - generic [ref=e267]:
+              - generic [ref=e268]: Pick Label Quantities
+              - generic [ref=e270]:
+                - generic [ref=e271]: Pick 1
+                - textbox "Qty" [ref=e272]
+                - button "✕" [ref=e273] [cursor=pointer]
+              - button "＋ Add pick label" [ref=e274] [cursor=pointer]
+          - generic [ref=e275]:
+            - generic [ref=e276]:
+              - generic [ref=e277]:
+                - generic [ref=e278]: Box Verification
+                - generic [ref=e279]: 0 pcs verified · 0 boxes
+              - generic [ref=e280]:
+                - button "Scan" [ref=e281] [cursor=pointer]
+                - button "Visual" [ref=e282] [cursor=pointer]
+            - generic [ref=e283]:
+              - generic [ref=e285]:
+                - generic [ref=e286]: Part Number — Box Label
+                - textbox "Scan PN from first box" [ref=e288]
+              - generic [ref=e290]:
+                - generic [ref=e291]: Box Quantities — one per box
+                - generic [ref=e293]:
+                  - generic [ref=e294]: B1
+                  - textbox "Qty" [ref=e295]
+                  - button "✕" [ref=e296] [cursor=pointer]
+                - button "＋ Add box" [ref=e297] [cursor=pointer]
+        - generic [ref=e298]:
+          - generic [ref=e299]:
+            - generic [ref=e300]: Pick PN
+            - generic [ref=e301]: —
+          - generic [ref=e302]:
+            - generic [ref=e303]: Box PN
+            - generic [ref=e304]: —
+          - generic [ref=e305]:
+            - generic [ref=e306]: PN Check
+            - generic [ref=e307]: —
+          - generic [ref=e308]:
+            - generic [ref=e309]: Target (pcs)
+            - generic [ref=e310]: —
+          - generic [ref=e311]:
+            - generic [ref=e312]: Verified (pcs)
+            - generic [ref=e313]: —
+          - generic [ref=e314]:
+            - generic [ref=e315]: Boxes
+            - generic [ref=e316]: —
+          - generic [ref=e317]: PENDING

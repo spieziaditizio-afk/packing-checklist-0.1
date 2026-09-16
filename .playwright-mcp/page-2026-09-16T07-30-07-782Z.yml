@@ -1,0 +1,68 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - img "Outbound Checklist" [ref=e4]
+    - img "Arrow Electronics" [ref=e5]
+    - generic [ref=e6]:
+      - generic [ref=e7]: Arrow Electronics
+      - generic [ref=e8]: Special Operations Area · Sevenum
+    - generic [ref=e9]: Wed, 16 Sept 2026
+    - button "🆕 New Order" [ref=e10] [cursor=pointer]:
+      - generic [ref=e11]: 🆕
+      - generic [ref=e12]: New Order
+    - button [ref=e14] [cursor=pointer]:
+      - img "Print" [ref=e15]
+    - button "Audit Audit PN" [ref=e17] [cursor=pointer]:
+      - img "Audit" [ref=e18]
+      - generic [ref=e19]: Audit PN
+    - button "?" [ref=e20] [cursor=pointer]
+    - button "tablab-test" [ref=e21] [cursor=pointer]
+    - button "🔊" [ref=e23] [cursor=pointer]
+    - button "🌙" [ref=e24] [cursor=pointer]
+  - generic [ref=e51]:
+    - complementary [ref=e52]:
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - generic [ref=e55]: 📋
+          - generic [ref=e56]: Delivery Information
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - generic [ref=e59]:
+              - generic [ref=e60]: Operator
+              - textbox "Your name" [ref=e61]
+            - generic [ref=e62]:
+              - generic [ref=e63]: Delivery No.
+              - textbox "e.g. 45000…" [ref=e64]
+          - generic [ref=e66]:
+            - generic [ref=e67]: Destination
+            - generic [ref=e68]:
+              - button "Europe 180 cm" [ref=e69] [cursor=pointer]: Europe180 cm
+              - button "Export 160 cm" [ref=e70] [cursor=pointer]: Export160 cm
+          - generic [ref=e71]:
+            - generic [ref=e72]: Part Number
+            - textbox "Scan PN from pick label" [ref=e74]
+      - generic [ref=e75]:
+        - generic [ref=e76]:
+          - generic [ref=e77]: 📊
+          - generic [ref=e78]: Live Summary
+        - generic [ref=e79]:
+          - generic [ref=e80]:
+            - generic [ref=e81]: Pallets
+            - generic [ref=e82]: "0"
+          - generic [ref=e83]:
+            - generic [ref=e84]: Total Boxes
+            - generic [ref=e85]: "0"
+          - generic [ref=e86]:
+            - generic [ref=e87]: Pick Total (pcs)
+            - generic [ref=e88]: "0"
+          - generic [ref=e89]:
+            - generic [ref=e90]: Verified (pcs)
+            - generic [ref=e91]: "0"
+          - generic [ref=e92]:
+            - generic [ref=e93]: Total Weight (kg)
+            - generic [ref=e94]: "0"
+          - generic [ref=e95]:
+            - generic [ref=e96]: Status
+            - generic [ref=e97]: — Waiting
+    - generic [ref=e98]:
+      - generic [ref=e99]: Scanner ready — click a field and scan. Press Enter to auto-advance. Non-numeric characters in quantity fields are stripped automatically.
+      - button "＋ Add Pallet" [ref=e104] [cursor=pointer]
