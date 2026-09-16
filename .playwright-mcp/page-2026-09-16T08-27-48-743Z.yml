@@ -1,0 +1,46 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]: Outbound Checklist — What's New
+    - heading "3 updates on the floor" [level=1] [ref=e4]
+    - generic [ref=e5]: Sevenum NL · Sept 2026
+  - generic [ref=e6]:
+    - generic [ref=e7]: "1"
+    - generic [ref=e8]:
+      - heading "Over-scans now stop the run" [level=2] [ref=e9]
+      - paragraph [ref=e10]: "Keep scanning box after box — the app still jumps to the next pallet for you automatically. New: if a scan ever pushes a pallet past its target, everything stops right there with a clear warning, so you can fix the extra box before it slips into the next pallet."
+    - generic [ref=e12]:
+      - generic [ref=e13]: ⚠ OVER TARGET
+      - generic [ref=e14]: Pallet 3 · 52 / 48 pcs (+4)
+  - generic [ref=e17]:
+    - generic [ref=e18]: "2"
+    - generic [ref=e19]:
+      - heading "Printing is more reliable" [level=2] [ref=e20]
+      - paragraph [ref=e21]: Ctrl+P now checks for missing data or mismatched quantities first — same safety check as clicking Print, no more skipping it by accident. And if a printer's paper size is set to Letter instead of A4, pallets no longer get cut off the bottom of the page.
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]: Ctrl
+        - generic [ref=e26]: P
+        - generic [ref=e27]: Print
+        - generic [ref=e28]: ✓ checked
+      - generic [ref=e29]:
+        - generic [ref=e30]: A4 paper
+        - generic [ref=e31]: ✓ fits
+      - generic [ref=e32]:
+        - generic [ref=e33]: Letter paper
+        - generic [ref=e34]: ✓ fits
+  - generic [ref=e35]:
+    - generic [ref=e36]: "3"
+    - generic [ref=e37]:
+      - heading "See which pallet you're on, instantly" [level=2] [ref=e38]
+      - paragraph [ref=e39]: The pallet tab you're currently working on now stands out with a blue highlight and a slight lift — easy to spot at a glance, even from across the station, instead of blending in with the others.
+    - generic [ref=e41]:
+      - generic [ref=e42]:
+        - generic [ref=e43]: "1"
+        - text: Pallet 1
+      - generic [ref=e44]:
+        - generic [ref=e45]: "2"
+        - text: Pallet 2
+      - generic [ref=e46]:
+        - generic [ref=e47]: "3"
+        - text: Pallet 3
+  - contentinfo [ref=e49]: outbound-checklist.html

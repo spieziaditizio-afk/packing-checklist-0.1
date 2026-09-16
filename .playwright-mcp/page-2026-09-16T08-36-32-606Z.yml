@@ -1,0 +1,51 @@
+- generic [active] [ref=f2e1]:
+  - banner [ref=f2e2]:
+    - generic [ref=f2e3]: Outbound Checklist — What's New
+    - heading "Built From Your Feedback" [level=1] [ref=f2e4]
+    - generic [ref=f2e5]: Sevenum NL · Sept 2026
+  - generic [ref=f2e6]:
+    - generic [ref=f2e7]: "1"
+    - generic [ref=f2e8]:
+      - generic [ref=f2e9]: From a scanning mix-up
+      - heading "Over-scans now stop the run" [level=2] [ref=f2e10]
+      - paragraph [ref=f2e11]: "Keep scanning box after box — the app still jumps to the next pallet for you automatically. New: if a scan ever pushes a pallet past its target, everything stops right there with a clear warning, so you can fix the extra box before it slips into the next pallet."
+    - generic [ref=f2e13]:
+      - generic [ref=f2e14]: ⚠ OVER TARGET
+      - generic [ref=f2e15]: Pallet 3 · 52 / 48 pcs (+4)
+  - generic [ref=f2e18]:
+    - generic [ref=f2e19]: "2"
+    - generic [ref=f2e20]:
+      - generic [ref=f2e21]: From a printer running on Letter paper
+      - heading "Printing is more reliable" [level=2] [ref=f2e22]
+      - paragraph [ref=f2e23]: Ctrl+P now checks for missing data or mismatched quantities first — same safety check as clicking Print, no more skipping it by accident. And if a printer's paper size is set to Letter instead of A4, pallets no longer get cut off the bottom of the page.
+    - generic [ref=f2e25]:
+      - generic [ref=f2e26]:
+        - generic [ref=f2e27]: Ctrl
+        - generic [ref=f2e28]: P
+        - generic [ref=f2e29]: Print
+        - generic [ref=f2e30]: ✓ checked
+      - generic [ref=f2e31]:
+        - generic [ref=f2e32]: A4 paper
+        - generic [ref=f2e33]: ✓ fits
+      - generic [ref=f2e34]:
+        - generic [ref=f2e35]: Letter paper
+        - generic [ref=f2e36]: ✓ fits
+  - generic [ref=f2e37]:
+    - generic [ref=f2e38]: "3"
+    - generic [ref=f2e39]:
+      - generic [ref=f2e40]: From "I can't tell which pallet is open"
+      - heading "See which pallet you're on, instantly" [level=2] [ref=f2e41]
+      - paragraph [ref=f2e42]: The pallet tab you're currently working on now stands out with a blue highlight and a slight lift — easy to spot at a glance, even from across the station, instead of blending in with the others.
+    - generic [ref=f2e44]:
+      - generic [ref=f2e45]:
+        - generic [ref=f2e46]: "1"
+        - text: Pallet 1
+      - generic [ref=f2e47]:
+        - generic [ref=f2e48]: "2"
+        - text: Pallet 2
+      - generic [ref=f2e49]:
+        - generic [ref=f2e50]: "3"
+        - text: Pallet 3
+  - contentinfo [ref=f2e52]:
+    - paragraph [ref=f2e53]: Notice something else that slows you down? Tell your shift lead — that's exactly how these three started.
+    - generic [ref=f2e54]: outbound-checklist.html
