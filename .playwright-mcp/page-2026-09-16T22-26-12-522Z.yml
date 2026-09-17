@@ -1,0 +1,103 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]: Outbound Checklist — What's New
+    - heading "Built From Your Feedback" [level=1] [ref=e4]
+    - generic [ref=e5]: Sevenum NL · Sept 2026
+  - generic [ref=e6]:
+    - generic [ref=e7]: "1"
+    - generic [ref=e8]:
+      - generic [ref=e9]: From walking back to the computer for every pallet
+      - heading "Scan the Whole Row" [level=2] [ref=e10]
+      - paragraph [ref=e11]: "Scan every box across every pallet in one continuous run — the app jumps to the next pallet's tab for you automatically, no need to stop and click into each one on the computer. Paired with a new safeguard: if a scan ever pushes a pallet past its target, the run stops right there with a clear warning, so the extra box gets fixed before it slips into the next pallet."
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]: 1✓
+        - generic [ref=e16]: →
+        - generic [ref=e17]: "2"
+        - generic [ref=e18]: →
+        - generic [ref=e19]: "3"
+      - generic [ref=e20]:
+        - generic [ref=e21]: ⚠ OVER TARGET
+        - generic [ref=e22]: Pallet 3 · 52 / 48 pcs (+4)
+  - generic [ref=e25]:
+    - generic [ref=e26]: "2"
+    - generic [ref=e27]:
+      - generic [ref=e28]: From a printer running on Letter paper
+      - heading "Printing is more reliable" [level=2] [ref=e29]
+      - paragraph [ref=e30]: Ctrl+P now checks for missing data or mismatched quantities first — same safety check as clicking Print, no more skipping it by accident. And if a printer's paper size is set to Letter instead of A4, pallets no longer get cut off the bottom of the page.
+    - generic [ref=e32]:
+      - generic [ref=e33]:
+        - generic [ref=e34]: Ctrl
+        - generic [ref=e35]: P
+        - generic [ref=e36]: Print
+        - generic [ref=e37]: ✓ checked
+      - generic [ref=e38]:
+        - generic [ref=e39]: A4 paper
+        - generic [ref=e40]: ✓ fits
+      - generic [ref=e41]:
+        - generic [ref=e42]: Letter paper
+        - generic [ref=e43]: ✓ fits
+  - generic [ref=e44]:
+    - generic [ref=e45]: "3"
+    - generic [ref=e46]:
+      - generic [ref=e47]: From "I can't tell which pallet is open"
+      - heading "See which pallet you're on, instantly" [level=2] [ref=e48]
+      - paragraph [ref=e49]: The pallet tab you're currently working on now stands out with a blue highlight and a slight lift — easy to spot at a glance, even from across the station, instead of blending in with the others.
+    - generic [ref=e51]:
+      - generic [ref=e52]:
+        - generic [ref=e53]: "1"
+        - text: Pallet 1
+      - generic [ref=e54]:
+        - generic [ref=e55]: "2"
+        - text: Pallet 2
+      - generic [ref=e56]:
+        - generic [ref=e57]: "3"
+        - text: Pallet 3
+  - generic [ref=e59]:
+    - generic [ref=e60]: "4"
+    - generic [ref=e61]:
+      - generic [ref=e62]: From a supplier pallet we hadn't seen before
+      - heading "Custom pallet types now fit right in" [level=2] [ref=e63]
+      - paragraph [ref=e64]: Got a pallet that isn't KP, EP, BP, GP, NP, or AP? Pick Other, type in a code and its dimensions, and it flows through validation, print, PDF, and CSV exactly like the standard types — no more forcing it into the wrong pill.
+    - generic [ref=e66]:
+      - generic [ref=e67]:
+        - generic [ref=e68]:
+          - text: EP
+          - generic [ref=e69]: 120×80
+        - generic [ref=e70]:
+          - text: AP
+          - generic [ref=e71]: 140×105
+        - generic [ref=e72]:
+          - text: Other
+          - generic [ref=e73]: custom
+      - generic [ref=e74]:
+        - generic [ref=e75]:
+          - generic [ref=e76]: Code
+          - generic [ref=e77]: AMP1
+        - generic [ref=e78]:
+          - generic [ref=e79]: Dims cm
+          - generic [ref=e80]: 140×105
+  - generic [ref=e81]:
+    - generic [ref=e82]: "5"
+    - generic [ref=e83]:
+      - generic [ref=e84]: From how a scanner actually reads a label
+      - heading "Smarter scans, safer stops" [level=2] [ref=e85]
+      - paragraph [ref=e86]:
+        - text: Every quantity scan gets cleaned up automatically — stray letters and leading zeros from the scanner (
+        - code [ref=e87]: "00250"
+        - text: ","
+        - code [ref=e88]: A00250
+        - text: ) come through as a clean
+        - code [ref=e89]: "250"
+        - text: ", no retyping needed. And if you scan something that isn't a quantity at all — a Part Number label, say — into a Qty field, the app stops immediately with a warning instead of accepting garbage, so you can rescan the right thing."
+    - generic [ref=e91]:
+      - generic [ref=e92]:
+        - generic [ref=e93]: A00250
+        - generic [ref=e94]: →
+        - generic [ref=e95]: 250 ✓
+      - generic [ref=e96]:
+        - generic [ref=e97]: ⚠ WRONG BARCODE
+        - generic [ref=e98]: Scan again
+  - contentinfo [ref=e99]:
+    - paragraph [ref=e100]: Notice something else that slows you down? Tell your shift lead — that's exactly how these five started.
+    - generic [ref=e101]: outbound-checklist.html

@@ -1,0 +1,126 @@
+- generic [ref=f2e2]:
+  - banner [ref=f2e3]:
+    - paragraph [ref=f2e4]: Outbound Checklist — Analytics
+    - heading "Packing Dashboard Concepts" [level=1] [ref=f2e5]
+    - paragraph [ref=f2e6]: Four example layouts for viewing deliveries, pallets, boxes, and pieces packed — by day, week, month or year. Sample data below (not live). Switch the period and the model to compare.
+    - 'button "🖥️ Theme: System" [ref=f2e7] [cursor=pointer]'
+  - generic [ref=f2e8]:
+    - generic [ref=f2e9]:
+      - button "Day" [ref=f2e10] [cursor=pointer]
+      - button "Week" [ref=f2e11] [cursor=pointer]
+      - button "Month" [ref=f2e12] [cursor=pointer]
+      - button "Year" [ref=f2e13] [cursor=pointer]
+    - generic [ref=f2e14]:
+      - button "1 · Executive Overview" [ref=f2e15] [cursor=pointer]
+      - button "2 · Floor Wallboard" [ref=f2e16] [cursor=pointer]
+      - button "3 · Delivery Log" [ref=f2e17] [cursor=pointer]
+      - button "4 · Trends & Comparison" [ref=f2e18] [cursor=pointer]
+  - generic [ref=f2e19]:
+    - generic [ref=f2e20]:
+      - heading "Executive Overview" [level=2] [ref=f2e21]
+      - generic [ref=f2e22]: KPI tiles + trend + recent activity
+    - paragraph [ref=f2e23]: "A general-purpose landing view: the four headline numbers up top, a throughput trend underneath, and the most recent deliveries below that. Works for anyone checking in from a desk."
+    - generic [ref=f2e24]:
+      - generic [ref=f2e25]:
+        - generic [ref=f2e26]: Deliveries
+        - generic [ref=f2e27]: "6"
+        - generic [ref=f2e28]: ▲ 8% vs last day
+      - generic [ref=f2e29]:
+        - generic [ref=f2e30]: Pallets
+        - generic [ref=f2e31]: "14"
+        - generic [ref=f2e32]: ▲ 3% vs last day
+      - generic [ref=f2e33]:
+        - generic [ref=f2e34]: Boxes
+        - generic [ref=f2e35]: "132"
+        - generic [ref=f2e36]: ▼ 2% vs last day
+      - generic [ref=f2e37]:
+        - generic [ref=f2e38]: Pieces
+        - generic [ref=f2e39]: 4,180
+        - generic [ref=f2e40]: ▲ 6% vs last day
+    - generic [ref=f2e41]:
+      - generic [ref=f2e42]:
+        - heading "Pieces packed" [level=3] [ref=f2e43]
+        - generic [ref=f2e44]:
+          - generic [ref=f2e45]: pcs / hour
+          - button "Table view" [ref=f2e46] [cursor=pointer]
+      - generic [ref=f2e47]:
+        - generic [ref=f2e48]:
+          - generic [ref=f2e49] [cursor=pointer]
+          - generic [ref=f2e50]: 6–7a
+        - generic [ref=f2e51]:
+          - generic [ref=f2e52] [cursor=pointer]
+          - generic [ref=f2e53]: 7–8a
+        - generic [ref=f2e54]:
+          - generic [ref=f2e55] [cursor=pointer]
+          - generic [ref=f2e56]: 8–9a
+        - generic [ref=f2e57]:
+          - generic [ref=f2e58] [cursor=pointer]
+          - generic [ref=f2e59]: 9–10a
+        - generic [ref=f2e60]:
+          - generic [ref=f2e61] [cursor=pointer]
+          - generic [ref=f2e62]: 10–11a
+        - generic [ref=f2e63]:
+          - generic [ref=f2e64] [cursor=pointer]
+          - generic [ref=f2e65]: 11a–12p
+    - generic [ref=f2e66]:
+      - generic [ref=f2e67]:
+        - heading "Recent deliveries" [level=3] [ref=f2e68]
+        - generic [ref=f2e69]: Showing 5 of 6 this day
+      - table [ref=f2e70]:
+        - rowgroup [ref=f2e71]:
+          - row [ref=f2e72]:
+            - columnheader "Delivery" [ref=f2e73]
+            - columnheader "Operator" [ref=f2e74]
+            - columnheader "Dest." [ref=f2e75]
+            - columnheader "Pallets" [ref=f2e76]
+            - columnheader "Boxes" [ref=f2e77]
+            - columnheader "Pieces" [ref=f2e78]
+            - columnheader "Status" [ref=f2e79]
+        - rowgroup [ref=f2e80]:
+          - row [ref=f2e81]:
+            - cell "45231" [ref=f2e82]
+            - cell "J. Bakker" [ref=f2e83]
+            - cell "Europe" [ref=f2e84]
+            - cell "3" [ref=f2e85]
+            - cell "24" [ref=f2e86]
+            - cell "720" [ref=f2e87]
+            - cell "✓ Match" [ref=f2e88]
+          - row [ref=f2e89]:
+            - cell "45230" [ref=f2e90]
+            - cell "R. Martinez" [ref=f2e91]
+            - cell "Export" [ref=f2e92]
+            - cell "2" [ref=f2e93]
+            - cell "18" [ref=f2e94]
+            - cell "540" [ref=f2e95]
+            - cell "✓ Match" [ref=f2e96]
+          - row [ref=f2e97]:
+            - cell "45229" [ref=f2e98]
+            - cell "T. de Vries" [ref=f2e99]
+            - cell "Europe" [ref=f2e100]
+            - cell "4" [ref=f2e101]
+            - cell "31" [ref=f2e102]
+            - cell "980" [ref=f2e103]
+            - cell "✗ Mismatch" [ref=f2e104]
+          - row [ref=f2e105]:
+            - cell "45228" [ref=f2e106]
+            - cell "M. Alonso" [ref=f2e107]
+            - cell "Europe" [ref=f2e108]
+            - cell "1" [ref=f2e109]
+            - cell "9" [ref=f2e110]
+            - cell "260" [ref=f2e111]
+            - cell "✓ Match" [ref=f2e112]
+          - row [ref=f2e113]:
+            - cell "45227" [ref=f2e114]
+            - cell "K. van Dijk" [ref=f2e115]
+            - cell "Export" [ref=f2e116]
+            - cell "3" [ref=f2e117]
+            - cell "26" [ref=f2e118]
+            - cell "810" [ref=f2e119]
+            - cell "✓ Match" [ref=f2e120]
+  - generic [ref=f2e121]:
+    - heading "Which one to build" [level=2] [ref=f2e122]
+    - paragraph [ref=f2e123]: Executive Overview (1) is the safest default if this is a page people open on their own — it answers "how are we doing" and "what just happened" in one scroll. Floor Wallboard (2) is the one worth building first if the goal is a shared monitor on the packing floor itself — nothing to click, readable from a few meters away. Delivery Log (3) and Trends (4) are better as a second screen for a supervisor once the basic numbers exist.
+    - paragraph [ref=f2e124]:
+      - text: "One thing to flag regardless of which direction: right now each delivery lives only in that browser's own"
+      - code [ref=f2e125]: localStorage
+      - text: ", scoped to one session — there's no shared place today's numbers from every packing station would already be adding up in. Any of these four needs that piece built first (a small shared store the app writes a summary to when a delivery is completed) before the numbers on screen would be real instead of sample data."
