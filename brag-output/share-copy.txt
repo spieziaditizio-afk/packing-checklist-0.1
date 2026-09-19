@@ -1,0 +1,1 @@
+Outbound Checklist is now live. Live scan verification, continuous cross-pallet advance, and a hard stop the instant a scan goes one box over target — all in a single HTML file with zero build step.

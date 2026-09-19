@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Outbound Checklist — Storyboard v1</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #05070a; color: #e6edf3; font-family: 'DM Sans', sans-serif; padding: 40px 48px 80px; }
+  .mono { font-family: 'DM Mono', monospace; }
+  header.page { margin-bottom: 8px; }
+  header.page h1 { font-size: 30px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+  header.page .ver { font-size: 13px; font-weight: 600; color: #38bdf8; background: rgba(56,189,248,.12); border: 1px solid rgba(56,189,248,.35); border-radius: 6px; padding: 3px 9px; }
+  header.page .dek { color: #8b949e; font-size: 15px; margin-top: 6px; }
+  header.page .tag { margin-top: 10px; font-size: 12px; color: #6e7681; font-family: 'DM Mono', monospace; letter-spacing: .03em; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 28px; }
+
+  .cell-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .cell {
+    aspect-ratio: 16 / 9;
+    container-type: inline-size;
+    background: #0d1117;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cell .fill { position: absolute; inset: 0; }
+
+  .label-row { display: flex; justify-content: space-between; align-items: baseline; font-family: 'DM Mono', monospace; }
+  .label-row .name { font-size: 13px; font-weight: 600; color: #e6edf3; }
+  .label-row .meta { font-size: 11px; color: #6e7681; }
+  .note { font-size: 12.5px; color: #8b949e; line-height: 1.45; }
+  .note b { color: #e6edf3; }
+  .chip { display: inline-block; margin-top: 4px; font-family: 'DM Mono', monospace; font-size: 10.5px; color: #38bdf8; background: rgba(56,189,248,.10); border: 1px solid rgba(56,189,248,.28); border-radius: 5px; padding: 2px 7px; }
+
+  /* ---- generic in-cell primitives (cqw-scaled) ---- */
+  .topbar { position: absolute; top: 0; left: 0; right: 0; height: 16cqw; background: linear-gradient(180deg,#010409 0%,#0d1117 100%); display: flex; align-items: center; padding: 0 5cqw; gap: 2cqw; }
+  .app-icon { width: 5cqw; height: 5cqw; border-radius: 1.2cqw; background: rgba(56,189,248,.12); border: 0.15cqw solid rgba(56,189,248,.4); flex-shrink: 0; }
+  .app-title { font-size: 3cqw; font-weight: 700; color: #e6edf3; }
+  .app-sub { font-size: 1.3cqw; color: #8b949e; font-family: 'DM Mono', monospace; margin-top: .3cqw; }
+  .wordmark-sm { margin-left: auto; font-size: 2cqw; font-weight: 700; letter-spacing: .14em; color: #e6edf3; }
+
+  .card { position: absolute; background: #161b22; border: 0.12cqw solid #30363d; border-radius: 1.2cqw; }
+  .fieldbox { background: #0d1117; border: 0.15cqw solid #30363d; border-radius: 0.8cqw; }
+  .label-tiny { font-size: 1.1cqw; color: #8b949e; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  .val-mono { font-family: 'DM Mono', monospace; font-weight: 700; color: #e6edf3; }
+
+  .headline-block { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; flex-direction: column; gap: 1.2cqw; padding: 6cqw; }
+  .headline-block .h { font-size: 5.5cqw; font-weight: 700; line-height: 1.05; color: #e6edf3; }
+  .headline-block .s { font-size: 2.2cqw; color: #8b949e; font-family: 'DM Mono', monospace; }
+
+  .grid-bg { background-image: linear-gradient(rgba(56,189,248,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,.08) 1px, transparent 1px); background-size: 6cqw 6cqw; }
+
+  .toast { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 46cqw; padding: 4cqw 5cqw; background: #161b22; border: 0.18cqw solid #dc2626; border-radius: 1.4cqw; text-align: center; }
+  .toast .t { font-size: 3.2cqw; font-weight: 700; color: #f87171; }
+  .toast .s { font-size: 1.8cqw; color: #e6edf3; font-family: 'DM Mono', monospace; margin-top: .6cqw; }
+
+  .badge-match { font-family: 'DM Mono', monospace; font-weight: 700; color: #10b981; font-size: 2.4cqw; }
+
+  .accent-dot { width: 1.4cqw; height: 1.4cqw; border-radius: 50%; background: #38bdf8; display: inline-block; }
+
+  .seam-strip { display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 8px 0; }
+  .seam-node { flex-shrink: 0; width: 96px; height: 54px; border-radius: 6px; background: #161b22; border: 1px solid #30363d; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 11px; color: #8b949e; }
+  .seam-arrow { flex-shrink: 0; font-size: 13px; color: #38bdf8; font-family: 'DM Mono', monospace; text-align: center; min-width: 64px; }
+
+  .tok-row { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+  .swatch { width: 22px; height: 22px; border-radius: 5px; border: 1px solid rgba(255,255,255,.15); flex-shrink: 0; }
+  .tok-label { font-family: 'DM Mono', monospace; font-size: 12px; color: #8b949e; }
+  .tok-hex { font-family: 'DM Mono', monospace; font-size: 12px; color: #e6edf3; }
+
+  section.closing { margin-top: 8px; }
+  section.closing h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .08em; color: #6e7681; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <h1>Outbound Checklist — Launch Demo <span class="ver">v1</span></h1>
+  <div class="dek">A show-it-as-is feature walkthrough — the real scan-and-verify workflow, narrated.</div>
+  <div class="tag">1920×1080 · ~63s · 8 beats · voiceover: Kokoro am_michael · music: understated tech/ops underscore</div>
+</header>
+
+<div class="grid">
+
+  <!-- FRAME 1 — HOOK -->
+  <div class="cell-wrap" id="frame-01">
+    <div class="cell">
+      <div class="fill" style="background:#05070a;"></div>
+      <div class="headline-block">
+        <div class="h">One box too many.</div>
+        <div class="h" style="color:#38bdf8;">Nobody catches it —</div>
+        <div class="h">until the dock.</div>
+      </div>
+    </div>
+    <div class="label-row"><span class="name">01 · One box too many</span><span class="meta">0.0–4.0s</span></div>
+    <div class="note"><b>Type-in, hard cut out.</b> Full black canvas, three short phrases land one at a time; no product name yet — pure stakes.</div>
+    <div class="chip">seam → cut</div>
+  </div>
+
+  <!-- FRAME 2 — PRODUCT INTRO -->
+  <div class="cell-wrap" id="frame-02">
+    <div class="cell">
+      <div class="fill" style="background:#0d1117;"></div>
+      <div class="topbar">
+        <div class="app-icon"></div>
+        <div>
+          <div class="app-title">Outbound Checklist</div>
+          <div class="app-sub">SEVENUM NL · PRE-SHIPMENT VERIFICATION</div>
+        </div>
+        <div class="wordmark-sm">ARROW</div>
+      </div>
+      <div style="position:absolute;bottom:8cqw;left:0;right:0;text-align:center;font-family:'DM Mono',monospace;font-size:1.8cqw;color:#8b949e;">scan by scan, right on the floor</div>
+    </div>
+    <div class="label-row"><span class="name">02 · Meet Outbound Checklist</span><span class="meta">4.0–10.0s</span></div>
+    <div class="note"><b>Topbar slides down into frame</b> on the cut from black — real app icon, title, Arrow wordmark. Names the product for the first time.</div>
+    <div class="chip">seam → zoom-through</div>
+  </div>
+
+  <!-- FRAME 3 — SCAN PIPELINE -->
+  <div class="cell-wrap" id="frame-03">
+    <div class="cell">
+      <div class="fill" style="background:#0d1117;"></div>
+      <div class="card" style="top:14cqw;left:8cqw;right:8cqw;bottom:8cqw;padding:4cqw;">
+        <div class="label-tiny">Pick Label PN</div>
+        <div class="fieldbox" style="display:inline-block;padding:1.5cqw 3cqw;margin-top:1cqw;">
+          <span class="val-mono" style="font-size:2.4cqw;">AS-4471-B</span>
+        </div>
+        <div class="label-tiny" style="margin-top:4cqw;">Box Verification</div>
+        <div style="display:flex;gap:2cqw;margin-top:1.4cqw;">
+          <div class="fieldbox" style="padding:1.2cqw 3cqw;border-color:#10b981;background:rgba(16,185,129,.12);"><span class="val-mono">6</span></div>
+          <div class="fieldbox" style="padding:1.2cqw 3cqw;"><span class="val-mono">3</span></div>
+        </div>
+        <div style="margin-top:4cqw;">
+          <div class="label-tiny">Verified / Target</div>
+          <div style="height:1.6cqw;background:#21262d;border-radius:1cqw;margin-top:1cqw;overflow:hidden;">
+            <div style="width:65%;height:100%;background:#38bdf8;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="label-row"><span class="name">03 · Scan the pallet</span><span class="meta">10.0–20.0s</span></div>
+    <div class="note"><b>Green flash on each scan</b>, progress bar fills live. First demo cycle — the core loop the rest of the video builds on.</div>
+    <div class="chip">seam → crossfade</div>
+  </div>
+
+  <!-- FRAME 4 — AUTO ADVANCE -->
+  <div class="cell-wrap" id="frame-04">
+    <div class="cell">
+      <div class="fill" style="background:#0d1117;"></div>
+      <div style="position:absolute;top:10cqw;left:8cqw;display:flex;gap:1cqw;">
+        <div class="fieldbox" style="padding:1cqw 2.4cqw;background:transparent;"><span class="mono" style="font-size:1.6cqw;color:#6e7681;">Pallet 1</span></div>
+        <div class="fieldbox" style="padding:1cqw 2.4cqw;background:rgba(56,189,248,.14);border-color:#38bdf8;"><span class="mono" style="font-size:1.6cqw;color:#e6edf3;">Pallet 2</span></div>
+      </div>
+      <div class="card" style="top:20cqw;left:8cqw;right:8cqw;bottom:8cqw;padding:4cqw;display:flex;flex-direction:column;justify-content:flex-end;">
+        <div style="height:1.6cqw;background:#21262d;border-radius:1cqw;overflow:hidden;">
+          <div style="width:100%;height:100%;background:#10b981;"></div>
+        </div>
+        <div class="label-tiny" style="margin-top:1.4cqw;color:#10b981;">✓ auto-advanced — focus jumped, no click</div>
+      </div>
+    </div>
+    <div class="label-row"><span class="name">04 · It keeps moving with you</span><span class="meta">20.0–30.0s</span></div>
+    <div class="note"><b>Tab strip crossfades active state</b> the instant the bar completes — the operator never touches the mouse. Second demo cycle: momentum across a whole delivery.</div>
+    <div class="chip">seam → crossfade</div>
+  </div>
+
+  <!-- FRAME 5 — OVER TARGET (CLIMAX / HELD FRAME) -->
+  <div class="cell-wrap" id="frame-05">
+    <div class="cell">
+      <div class="fill" style="background:#0d1117;"></div>
+      <div class="toast">
+        <div class="t">⚠ OVER TARGET</div>
+        <div class="s">1 pc over target</div>
+      </div>
+      <div style="position:absolute;bottom:6cqw;left:0;right:0;text-align:center;">
+        <div style="height:1.6cqw;width:70%;margin:0 auto;background:#dc2626;border-radius:1cqw;"></div>
+      </div>
+    </div>
+    <div class="label-row"><span class="name">05 · It stops before the truck does</span><span class="meta">30.0–42.0s</span></div>
+    <div class="note"><b>The held frame.</b> Toast slams in, field flashes red, bar locks — nothing else moves for a beat. This is the signature differentiator; give it the longest hold and the loudest silence around it. <b>No exit until the line finishes.</b></div>
+    <div class="chip">seam → zoom-through</div>
+  </div>
+
+  <!-- FRAME 6 — MATCH / REPORT -->
+  <div class="cell-wrap" id="frame-06">
+    <div class="cell">
+      <div class="fill" style="background:#0d1117;"></div>
+      <div class="card" style="top:14cqw;left:8cqw;right:8cqw;bottom:8cqw;padding:4cqw;display:flex;flex-direction:column;justify-content:space-between;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="label-tiny">Validation</span>
+          <span class="badge-match">✓ MATCH</span>
+        </div>
+        <div class="card" style="position:relative;top:auto;left:auto;right:auto;bottom:auto;align-self:flex-end;width:34%;aspect-ratio:3/4;background:#f6f8fa;padding:1.6cqw;">
+          <div style="height:.6cqw;width:80%;background:#d0d7de;border-radius:.3cqw;margin-bottom:1cqw;"></div>
+          <div style="height:.6cqw;width:55%;background:#d0d7de;border-radius:.3cqw;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="label-row"><span class="name">06 · One clear answer</span><span class="meta">42.0–50.0s</span></div>
+    <div class="note"><b>Red resolves to green</b>, badge flips to MATCH, report card slides up. Pays off the tension from Frame 5 with a clean, provable result.</div>
+    <div class="chip">seam → crossfade</div>
+  </div>
+
+  <!-- FRAME 7 — SINGLE FILE -->
+  <div class="cell-wrap" id="frame-07">
+    <div class="cell grid-bg">
+      <div class="headline-block">
+        <div style="width:9cqw;height:11cqw;border:0.2cqw solid #38bdf8;border-radius:1cqw;position:relative;">
+          <div style="position:absolute;top:-0.5cqw;right:-0.5cqw;width:3cqw;height:3cqw;background:#0d1117;border:0.2cqw solid #38bdf8;border-radius:0 0.6cqw 0 0.6cqw;"></div>
+        </div>
+        <div class="s mono" style="margin-top:1.5cqw;">outbound-checklist.html</div>
+        <div class="s" style="color:#e6edf3;">no server · no install · double-click to open</div>
+      </div>
+    </div>
+    <div class="label-row"><span class="name">07 · No server, no install</span><span class="meta">50.0–57.0s</span></div>
+    <div class="note"><b>UI dissolves through blur</b> into a single file icon on the graph-paper ground. The differentiator against a typical SaaS setup story.</div>
+    <div class="chip">seam → blur-crossfade</div>
+  </div>
+
+  <!-- FRAME 8 — OUTRO -->
+  <div class="cell-wrap" id="frame-08">
+    <div class="cell">
+      <div class="fill" style="background:#05070a;"></div>
+      <div class="headline-block">
+        <div class="h" style="font-size:4.4cqw;">Outbound Checklist.</div>
+        <div class="s">Every pallet, verified before it ships.</div>
+        <div style="margin-top:2cqw;font-size:1.6cqw;font-weight:700;letter-spacing:.14em;color:#6e7681;">ARROW</div>
+      </div>
+    </div>
+    <div class="label-row"><span class="name">08 · Every pallet, verified</span><span class="meta">57.0–63.0s</span></div>
+    <div class="note"><b>Calm end card.</b> No CTA button — this is an internal tool closing on confidence, not a signup push.</div>
+    <div class="chip">seam → hold / end</div>
+  </div>
+
+</div>
+
+<section class="closing">
+  <h2>Seam map</h2>
+  <div class="seam-strip">
+    <div class="seam-node">01 Hook</div>
+    <div class="seam-arrow">cut</div>
+    <div class="seam-node">02 Intro</div>
+    <div class="seam-arrow">zoom-through</div>
+    <div class="seam-node">03 Scan</div>
+    <div class="seam-arrow">crossfade</div>
+    <div class="seam-node">04 Advance</div>
+    <div class="seam-arrow">crossfade</div>
+    <div class="seam-node">05 Over-target</div>
+    <div class="seam-arrow">zoom-through</div>
+    <div class="seam-node">06 MATCH</div>
+    <div class="seam-arrow">crossfade</div>
+    <div class="seam-node">07 Single file</div>
+    <div class="seam-arrow">blur-crossfade</div>
+    <div class="seam-node">08 Outro</div>
+  </div>
+</section>
+
+<section class="closing">
+  <h2>Tokens (from frame.md — cobalt-grid remixed onto the real app palette)</h2>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;">
+    <div>
+      <div class="tok-row"><div class="swatch" style="background:#0d1117;"></div><div><div class="tok-label">canvas (paper)</div><div class="tok-hex">#0d1117</div></div></div>
+      <div class="tok-row"><div class="swatch" style="background:#1c2433;"></div><div><div class="tok-label">canvas-2 (paper-2)</div><div class="tok-hex">#1c2433</div></div></div>
+      <div class="tok-row"><div class="swatch" style="background:#e6edf3;"></div><div><div class="tok-label">ink (text)</div><div class="tok-hex">#e6edf3</div></div></div>
+      <div class="tok-row"><div class="swatch" style="background:#38bdf8;"></div><div><div class="tok-label">accent (ink-soft)</div><div class="tok-hex">#38bdf8</div></div></div>
+    </div>
+    <div>
+      <div class="tok-row"><div class="swatch" style="background:#10b981;"></div><div><div class="tok-label">status · match</div><div class="tok-hex">#10b981</div></div></div>
+      <div class="tok-row"><div class="swatch" style="background:#dc2626;"></div><div><div class="tok-label">status · over-target</div><div class="tok-hex">#dc2626</div></div></div>
+      <div class="tok-row"><div class="swatch" style="background:#8b949e;"></div><div><div class="tok-label">text secondary</div><div class="tok-hex">#8b949e</div></div></div>
+    </div>
+    <div>
+      <div class="tok-label">Display / body</div>
+      <div class="tok-hex" style="font-family:'DM Sans',sans-serif;font-size:18px;margin:4px 0 10px;">DM Sans</div>
+      <div class="tok-label">Mono (labels/values)</div>
+      <div class="tok-hex" style="font-family:'DM Mono',monospace;font-size:16px;margin-top:4px;">DM Mono</div>
+    </div>
+    <div>
+      <div class="tok-label" style="margin-bottom:6px;">Bans</div>
+      <div class="note">No glow-heavy hero shots · no fake/invented UI (every scan/badge/toast copy is verbatim from the real app) · no side-by-side explainer diagrams · no static screenshot endcard — the outro is typographic · no slideshow rhythm (frames 3–4 and 5–6 must read as continuous states of the same app, not fresh unrelated cards).</div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

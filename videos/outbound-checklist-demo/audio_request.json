@@ -1,0 +1,60 @@
+{
+  "lines": [
+    {
+      "id": "01",
+      "sfx": [
+        "sharp flash-cut hit on each phrase's hard-cut-in"
+      ]
+    },
+    {
+      "id": "02",
+      "sfx": [
+        "soft whoosh/drop as the topbar arrives"
+      ]
+    },
+    {
+      "id": "03",
+      "sfx": [
+        "three scan-click ticks",
+        "one per field landing"
+      ]
+    },
+    {
+      "id": "04",
+      "sfx": [
+        "completion chime",
+        "then a distinct tab-switch tone"
+      ]
+    },
+    {
+      "id": "05",
+      "sfx": [
+        "one clear alert tone exactly as the toast lands — no other sound competing"
+      ]
+    },
+    {
+      "id": "06",
+      "sfx": [
+        "soft confirmation chime on the MATCH flip"
+      ]
+    },
+    {
+      "id": "07",
+      "sfx": [
+        "none — calm beat",
+        "let the VO carry it"
+      ]
+    },
+    {
+      "id": "08",
+      "sfx": [
+        "none — calm close",
+        "no button",
+        "no sting"
+      ]
+    }
+  ],
+  "bgm": {
+    "mode": "none"
+  }
+}

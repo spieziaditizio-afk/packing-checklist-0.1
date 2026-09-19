@@ -1,0 +1,79 @@
+OUTBOUND CHECKLIST — source material (no-capture path; local single-file app,
+outbound-checklist.html, Arrow Electronics)
+
+APP IDENTITY
+- Title: "Outbound Checklist — Arrow Electronics"
+- Topbar subtitle pattern: "<DELIVERY#> · PRE-SHIPMENT VERIFICATION" (demo uses
+  "SEVENUM NL · PRE-SHIPMENT VERIFICATION")
+- Wordmark: "ARROW"
+
+DOMAIN MODEL
+A delivery has: operator, delivery#, Pick Label PN, destination (Europe ≤180cm
+/ Export ≤160cm height limit). Each pallet has: type (KP/EP/BP/GP/NP/AP →
+dimensions), weight, height, plus two sub-sections:
+1. Pick Labels — target quantities (sum of Pick 1, Pick 2… rows = target
+   pieces for the pallet).
+2. Box Verification — actual verified quantities, scanned per box in Scan
+   mode (one shared PN field + per-box qty rows).
+
+The validation strip at the bottom of each pallet aggregates: Pick PN | Box PN
+| PN Check | Target (pcs) | Verified (pcs) | Boxes, plus a status badge:
+PENDING / ✓ MATCH / ✗ MISMATCH.
+
+CORE WORKFLOW COPY (verbatim UI strings to reuse)
+- Field labels: "Pick Label PN", "Pallet Type", "Weight (kg)", "Height (cm)",
+  "Box Verification", "Verified / Target"
+- Status badges: "PENDING", "✓ MATCH", "✗ MISMATCH"
+- Over-target toast: "⚠ OVER TARGET" / "N pcs over target"
+- Wrong-scan toast: "⚠ WRONG BARCODE" / "Scan again"
+
+SIGNATURE FEATURES (what the video should demonstrate)
+1. Central scan pipeline — every scannable field accepts Enter or Tab (Zebra
+   DS3678 scanner or typed input, treated identically); a green flash + beep
+   confirms every valid scan.
+2. Live Box Progress bar — per pallet, fills live as boxes are verified
+   against the Pick Label target; color states sweep idle → low → mid → high
+   → done (green completion pulse).
+3. Continuous cross-pallet scanning — the moment a pallet's Box Verification
+   total reaches its Pick Label target, focus automatically switches to the
+   next pallet's tab and scan field, with no mouse clicks — an operator can
+   scan an entire delivery front to back without touching the computer to
+   pick each pallet manually.
+4. Over-target hard stop (the standout feature) — scanning past the target is
+   a hard stop, not a warning: the field flashes red, a centered toast reads
+   "⚠ OVER TARGET — N pcs over target", and the run freezes so the operator
+   can find the double-scanned box immediately, not several pallets later at
+   print time.
+5. Validation strip — per pallet: Pick PN | Box PN | PN Check | Target |
+   Verified | Boxes, plus the MATCH/MISMATCH/PENDING badge.
+6. Multi-session — each delivery is its own session (URL hash #s=<id>); an
+   Order History dropdown lists/switches/deletes saved orders; "New Order"
+   flushes the current session and jumps to a fresh blank one.
+7. Random PN Audit — a standalone 🎲 modal for spot-checking random boxes
+   against the reference PN, independent of pallet state.
+8. Print / export — a validation-complete delivery produces a print-ready
+   report (browser print → PDF), one row per pallet with Pick Label
+   breakdown, Box Verification detail, and the summary/status table.
+9. Architecture callout — the whole app is a single ~2200-line HTML file:
+   double-click to open in Chrome, no server, no build step, no node_modules;
+   state persists in localStorage per session.
+
+VISUAL IDENTITY (from outbound-checklist.html :root CSS vars, dark theme —
+the app's default)
+- --bg-deep: #010409 (topbar gradient start)
+- --bg-page: #0d1117 (app background)
+- --bg-surface: #161b22 (cards)
+- --bg-elevated: #1c2433
+- --border-subtle: #21262d / --border: #30363d
+- --text-primary: #e6edf3 / --text-secondary: #8b949e / --text-muted: #6e7681
+- --status-success-text: #34d399 (validation strip uses #10b981 for
+  progress/MATCH fills)
+- --status-error-text: #f87171 (over-target/MISMATCH uses #dc2626 for fills)
+- --status-warn-text: #fbbf24
+- Cyan accent (active tab, focus ring, progress mid-state): #38bdf8
+- Fonts: DM Sans (400/500/600) for UI text, DM Mono (500) for labels, badges,
+  numeric values — loaded from Google Fonts.
+
+TARGET AUDIENCE
+Warehouse operators and ops leads evaluating or onboarding to the tool —
+practical, competent, no-nonsense tone. Not a consumer product; not a joke.
