@@ -1,0 +1,350 @@
+{
+  ".claude/config.json": {
+    "mtime": 1782196339.190894,
+    "seen": 1789908599.0769355,
+    "ast_hash": "50ad62ed1620d4cb55a64a6e6756d4fc",
+    "semantic_hash": "50ad62ed1620d4cb55a64a6e6756d4fc"
+  },
+  ".claude/settings.json": {
+    "mtime": 1782834910.8115888,
+    "seen": 1789908599.0769355,
+    "ast_hash": "4bfcf884b309b003a76dff4a6dd238fc",
+    "semantic_hash": "4bfcf884b309b003a76dff4a6dd238fc"
+  },
+  "brag-output/composition/assets/music/cues/happy-beats-business-moves-vol-9-by-ende-dot-app.music-cues.json": {
+    "mtime": 1789838552.6262252,
+    "seen": 1789908599.0769355,
+    "ast_hash": "581510c6c614026f4f58e57dd3f42d81",
+    "semantic_hash": "581510c6c614026f4f58e57dd3f42d81"
+  },
+  "brag-output/composition/hyperframes.json": {
+    "mtime": 1789838619.3459663,
+    "seen": 1789908599.0769355,
+    "ast_hash": "9aba7af72c9a867a940b5ea847eb18da",
+    "semantic_hash": "9aba7af72c9a867a940b5ea847eb18da"
+  },
+  "brag-output/composition/meta.json": {
+    "mtime": 1789838619.3449664,
+    "seen": 1789908599.0769355,
+    "ast_hash": "bb4ca1e3b033a79599fdd732346a1807",
+    "semantic_hash": "bb4ca1e3b033a79599fdd732346a1807"
+  },
+  "brag-output/composition/package.json": {
+    "mtime": 1789838619.3470018,
+    "seen": 1789908599.0769355,
+    "ast_hash": "736d3dcba13559c7a585afa94c9ddbc7",
+    "semantic_hash": "736d3dcba13559c7a585afa94c9ddbc7"
+  },
+  "skills-lock.json": {
+    "mtime": 1789286289.1321845,
+    "seen": 1789908599.0769355,
+    "ast_hash": "6121b0940124041bd7bd5c2c9faff442",
+    "semantic_hash": "6121b0940124041bd7bd5c2c9faff442"
+  },
+  "videos/outbound-checklist-demo/.media/preferences.json": {
+    "mtime": 1789841996.246679,
+    "seen": 1789908599.0769355,
+    "ast_hash": "36dcf15738a1ff7c598b4b1e707e1d62",
+    "semantic_hash": "36dcf15738a1ff7c598b4b1e707e1d62"
+  },
+  "videos/outbound-checklist-demo/.waveform-cache/v2_assets_sfx_chime.mp3_27309-1789841097956.json": {
+    "mtime": 1789889281.9686294,
+    "seen": 1789908599.0769355,
+    "ast_hash": "43f9930b756420a781deda66d818dd3d",
+    "semantic_hash": "43f9930b756420a781deda66d818dd3d"
+  },
+  "videos/outbound-checklist-demo/.waveform-cache/v2_assets_sfx_click.mp3_11702-1789841097959.json": {
+    "mtime": 1789889281.8870904,
+    "seen": 1789908599.0769355,
+    "ast_hash": "4d021957ad39356b63e58cea0fb9eccd",
+    "semantic_hash": "4d021957ad39356b63e58cea0fb9eccd"
+  },
+  "videos/outbound-checklist-demo/.waveform-cache/v2_assets_sfx_impact-bass-1.mp3_67709-1789841097969.json": {
+    "mtime": 1789889281.6801443,
+    "seen": 1789908599.0769355,
+    "ast_hash": "3a2f59b8bbefe5ef8d24c6f1b70bb76c",
+    "semantic_hash": "3a2f59b8bbefe5ef8d24c6f1b70bb76c"
+  },
+  "videos/outbound-checklist-demo/.waveform-cache/v2_assets_sfx_pop.mp3_23040-1789841097976.json": {
+    "mtime": 1789889281.79139,
+    "seen": 1789908599.0769355,
+    "ast_hash": "5ff63292339051a98439b3ced23390ba",
+    "semantic_hash": "5ff63292339051a98439b3ced23390ba"
+  },
+  "videos/outbound-checklist-demo/.waveform-cache/v2_assets_voice_01.wav_378924-1789843637361.json": {
+    "mtime": 1789889273.9053576,
+    "seen": 1789908599.0769355,
+    "ast_hash": "ac18569e294dcb4c0686e399e32bbec4",
+    "semantic_hash": "ac18569e294dcb4c0686e399e32bbec4"
+  },
+  "videos/outbound-checklist-demo/.waveform-cache/v2_assets_voice_02.wav_472108-1789843642433.json": {
+    "mtime": 1789889273.8986564,
+    "seen": 1789908599.0769355,
+    "ast_hash": "506374ee17b61f701d80cc078dc51540",
+    "semantic_hash": "506374ee17b61f701d80cc078dc51540"
+  },
+  "videos/outbound-checklist-demo/.waveform-cache/v2_assets_voice_03.wav_394284-1789843644771.json": {
+    "mtime": 1789889274.3967867,
+    "seen": 1789908599.0769355,
+    "ast_hash": "61587c0ccf76a6279809ce7754349883",
+    "semantic_hash": "61587c0ccf76a6279809ce7754349883"
+  },
+  "videos/outbound-checklist-demo/.waveform-cache/v2_assets_voice_04.wav_489516-1789843645586.json": {
+    "mtime": 1789889274.5014396,
+    "seen": 1789908599.0769355,
+    "ast_hash": "501cba66b9af7383f5a976d235def3c2",
+    "semantic_hash": "501cba66b9af7383f5a976d235def3c2"
+  },
+  "videos/outbound-checklist-demo/.waveform-cache/v2_assets_voice_05.wav_497708-1789843663326.json": {
+    "mtime": 1789889275.479521,
+    "seen": 1789908599.0769355,
+    "ast_hash": "9e03f62eafd0a678d1ab732590dd98b5",
+    "semantic_hash": "9e03f62eafd0a678d1ab732590dd98b5"
+  },
+  "videos/outbound-checklist-demo/.waveform-cache/v2_assets_voice_06.wav_372780-1789843675599.json": {
+    "mtime": 1789889275.5168953,
+    "seen": 1789908599.0769355,
+    "ast_hash": "addfbbc99973ef183f937fe7be0d1361",
+    "semantic_hash": "addfbbc99973ef183f937fe7be0d1361"
+  },
+  "videos/outbound-checklist-demo/.waveform-cache/v2_assets_voice_07.wav_403500-1789843681638.json": {
+    "mtime": 1789889275.5228994,
+    "seen": 1789908599.0769355,
+    "ast_hash": "ec4504b4e314bfe971be2a7d6fd7e4a8",
+    "semantic_hash": "ec4504b4e314bfe971be2a7d6fd7e4a8"
+  },
+  "videos/outbound-checklist-demo/.waveform-cache/v2_assets_voice_08.wav_279596-1789843680273.json": {
+    "mtime": 1789889275.6032097,
+    "seen": 1789908599.0769355,
+    "ast_hash": "38fbdedec9d495308ada6f5bd4117009",
+    "semantic_hash": "38fbdedec9d495308ada6f5bd4117009"
+  },
+  "videos/outbound-checklist-demo/audio_engine_meta.json": {
+    "mtime": 1789887963.8339822,
+    "seen": 1789908599.0769355,
+    "ast_hash": "d10b01039055e26c4b3c794acd58efcd",
+    "semantic_hash": "d10b01039055e26c4b3c794acd58efcd"
+  },
+  "videos/outbound-checklist-demo/audio_meta.json": {
+    "mtime": 1789887963.843995,
+    "seen": 1789908599.0769355,
+    "ast_hash": "f18c372c0b6b882ef5e0fd8828e3fca4",
+    "semantic_hash": "f18c372c0b6b882ef5e0fd8828e3fca4"
+  },
+  "videos/outbound-checklist-demo/audio_request.json": {
+    "mtime": 1789887963.7666938,
+    "seen": 1789908599.0769355,
+    "ast_hash": "2c9d08d68bf7be42aeb460abcfcb03f7",
+    "semantic_hash": "2c9d08d68bf7be42aeb460abcfcb03f7"
+  },
+  "videos/outbound-checklist-demo/hyperframes.json": {
+    "mtime": 1789841141.1349897,
+    "seen": 1789908599.0769355,
+    "ast_hash": "80d300dd25024165691d726ad37ba53d",
+    "semantic_hash": "80d300dd25024165691d726ad37ba53d"
+  },
+  "videos/outbound-checklist-demo/meta.json": {
+    "mtime": 1789841141.1339867,
+    "seen": 1789908599.0769355,
+    "ast_hash": "a40f36ff7b76f09770a55e027ce5a118",
+    "semantic_hash": "a40f36ff7b76f09770a55e027ce5a118"
+  },
+  "videos/outbound-checklist-demo/package.json": {
+    "mtime": 1789841141.136394,
+    "seen": 1789908599.0769355,
+    "ast_hash": "8f93e9c7cb5f9aa5b2e881ec6b99bd10",
+    "semantic_hash": "8f93e9c7cb5f9aa5b2e881ec6b99bd10"
+  },
+  "CLAUDE.md": {
+    "mtime": 1789301585.8804412,
+    "seen": 1789908599.0769355,
+    "ast_hash": "080a147f0d14e7b64f587cd076754ca6",
+    "semantic_hash": "080a147f0d14e7b64f587cd076754ca6"
+  },
+  "brag-output/brag.mp4": {
+    "mtime": 1789839496.469678,
+    "seen": 1789908599.0769355,
+    "ast_hash": "2e200b370f0e4e1a1b93a4900bf3e16f",
+    "semantic_hash": "2e200b370f0e4e1a1b93a4900bf3e16f"
+  },
+  "brag-output/composition/assets/music/happy-beats-business-moves-vol-9-by-ende-dot-app.mp3": {
+    "mtime": 1789838552.5735948,
+    "seen": 1789908599.0769355,
+    "ast_hash": "632c48b00b21e7af98b4a0c123c68d6e",
+    "semantic_hash": "632c48b00b21e7af98b4a0c123c68d6e"
+  },
+  "brag-output/composition/assets/sfx/impact/impactBell_heavy_000.ogg": {
+    "mtime": 1789838982.3872223,
+    "seen": 1789908599.0769355,
+    "ast_hash": "59698e3609b413aedcd7d96c27badd4d",
+    "semantic_hash": "59698e3609b413aedcd7d96c27badd4d"
+  },
+  "brag-output/composition/assets/sfx/impact/impactSoft_medium_001.ogg": {
+    "mtime": 1789838982.345356,
+    "seen": 1789908599.0769355,
+    "ast_hash": "daf869c83db8d9799689a01836439d2c",
+    "semantic_hash": "daf869c83db8d9799689a01836439d2c"
+  },
+  "brag-output/composition/assets/sfx/interface/click_001.ogg": {
+    "mtime": 1789838982.1434329,
+    "seen": 1789908599.0769355,
+    "ast_hash": "594234cc27bcfb903fdafc49cb728bc9",
+    "semantic_hash": "594234cc27bcfb903fdafc49cb728bc9"
+  },
+  "brag-output/composition/assets/sfx/interface/click_002.ogg": {
+    "mtime": 1789838982.1813126,
+    "seen": 1789908599.0769355,
+    "ast_hash": "722ec540eb252470b8b0cf3577ceba27",
+    "semantic_hash": "722ec540eb252470b8b0cf3577ceba27"
+  },
+  "brag-output/composition/assets/sfx/interface/click_003.ogg": {
+    "mtime": 1789838982.2165384,
+    "seen": 1789908599.0769355,
+    "ast_hash": "4ca9982997589cb0f2f823741545ef4f",
+    "semantic_hash": "4ca9982997589cb0f2f823741545ef4f"
+  },
+  "brag-output/composition/assets/sfx/interface/drop_001.ogg": {
+    "mtime": 1789838982.1090333,
+    "seen": 1789908599.0769355,
+    "ast_hash": "fdb7c6bd1abf0e06c75f5ef3ee29d5a2",
+    "semantic_hash": "fdb7c6bd1abf0e06c75f5ef3ee29d5a2"
+  },
+  "brag-output/composition/assets/sfx/interface/error_005.ogg": {
+    "mtime": 1789838982.3030334,
+    "seen": 1789908599.0769355,
+    "ast_hash": "b6723b1ad48ef3c9b743ab2f81a53318",
+    "semantic_hash": "b6723b1ad48ef3c9b743ab2f81a53318"
+  },
+  "brag-output/composition/assets/sfx/interface/switch_004.ogg": {
+    "mtime": 1789838982.2561774,
+    "seen": 1789908599.0769355,
+    "ast_hash": "62a8978241dcaae2dadde7a5af93326f",
+    "semantic_hash": "62a8978241dcaae2dadde7a5af93326f"
+  },
+  "brag-output/composition/assets/sfx/keyboard/keypress-003.wav": {
+    "mtime": 1789838981.843919,
+    "seen": 1789908599.0769355,
+    "ast_hash": "dc505cace4a40069f49015774f521c5e",
+    "semantic_hash": "dc505cace4a40069f49015774f521c5e"
+  },
+  "brag-output/composition/assets/sfx/keyboard/keypress-007.wav": {
+    "mtime": 1789838981.889279,
+    "seen": 1789908599.0769355,
+    "ast_hash": "5965e256b4303e1ce8cecab16ccd0762",
+    "semantic_hash": "5965e256b4303e1ce8cecab16ccd0762"
+  },
+  "brag-output/composition/assets/sfx/keyboard/keypress-011.wav": {
+    "mtime": 1789838981.9365008,
+    "seen": 1789908599.0769355,
+    "ast_hash": "09f77cae86e7120080475ca451441de9",
+    "semantic_hash": "09f77cae86e7120080475ca451441de9"
+  },
+  "brag-output/composition/assets/sfx/keyboard/keypress-015.wav": {
+    "mtime": 1789838981.987503,
+    "seen": 1789908599.0769355,
+    "ast_hash": "4538128c86ef0ac56dd90cfbfa413791",
+    "semantic_hash": "4538128c86ef0ac56dd90cfbfa413791"
+  },
+  "brag-output/composition/assets/sfx/keyboard/keypress-019.wav": {
+    "mtime": 1789838982.0291202,
+    "seen": 1789908599.0769355,
+    "ast_hash": "9e9d8968badbdfe17f9a157646e21cba",
+    "semantic_hash": "9e9d8968badbdfe17f9a157646e21cba"
+  },
+  "brag-output/composition/assets/sfx/keyboard/keypress-023.wav": {
+    "mtime": 1789838982.0683453,
+    "seen": 1789908599.0769355,
+    "ast_hash": "aab08c1e3e0f35ad21aab603aafe7458",
+    "semantic_hash": "aab08c1e3e0f35ad21aab603aafe7458"
+  },
+  "videos/outbound-checklist-demo/assets/sfx/chime.mp3": {
+    "mtime": 1789841097.9555936,
+    "seen": 1789908599.0769355,
+    "ast_hash": "e466b99ab7e28be6035a7755c45986c0",
+    "semantic_hash": "e466b99ab7e28be6035a7755c45986c0"
+  },
+  "videos/outbound-checklist-demo/assets/sfx/click-soft.mp3": {
+    "mtime": 1789841097.9575763,
+    "seen": 1789908599.0769355,
+    "ast_hash": "7f90c47fcc5f15e0c0e94b3bfb6467f7",
+    "semantic_hash": "7f90c47fcc5f15e0c0e94b3bfb6467f7"
+  },
+  "videos/outbound-checklist-demo/assets/sfx/click.mp3": {
+    "mtime": 1789841097.9585993,
+    "seen": 1789908599.0769355,
+    "ast_hash": "7f90c47fcc5f15e0c0e94b3bfb6467f7",
+    "semantic_hash": "7f90c47fcc5f15e0c0e94b3bfb6467f7"
+  },
+  "videos/outbound-checklist-demo/assets/sfx/error.mp3": {
+    "mtime": 1789841097.9596024,
+    "seen": 1789908599.0769355,
+    "ast_hash": "e77530478844f5163034f37ec0df559f",
+    "semantic_hash": "e77530478844f5163034f37ec0df559f"
+  },
+  "videos/outbound-checklist-demo/assets/sfx/impact-bass-1.mp3": {
+    "mtime": 1789841097.9685843,
+    "seen": 1789908599.0769355,
+    "ast_hash": "2ede2174d78ffd20cb4a2e526e5f1535",
+    "semantic_hash": "2ede2174d78ffd20cb4a2e526e5f1535"
+  },
+  "videos/outbound-checklist-demo/assets/sfx/pop.mp3": {
+    "mtime": 1789841097.975576,
+    "seen": 1789908599.0769355,
+    "ast_hash": "f7573505e51e4db50ba516a03844ef55",
+    "semantic_hash": "f7573505e51e4db50ba516a03844ef55"
+  },
+  "videos/outbound-checklist-demo/assets/voice/01.wav": {
+    "mtime": 1789843637.3609426,
+    "seen": 1789908599.0769355,
+    "ast_hash": "3799673ed30e4246dbac0ffe48810c1e",
+    "semantic_hash": "3799673ed30e4246dbac0ffe48810c1e"
+  },
+  "videos/outbound-checklist-demo/assets/voice/02.wav": {
+    "mtime": 1789843642.4332068,
+    "seen": 1789908599.0769355,
+    "ast_hash": "42a22cfc03e3fc7f4b82bbe85987db2c",
+    "semantic_hash": "42a22cfc03e3fc7f4b82bbe85987db2c"
+  },
+  "videos/outbound-checklist-demo/assets/voice/03.wav": {
+    "mtime": 1789843644.7708485,
+    "seen": 1789908599.0769355,
+    "ast_hash": "dd9fb2b01559d35e31d7b4034ac0f8a1",
+    "semantic_hash": "dd9fb2b01559d35e31d7b4034ac0f8a1"
+  },
+  "videos/outbound-checklist-demo/assets/voice/04.wav": {
+    "mtime": 1789843645.5859723,
+    "seen": 1789908599.0769355,
+    "ast_hash": "a95c2850f5952fdc4c619a35bd47b786",
+    "semantic_hash": "a95c2850f5952fdc4c619a35bd47b786"
+  },
+  "videos/outbound-checklist-demo/assets/voice/05.wav": {
+    "mtime": 1789843663.32561,
+    "seen": 1789908599.0769355,
+    "ast_hash": "745f5a7f903cd624dcc0a26d0eb0ea11",
+    "semantic_hash": "745f5a7f903cd624dcc0a26d0eb0ea11"
+  },
+  "videos/outbound-checklist-demo/assets/voice/06.wav": {
+    "mtime": 1789843675.5993242,
+    "seen": 1789908599.0769355,
+    "ast_hash": "71dd980899ff436073b006a2e571bf4c",
+    "semantic_hash": "71dd980899ff436073b006a2e571bf4c"
+  },
+  "videos/outbound-checklist-demo/assets/voice/07.wav": {
+    "mtime": 1789843681.6376052,
+    "seen": 1789908599.0769355,
+    "ast_hash": "a6be0f56efb08e0fd6006f777024c70a",
+    "semantic_hash": "a6be0f56efb08e0fd6006f777024c70a"
+  },
+  "videos/outbound-checklist-demo/assets/voice/08.wav": {
+    "mtime": 1789843680.2733917,
+    "seen": 1789908599.0769355,
+    "ast_hash": "e84338aee73433ae5f66ab6583b66ebc",
+    "semantic_hash": "e84338aee73433ae5f66ab6583b66ebc"
+  },
+  "videos/outbound-checklist-demo/renders/video.mp4": {
+    "mtime": 1789889468.5245519,
+    "seen": 1789908599.0769355,
+    "ast_hash": "c96496686c3d0eb1a86fca0a0c3e4da9",
+    "semantic_hash": "c96496686c3d0eb1a86fca0a0c3e4da9"
+  }
+}

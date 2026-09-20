@@ -1,0 +1,1534 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {
+    "hyperedges": [
+      {
+        "nodes": [
+          "composition-04-auto-advance",
+          "composition-05-over-target-stop",
+          "composition-06-match-report"
+        ],
+        "label": "workflow_phases",
+        "description": "Three critical workflow phases demonstrated: auto-advance on target match, hard stop on over-target, and final report",
+        "confidence": 0.9
+      },
+      {
+        "nodes": [
+          "frame-00-at-32s",
+          "frame-01-at-36s",
+          "frame-02-at-40s",
+          "frame-03-at-66s"
+        ],
+        "label": "temporal_sequence",
+        "description": "Ordered timeline of key frames from video demonstration (32s \u2192 36s \u2192 40s \u2192 66.445s)",
+        "confidence": 0.95
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "videos_outbound_checklist_demo_hyperframes",
+      "label": "outbound-checklist-demo/hyperframes.json",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "outbound-checklist-demo/hyperframes.json",
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L1"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_hyperframes_authoringskill",
+      "label": "authoringSkill",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "authoringskill",
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L12"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_hyperframes_media",
+      "label": "media",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "media",
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L9"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_hyperframes_media_autoproxy",
+      "label": "autoProxy",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "autoproxy",
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L10"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_hyperframes_paths",
+      "label": "paths",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "paths",
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L4"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_hyperframes_paths_assets",
+      "label": "assets",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "assets",
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L7"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_hyperframes_paths_blocks",
+      "label": "blocks",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "blocks",
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L5"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_hyperframes_paths_components",
+      "label": "components",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "components",
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L6"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_hyperframes_registry",
+      "label": "registry",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "registry",
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L3"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_hyperframes_schema",
+      "label": "$schema",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "$schema",
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L2"
+    },
+    {
+      "id": "brag_output_composition_hyperframes",
+      "label": "composition/hyperframes.json",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Community 1",
+      "file_type": "code",
+      "norm_label": "composition/hyperframes.json",
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L1"
+    },
+    {
+      "id": "brag_output_composition_hyperframes_media",
+      "label": "media",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Community 1",
+      "file_type": "code",
+      "norm_label": "media",
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L9"
+    },
+    {
+      "id": "brag_output_composition_hyperframes_media_autoproxy",
+      "label": "autoProxy",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Community 1",
+      "file_type": "code",
+      "norm_label": "autoproxy",
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L10"
+    },
+    {
+      "id": "brag_output_composition_hyperframes_paths",
+      "label": "paths",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Community 1",
+      "file_type": "code",
+      "norm_label": "paths",
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L4"
+    },
+    {
+      "id": "brag_output_composition_hyperframes_paths_assets",
+      "label": "assets",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Community 1",
+      "file_type": "code",
+      "norm_label": "assets",
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L7"
+    },
+    {
+      "id": "brag_output_composition_hyperframes_paths_blocks",
+      "label": "blocks",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Community 1",
+      "file_type": "code",
+      "norm_label": "blocks",
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L5"
+    },
+    {
+      "id": "brag_output_composition_hyperframes_paths_components",
+      "label": "components",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Community 1",
+      "file_type": "code",
+      "norm_label": "components",
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L6"
+    },
+    {
+      "id": "brag_output_composition_hyperframes_registry",
+      "label": "registry",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Community 1",
+      "file_type": "code",
+      "norm_label": "registry",
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L3"
+    },
+    {
+      "id": "brag_output_composition_hyperframes_schema",
+      "label": "$schema",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Community 1",
+      "file_type": "code",
+      "norm_label": "$schema",
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L2"
+    },
+    {
+      "id": "brag_output_composition_package",
+      "label": "composition/package.json",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "Community 2",
+      "file_type": "code",
+      "norm_label": "composition/package.json",
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L1"
+    },
+    {
+      "id": "brag_output_composition_package_name",
+      "label": "name",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "Community 2",
+      "file_type": "code",
+      "norm_label": "name",
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L2"
+    },
+    {
+      "id": "brag_output_composition_package_private",
+      "label": "private",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "Community 2",
+      "file_type": "code",
+      "norm_label": "private",
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L3"
+    },
+    {
+      "id": "brag_output_composition_package_scripts",
+      "label": "scripts",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "Community 2",
+      "file_type": "code",
+      "norm_label": "scripts",
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L5"
+    },
+    {
+      "id": "brag_output_composition_package_scripts_check",
+      "label": "check",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "Community 2",
+      "file_type": "code",
+      "norm_label": "check",
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L7"
+    },
+    {
+      "id": "brag_output_composition_package_scripts_dev",
+      "label": "dev",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "Community 2",
+      "file_type": "code",
+      "norm_label": "dev",
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L6"
+    },
+    {
+      "id": "brag_output_composition_package_scripts_publish",
+      "label": "publish",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "Community 2",
+      "file_type": "code",
+      "norm_label": "publish",
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L9"
+    },
+    {
+      "id": "brag_output_composition_package_scripts_render",
+      "label": "render",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "Community 2",
+      "file_type": "code",
+      "norm_label": "render",
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L8"
+    },
+    {
+      "id": "brag_output_composition_package_type",
+      "label": "type",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "Community 2",
+      "file_type": "code",
+      "norm_label": "type",
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L4"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_package",
+      "label": "outbound-checklist-demo/package.json",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Community 3",
+      "file_type": "code",
+      "norm_label": "outbound-checklist-demo/package.json",
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L1"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_package_name",
+      "label": "name",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Community 3",
+      "file_type": "code",
+      "norm_label": "name",
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L2"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_package_private",
+      "label": "private",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Community 3",
+      "file_type": "code",
+      "norm_label": "private",
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L3"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_package_scripts",
+      "label": "scripts",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Community 3",
+      "file_type": "code",
+      "norm_label": "scripts",
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L5"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_package_scripts_check",
+      "label": "check",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Community 3",
+      "file_type": "code",
+      "norm_label": "check",
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L7"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_package_scripts_dev",
+      "label": "dev",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Community 3",
+      "file_type": "code",
+      "norm_label": "dev",
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L6"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_package_scripts_publish",
+      "label": "publish",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Community 3",
+      "file_type": "code",
+      "norm_label": "publish",
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L9"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_package_scripts_render",
+      "label": "render",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Community 3",
+      "file_type": "code",
+      "norm_label": "render",
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L8"
+    },
+    {
+      "id": "videos_outbound_checklist_demo_package_type",
+      "label": "type",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Community 3",
+      "file_type": "code",
+      "norm_label": "type",
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L4"
+    },
+    {
+      "id": "composition-04-auto-advance",
+      "label": "auto-advance composition",
+      "category": "application_behavior",
+      "community": 4,
+      "community_name": "Community 4",
+      "confidence": 1.0,
+      "description": "Automatic cursor advancement across pallet entries when scanning box quantities reaches target",
+      "file_type": "concept",
+      "norm_label": "auto-advance composition",
+      "source_files": [
+        "videos/outbound-checklist-demo/.thumbnails/v4_v3_fef1b7c5f15445e6_dbc76d79258dec6f_jpeg_preview_compositions_frames_04-auto-advance.html_1920x1080_240x135_1789889276808_3.00.jpg",
+        "videos/outbound-checklist-demo/.thumbnails/v4_v3_fef1b7c5f15445e6_dbc76d79258dec6f_jpeg_preview_compositions_frames_04-auto-advance.html_1920x1080_240x135_1789889276808_5.30.jpg"
+      ],
+      "type": "workflow_state"
+    },
+    {
+      "id": "composition-05-over-target-stop",
+      "label": "over-target-stop composition",
+      "category": "application_behavior",
+      "community": 4,
+      "community_name": "Community 4",
+      "confidence": 1.0,
+      "description": "Warehouse operator interaction when attempting to scan boxes beyond the target quantity limit - a hard stop that prevents over-shipping",
+      "file_type": "concept",
+      "norm_label": "over-target-stop composition",
+      "source_files": [
+        "videos/outbound-checklist-demo/.thumbnails/v4_v3_fef1b7c5f15445e6_d7c9c38b730d5b06_jpeg_preview_compositions_frames_05-over-target-stop.html_1920x1080_240x135_1789889277531_3.00.jpg",
+        "videos/outbound-checklist-demo/.thumbnails/v4_v3_fef1b7c5f15445e6_d7c9c38b730d5b06_jpeg_preview_compositions_frames_05-over-target-stop.html_1920x1080_240x135_1789889277531_5.43.jpg"
+      ],
+      "type": "workflow_state"
+    },
+    {
+      "id": "composition-06-match-report",
+      "label": "match-report composition",
+      "category": "application_output",
+      "community": 4,
+      "community_name": "Community 4",
+      "confidence": 1.0,
+      "description": "Final report display showing verification results and pallet summary after scanning completion",
+      "file_type": "concept",
+      "norm_label": "match-report composition",
+      "source_files": [
+        "videos/outbound-checklist-demo/.thumbnails/v4_v3_fef1b7c5f15445e6_f446b09e569b5ab4_jpeg_preview_compositions_frames_06-match-report.html_1920x1080_240x135_1789889302356_4.18.jpg"
+      ],
+      "type": "workflow_state"
+    },
+    {
+      "id": "contact-sheet",
+      "label": "contact sheet",
+      "category": "documentation",
+      "community": 5,
+      "community_name": "Community 5",
+      "confidence": 0.95,
+      "description": "Composite contact sheet showing multiple frame thumbnails from the video demonstration",
+      "file_type": "concept",
+      "norm_label": "contact sheet",
+      "source_files": [
+        "videos/outbound-checklist-demo/snapshots/contact-sheet.jpg"
+      ],
+      "type": "media_reference"
+    },
+    {
+      "id": "warehouse-scanning-workflow",
+      "label": "warehouse scanning workflow",
+      "category": "domain",
+      "community": 4,
+      "community_name": "Community 4",
+      "confidence": 0.85,
+      "description": "Primary workflow: operator scans/enters delivery info, pallet details, and box quantities before shipment",
+      "file_type": "concept",
+      "norm_label": "warehouse scanning workflow",
+      "source_files": [
+        "videos/outbound-checklist-demo"
+      ],
+      "type": "process"
+    },
+    {
+      "id": "pallet-verification",
+      "label": "pallet verification",
+      "category": "domain",
+      "community": 4,
+      "community_name": "Community 4",
+      "confidence": 0.85,
+      "description": "Sub-process: comparing actual scanned box quantities against pick label targets per pallet",
+      "file_type": "concept",
+      "norm_label": "pallet verification",
+      "source_files": [
+        "videos/outbound-checklist-demo"
+      ],
+      "type": "process"
+    },
+    {
+      "id": "outbound-checklist-demo",
+      "label": "outbound-checklist-demo",
+      "category": "project",
+      "community": 4,
+      "community_name": "Community 4",
+      "confidence": 1.0,
+      "description": "Video demonstration project for the outbound checklist warehouse app workflow",
+      "file_type": "concept",
+      "norm_label": "outbound-checklist-demo",
+      "source_files": [
+        "videos/outbound-checklist-demo"
+      ],
+      "type": "artifact"
+    },
+    {
+      "id": "demo-thumbnails",
+      "label": "demo thumbnails",
+      "category": "video",
+      "community": 4,
+      "community_name": "Community 4",
+      "confidence": 0.95,
+      "description": "Preview thumbnail images from video compositions",
+      "file_type": "concept",
+      "norm_label": "demo thumbnails",
+      "source_files": [
+        "videos/outbound-checklist-demo/.thumbnails"
+      ],
+      "type": "media_collection"
+    },
+    {
+      "id": "demo-snapshots",
+      "label": "demo snapshots",
+      "category": "video",
+      "community": 5,
+      "community_name": "Community 5",
+      "confidence": 0.95,
+      "description": "Frame snapshots captured at specific timestamps from the video demo",
+      "file_type": "concept",
+      "norm_label": "demo snapshots",
+      "source_files": [
+        "videos/outbound-checklist-demo/snapshots"
+      ],
+      "type": "media_collection"
+    },
+    {
+      "id": "frame-00-at-32s",
+      "label": "frame 00 at 32s",
+      "category": "video",
+      "community": 5,
+      "community_name": "Community 5",
+      "confidence": 1.0,
+      "description": "Video frame captured at 32 seconds - initial demo sequence",
+      "file_type": "concept",
+      "norm_label": "frame 00 at 32s",
+      "source_files": [
+        "videos/outbound-checklist-demo/snapshots/frame-00-at-32s.png"
+      ],
+      "type": "video_frame"
+    },
+    {
+      "id": "frame-01-at-36s",
+      "label": "frame 01 at 36s",
+      "category": "video",
+      "community": 5,
+      "community_name": "Community 5",
+      "confidence": 1.0,
+      "description": "Video frame captured at 36 seconds - demonstrating user interaction",
+      "file_type": "concept",
+      "norm_label": "frame 01 at 36s",
+      "source_files": [
+        "videos/outbound-checklist-demo/snapshots/frame-01-at-36s.png"
+      ],
+      "type": "video_frame"
+    },
+    {
+      "id": "frame-02-at-40s",
+      "label": "frame 02 at 40s",
+      "category": "video",
+      "community": 5,
+      "community_name": "Community 5",
+      "confidence": 1.0,
+      "description": "Video frame captured at 40 seconds - mid-workflow state",
+      "file_type": "concept",
+      "norm_label": "frame 02 at 40s",
+      "source_files": [
+        "videos/outbound-checklist-demo/snapshots/frame-02-at-40s.png"
+      ],
+      "type": "video_frame"
+    },
+    {
+      "id": "frame-03-at-66s",
+      "label": "frame 03 at 66.445s",
+      "category": "video",
+      "community": 5,
+      "community_name": "Community 5",
+      "confidence": 1.0,
+      "description": "Video frame captured at 66.445 seconds - later demonstration sequence",
+      "file_type": "concept",
+      "norm_label": "frame 03 at 66.445s",
+      "source_files": [
+        "videos/outbound-checklist-demo/snapshots/frame-03-at-66.445s.png"
+      ],
+      "type": "video_frame"
+    },
+    {
+      "id": "aggregator_update_pallet_summary",
+      "label": "updatePalletSummary",
+      "community": 10,
+      "community_name": "Community 10",
+      "confidence": 1.0,
+      "description": "Generates per-pallet badge and validation strip",
+      "file_type": "concept",
+      "norm_label": "updatepalletsummary",
+      "type": "AGGREGATOR_FUNCTION"
+    },
+    {
+      "id": "arrow_electronics_sevenum_nl",
+      "label": "Arrow Electronics - Sevenum NL",
+      "community": 11,
+      "community_name": "Community 11",
+      "confidence": 1.0,
+      "description": "Warehouse location in Sevenum Netherlands where Outbound Checklist is deployed",
+      "file_type": "concept",
+      "norm_label": "arrow electronics - sevenum nl",
+      "type": "ORGANIZATION_LOCATION"
+    },
+    {
+      "id": "box_progress_bar",
+      "label": "Box Progress Bar",
+      "community": 12,
+      "community_name": "Community 12",
+      "confidence": 1.0,
+      "description": "Shows verified/target with color states: idle, low, mid, high, done, over",
+      "file_type": "concept",
+      "norm_label": "box progress bar",
+      "type": "UI_COMPONENT"
+    },
+    {
+      "id": "box_verification_scan_mode",
+      "label": "Scan Mode",
+      "community": 13,
+      "community_name": "Community 13",
+      "confidence": 1.0,
+      "description": "Shared PN field plus per-box quantity rows for individual box scanning",
+      "file_type": "concept",
+      "norm_label": "scan mode",
+      "type": "UI_MODE"
+    },
+    {
+      "id": "box_verification_visual_mode",
+      "label": "Visual Mode",
+      "community": 14,
+      "community_name": "Community 14",
+      "confidence": 1.0,
+      "description": "Quantity groups for fast uniform box entry",
+      "file_type": "concept",
+      "norm_label": "visual mode",
+      "type": "UI_MODE"
+    },
+    {
+      "id": "brag_scene_1_hook",
+      "label": "Scene 1 - Hook",
+      "community": 15,
+      "community_name": "Community 15",
+      "confidence": 1.0,
+      "file_type": "concept",
+      "norm_label": "scene 1 - hook",
+      "properties": {
+        "duration": "3.7s"
+      },
+      "type": "VIDEO_SCENE"
+    },
+    {
+      "id": "brag_scene_2_scan_pipeline",
+      "label": "Scene 2 - Scan Pipeline",
+      "community": 16,
+      "community_name": "Community 16",
+      "confidence": 1.0,
+      "file_type": "concept",
+      "norm_label": "scene 2 - scan pipeline",
+      "properties": {
+        "duration": "3.7s"
+      },
+      "type": "VIDEO_SCENE"
+    },
+    {
+      "id": "brag_scene_3_cross_pallet",
+      "label": "Scene 3 - Cross-Pallet Scanning",
+      "community": 17,
+      "community_name": "Community 17",
+      "confidence": 1.0,
+      "file_type": "concept",
+      "norm_label": "scene 3 - cross-pallet scanning",
+      "properties": {
+        "duration": "3.66s"
+      },
+      "type": "VIDEO_SCENE"
+    },
+    {
+      "id": "brag_scene_4_hard_stop",
+      "label": "Scene 4 - The Hard Stop",
+      "community": 18,
+      "community_name": "Community 18",
+      "confidence": 1.0,
+      "file_type": "concept",
+      "norm_label": "scene 4 - the hard stop",
+      "properties": {
+        "duration": "4.75s",
+        "critical": true
+      },
+      "type": "VIDEO_SCENE"
+    },
+    {
+      "id": "brag_scene_5_outro",
+      "label": "Scene 5 - Outro",
+      "community": 19,
+      "community_name": "Community 19",
+      "confidence": 1.0,
+      "file_type": "concept",
+      "norm_label": "scene 5 - outro",
+      "properties": {
+        "duration": "3.67s"
+      },
+      "type": "VIDEO_SCENE"
+    },
+    {
+      "id": "brag_video_project",
+      "label": "Brag Video - Outbound Checklist",
+      "community": 20,
+      "community_name": "Community 20",
+      "confidence": 1.0,
+      "description": "19.5-second product launch video demonstrating hard-stop over-target feature",
+      "file_type": "concept",
+      "norm_label": "brag video - outbound checklist",
+      "type": "MEDIA_PROJECT"
+    },
+    {
+      "id": "cycle_count_app",
+      "label": "Cycle Count App",
+      "community": 21,
+      "community_name": "Community 21",
+      "confidence": 0.95,
+      "description": "Separate warehouse counting app",
+      "file_type": "concept",
+      "norm_label": "cycle count app",
+      "type": "SUPPLEMENTARY_APPLICATION"
+    },
+    {
+      "id": "delivery_entity",
+      "label": "Delivery",
+      "community": 22,
+      "community_name": "Community 22",
+      "confidence": 1.0,
+      "description": "Shipment order with operator, delivery number, PN, destination constraint",
+      "file_type": "concept",
+      "norm_label": "delivery",
+      "type": "DOMAIN_OBJECT"
+    },
+    {
+      "id": "hyperframes_framework",
+      "label": "Hyperframes",
+      "community": 23,
+      "community_name": "Community 23",
+      "confidence": 1.0,
+      "description": "Web-based animation and video composition framework",
+      "file_type": "concept",
+      "norm_label": "hyperframes",
+      "type": "TECHNOLOGY"
+    },
+    {
+      "id": "outbound_checklist_app",
+      "label": "Outbound Checklist",
+      "community": 24,
+      "community_name": "Community 24",
+      "confidence": 1.0,
+      "description": "Single-file HTML web app for pre-shipment pallet/box verification at Arrow Electronics Sevenum warehouse",
+      "file_type": "concept",
+      "norm_label": "outbound checklist",
+      "source_file": "CLAUDE.md",
+      "type": "APPLICATION"
+    },
+    {
+      "id": "over_target_hard_stop",
+      "label": "Over-Target Hard Stop",
+      "community": 25,
+      "community_name": "Community 25",
+      "confidence": 1.0,
+      "description": "Exceeding target quantity stops execution with centered toast notification",
+      "file_type": "concept",
+      "norm_label": "over-target hard stop",
+      "type": "BUSINESS_RULE"
+    },
+    {
+      "id": "pallet_entity",
+      "label": "Pallet",
+      "community": 26,
+      "community_name": "Community 26",
+      "confidence": 1.0,
+      "description": "Unit containing boxes with Pick Labels target and Box Verification actual counts",
+      "file_type": "concept",
+      "norm_label": "pallet",
+      "type": "DOMAIN_OBJECT"
+    },
+    {
+      "id": "pallet_type_ap",
+      "label": "AP Pallet",
+      "community": 27,
+      "community_name": "Community 27",
+      "confidence": 1.0,
+      "file_type": "concept",
+      "norm_label": "ap pallet",
+      "properties": {
+        "dimensions": "140x105 cm",
+        "supplier": "Amphenol"
+      },
+      "type": "PALLET_TYPE"
+    },
+    {
+      "id": "pallet_type_bp",
+      "label": "BP Pallet",
+      "community": 28,
+      "community_name": "Community 28",
+      "confidence": 1.0,
+      "file_type": "concept",
+      "norm_label": "bp pallet",
+      "properties": {
+        "dimensions": "120x100 cm"
+      },
+      "type": "PALLET_TYPE"
+    },
+    {
+      "id": "pallet_type_ep",
+      "label": "EP Pallet",
+      "community": 29,
+      "community_name": "Community 29",
+      "confidence": 1.0,
+      "file_type": "concept",
+      "norm_label": "ep pallet",
+      "properties": {
+        "dimensions": "120x80 cm"
+      },
+      "type": "PALLET_TYPE"
+    },
+    {
+      "id": "pallet_type_gp",
+      "label": "GP Pallet",
+      "community": 30,
+      "community_name": "Community 30",
+      "confidence": 1.0,
+      "file_type": "concept",
+      "norm_label": "gp pallet",
+      "properties": {
+        "dimensions": "125x100 cm"
+      },
+      "type": "PALLET_TYPE"
+    },
+    {
+      "id": "pallet_type_kp",
+      "label": "KP Pallet",
+      "community": 31,
+      "community_name": "Community 31",
+      "confidence": 1.0,
+      "file_type": "concept",
+      "norm_label": "kp pallet",
+      "properties": {
+        "dimensions": "60x80 cm"
+      },
+      "type": "PALLET_TYPE"
+    },
+    {
+      "id": "pallet_type_np",
+      "label": "NP Pallet",
+      "community": 32,
+      "community_name": "Community 32",
+      "confidence": 1.0,
+      "file_type": "concept",
+      "norm_label": "np pallet",
+      "properties": {
+        "dimensions": "130x110 cm"
+      },
+      "type": "PALLET_TYPE"
+    },
+    {
+      "id": "validation_strip_ui",
+      "label": "Validation Strip",
+      "community": 33,
+      "community_name": "Community 33",
+      "confidence": 1.0,
+      "description": "Pallet summary with Pick PN, Box PN, PN Check, Target, Verified, Boxes, Status",
+      "file_type": "concept",
+      "norm_label": "validation strip",
+      "type": "UI_COMPONENT"
+    },
+    {
+      "id": "workflow_animation_file",
+      "label": "workflow-animation.html",
+      "community": 34,
+      "community_name": "Community 34",
+      "confidence": 1.0,
+      "description": "Timeline-driven warehouse workflow animation",
+      "file_type": "concept",
+      "norm_label": "workflow-animation.html",
+      "type": "SUPPLEMENTARY_FILE"
+    },
+    {
+      "id": "workflow_scroll_file",
+      "label": "workflow-scroll.html",
+      "community": 35,
+      "community_name": "Community 35",
+      "confidence": 1.0,
+      "description": "Scroll-driven warehouse workflow presentation (synchronized with animation)",
+      "file_type": "concept",
+      "norm_label": "workflow-scroll.html",
+      "type": "SUPPLEMENTARY_FILE"
+    },
+    {
+      "id": "zebra_ds3678_scanner",
+      "label": "Zebra DS3678 Scanner",
+      "community": 36,
+      "community_name": "Community 36",
+      "confidence": 1.0,
+      "description": "Cordless 1D/2D imager, Bluetooth cradle, HID Keyboard Wedge mode",
+      "file_type": "concept",
+      "norm_label": "zebra ds3678 scanner",
+      "type": "HARDWARE"
+    },
+    {
+      "id": "aggregator_build_print_html",
+      "label": "buildPrintHTML",
+      "community": 6,
+      "community_name": "Community 6",
+      "confidence": 1.0,
+      "description": "Generates browser print preview",
+      "file_type": "concept",
+      "norm_label": "buildprinthtml",
+      "type": "AGGREGATOR_FUNCTION"
+    },
+    {
+      "id": "aggregator_export_csv",
+      "label": "doExportCSV",
+      "community": 7,
+      "community_name": "Community 7",
+      "confidence": 1.0,
+      "description": "CSV export with UTF-8 BOM for Excel",
+      "file_type": "concept",
+      "norm_label": "doexportcsv",
+      "type": "AGGREGATOR_FUNCTION"
+    },
+    {
+      "id": "aggregator_export_pdf",
+      "label": "doExportPDF",
+      "community": 8,
+      "community_name": "Community 8",
+      "confidence": 1.0,
+      "description": "jsPDF plus autoTable A4 export",
+      "file_type": "concept",
+      "norm_label": "doexportpdf",
+      "type": "AGGREGATOR_FUNCTION"
+    },
+    {
+      "id": "aggregator_update_delivery_summary",
+      "label": "updateDeliverySummary",
+      "community": 9,
+      "community_name": "Community 9",
+      "confidence": 1.0,
+      "description": "Generates sidebar Live Summary delivery total",
+      "file_type": "concept",
+      "norm_label": "updatedeliverysummary",
+      "type": "AGGREGATOR_FUNCTION"
+    }
+  ],
+  "links": [
+    {
+      "source": "brag_output_composition_hyperframes",
+      "target": "brag_output_composition_hyperframes_schema",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "brag_output_composition_hyperframes",
+      "target": "brag_output_composition_hyperframes_registry",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "brag_output_composition_hyperframes",
+      "target": "brag_output_composition_hyperframes_paths",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "brag_output_composition_hyperframes",
+      "target": "brag_output_composition_hyperframes_media",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "brag_output_composition_hyperframes_media",
+      "target": "brag_output_composition_hyperframes_media_autoproxy",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "brag_output_composition_hyperframes_paths",
+      "target": "brag_output_composition_hyperframes_paths_blocks",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "brag_output_composition_hyperframes_paths",
+      "target": "brag_output_composition_hyperframes_paths_components",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "brag_output_composition_hyperframes_paths",
+      "target": "brag_output_composition_hyperframes_paths_assets",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "brag-output/composition/hyperframes.json",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "brag_output_composition_package",
+      "target": "brag_output_composition_package_name",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "brag_output_composition_package",
+      "target": "brag_output_composition_package_private",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "brag_output_composition_package",
+      "target": "brag_output_composition_package_type",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "brag_output_composition_package",
+      "target": "brag_output_composition_package_scripts",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "brag_output_composition_package_scripts",
+      "target": "brag_output_composition_package_scripts_dev",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "brag_output_composition_package_scripts",
+      "target": "brag_output_composition_package_scripts_check",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "brag_output_composition_package_scripts",
+      "target": "brag_output_composition_package_scripts_render",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "brag_output_composition_package_scripts",
+      "target": "brag_output_composition_package_scripts_publish",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "brag-output/composition/package.json",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_hyperframes",
+      "target": "videos_outbound_checklist_demo_hyperframes_authoringskill",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_hyperframes",
+      "target": "videos_outbound_checklist_demo_hyperframes_schema",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_hyperframes",
+      "target": "videos_outbound_checklist_demo_hyperframes_registry",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_hyperframes",
+      "target": "videos_outbound_checklist_demo_hyperframes_paths",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_hyperframes",
+      "target": "videos_outbound_checklist_demo_hyperframes_media",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_hyperframes_media",
+      "target": "videos_outbound_checklist_demo_hyperframes_media_autoproxy",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_hyperframes_paths",
+      "target": "videos_outbound_checklist_demo_hyperframes_paths_blocks",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_hyperframes_paths",
+      "target": "videos_outbound_checklist_demo_hyperframes_paths_components",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_hyperframes_paths",
+      "target": "videos_outbound_checklist_demo_hyperframes_paths_assets",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/hyperframes.json",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_package",
+      "target": "videos_outbound_checklist_demo_package_name",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_package",
+      "target": "videos_outbound_checklist_demo_package_private",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_package",
+      "target": "videos_outbound_checklist_demo_package_type",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_package",
+      "target": "videos_outbound_checklist_demo_package_scripts",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_package_scripts",
+      "target": "videos_outbound_checklist_demo_package_scripts_dev",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_package_scripts",
+      "target": "videos_outbound_checklist_demo_package_scripts_check",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_package_scripts",
+      "target": "videos_outbound_checklist_demo_package_scripts_render",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "videos_outbound_checklist_demo_package_scripts",
+      "target": "videos_outbound_checklist_demo_package_scripts_publish",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "videos/outbound-checklist-demo/package.json",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "pallet-verification",
+      "target": "composition-04-auto-advance",
+      "relation": "illustration",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "label": "shown_in",
+      "source_file": ""
+    },
+    {
+      "source": "warehouse-scanning-workflow",
+      "target": "composition-04-auto-advance",
+      "relation": "illustration",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "label": "demonstrates",
+      "source_file": ""
+    },
+    {
+      "source": "warehouse-scanning-workflow",
+      "target": "composition-05-over-target-stop",
+      "relation": "illustration",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "label": "demonstrates",
+      "source_file": ""
+    },
+    {
+      "source": "warehouse-scanning-workflow",
+      "target": "composition-06-match-report",
+      "relation": "illustration",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "label": "demonstrates",
+      "source_file": ""
+    },
+    {
+      "source": "pallet-verification",
+      "target": "composition-05-over-target-stop",
+      "relation": "illustration",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "label": "shown_in",
+      "source_file": ""
+    },
+    {
+      "source": "warehouse-scanning-workflow",
+      "target": "pallet-verification",
+      "relation": "composition",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "label": "includes",
+      "source_file": ""
+    },
+    {
+      "source": "demo-snapshots",
+      "target": "contact-sheet",
+      "relation": "reference",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "label": "summarized_by",
+      "source_file": ""
+    },
+    {
+      "source": "demo-snapshots",
+      "target": "frame-00-at-32s",
+      "relation": "composition",
+      "confidence": "INFERRED",
+      "confidence_score": 1.0,
+      "label": "contains",
+      "source_file": ""
+    },
+    {
+      "source": "demo-snapshots",
+      "target": "frame-01-at-36s",
+      "relation": "composition",
+      "confidence": "INFERRED",
+      "confidence_score": 1.0,
+      "label": "contains",
+      "source_file": ""
+    },
+    {
+      "source": "demo-snapshots",
+      "target": "frame-02-at-40s",
+      "relation": "composition",
+      "confidence": "INFERRED",
+      "confidence_score": 1.0,
+      "label": "contains",
+      "source_file": ""
+    },
+    {
+      "source": "demo-snapshots",
+      "target": "frame-03-at-66s",
+      "relation": "composition",
+      "confidence": "INFERRED",
+      "confidence_score": 1.0,
+      "label": "contains",
+      "source_file": ""
+    },
+    {
+      "source": "outbound-checklist-demo",
+      "target": "demo-snapshots",
+      "relation": "composition",
+      "confidence": "INFERRED",
+      "confidence_score": 1.0,
+      "label": "contains",
+      "source_file": ""
+    },
+    {
+      "source": "outbound-checklist-demo",
+      "target": "demo-thumbnails",
+      "relation": "composition",
+      "confidence": "INFERRED",
+      "confidence_score": 1.0,
+      "label": "contains",
+      "source_file": ""
+    },
+    {
+      "source": "demo-thumbnails",
+      "target": "composition-04-auto-advance",
+      "relation": "reference",
+      "confidence": "INFERRED",
+      "confidence_score": 1.0,
+      "label": "previews",
+      "source_file": ""
+    },
+    {
+      "source": "demo-thumbnails",
+      "target": "composition-05-over-target-stop",
+      "relation": "reference",
+      "confidence": "INFERRED",
+      "confidence_score": 1.0,
+      "label": "previews",
+      "source_file": ""
+    },
+    {
+      "source": "demo-thumbnails",
+      "target": "composition-06-match-report",
+      "relation": "reference",
+      "confidence": "INFERRED",
+      "confidence_score": 1.0,
+      "label": "previews",
+      "source_file": ""
+    }
+  ],
+  "hyperedges": [
+    {
+      "nodes": [
+        "composition-04-auto-advance",
+        "composition-05-over-target-stop",
+        "composition-06-match-report"
+      ],
+      "label": "workflow_phases",
+      "description": "Three critical workflow phases demonstrated: auto-advance on target match, hard stop on over-target, and final report",
+      "confidence": 0.9
+    },
+    {
+      "nodes": [
+        "frame-00-at-32s",
+        "frame-01-at-36s",
+        "frame-02-at-40s",
+        "frame-03-at-66s"
+      ],
+      "label": "temporal_sequence",
+      "description": "Ordered timeline of key frames from video demonstration (32s \u2192 36s \u2192 40s \u2192 66.445s)",
+      "confidence": 0.95
+    }
+  ],
+  "built_at_commit": "aea6f63c90ef02635873a55aaac82d07d8c7dfd1"
+}
