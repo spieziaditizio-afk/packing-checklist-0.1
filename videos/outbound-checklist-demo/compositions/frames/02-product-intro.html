@@ -1,0 +1,382 @@
+<template>
+  <style>
+  @font-face {
+    font-family: 'DM Sans';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/dm-sans-400.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Sans';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('assets/fonts/dm-sans-600.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/dm-mono-400.woff2') format('woff2');
+  }
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      font-family: 'DM Sans', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    #root .mono {
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ---- background (full-bleed, on a clip layer — never on #root) ---- */
+    .opintro-bg {
+      background: #0d1117;
+    }
+    .opintro-glow {
+      position: absolute;
+      left: 50%;
+      top: -220px;
+      width: 1400px;
+      height: 900px;
+      transform: translateX(-50%);
+      background: radial-gradient(ellipse 700px 450px at 50% 30%, rgba(56, 189, 248, 0.22) 0%, rgba(56, 189, 248, 0) 72%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ---- topbar ---- */
+    .opintro-topbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 150px;
+    }
+    .opintro-topbar-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      padding: 0 96px;
+      background: linear-gradient(180deg, #010409 0%, #0d1117 100%);
+      border-bottom: 1px solid #21262d;
+    }
+    .opintro-appicon {
+      width: 72px;
+      height: 72px;
+      border-radius: 16px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 2px solid rgba(56, 189, 248, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .opintro-titleblock {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .opintro-title {
+      font-size: 44px;
+      font-weight: 700;
+      color: #e6edf3;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+    }
+    .opintro-sub {
+      font-size: 19px;
+      color: #8b949e;
+      letter-spacing: 0.1em;
+    }
+    .opintro-wordmark {
+      margin-left: auto;
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: 0.24em;
+      color: #e6edf3;
+    }
+
+    /* ---- card zone (empty -> populated swap) ---- */
+    .opintro-cardzone {
+      position: absolute;
+      left: 360px;
+      top: 230px;
+      width: 1200px;
+      height: 600px;
+    }
+    .opintro-swapwrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .opintro-skeleton,
+    .opintro-card {
+      position: absolute;
+      inset: 0;
+      transform-origin: 50% 50%;
+      border-radius: 20px;
+      box-sizing: border-box;
+    }
+    .opintro-skeleton {
+      opacity: 0;
+      border: 2px dashed #30363d;
+      background: rgba(22, 27, 34, 0.35);
+      padding: 44px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
+      z-index: 1;
+    }
+    .opintro-skel-bar {
+      height: 26px;
+      border-radius: 8px;
+      background: #1c2433;
+    }
+    .opintro-card {
+      border: 1px solid #30363d;
+      background: #161b22;
+      padding: 44px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      z-index: 2;
+    }
+    .opintro-tabstrip {
+      display: flex;
+      gap: 12px;
+    }
+    .opintro-tab {
+      font-size: 18px;
+      padding: 10px 22px;
+      border-radius: 10px;
+      border: 1px solid #30363d;
+      color: #6e7681;
+    }
+    .opintro-tab.is-active {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.14);
+      color: #e6edf3;
+    }
+    .opintro-field-label {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8b949e;
+      margin-bottom: 14px;
+    }
+    .opintro-chiprow {
+      display: flex;
+      gap: 12px;
+    }
+    .opintro-chip {
+      font-size: 18px;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid #30363d;
+      color: #6e7681;
+      background: #0d1117;
+    }
+    .opintro-chip.is-selected {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.14);
+      color: #e6edf3;
+    }
+    .opintro-metarow {
+      display: flex;
+      gap: 40px;
+    }
+    .opintro-metabox {
+      flex: 1;
+    }
+    .opintro-metaval {
+      margin-top: 12px;
+      font-size: 26px;
+      font-weight: 700;
+      color: #6e7681;
+      padding: 14px 20px;
+      border-radius: 8px;
+      border: 1px solid #30363d;
+      background: #0d1117;
+      width: fit-content;
+      min-width: 140px;
+    }
+    .opintro-statuspill {
+      position: absolute;
+      top: 44px;
+      right: 48px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      color: #8b949e;
+      border: 1px solid #30363d;
+      border-radius: 999px;
+      padding: 8px 18px;
+    }
+  </style>
+
+  <div data-hf-id="hf-6st4" id="root" data-composition-id="02-product-intro" data-width="1920" data-height="1080" data-duration="10.335">
+    <div data-hf-id="hf-gcx5" class="clip opintro-bg" data-start="0" data-duration="10.335" data-track-index="0">
+      <div data-hf-id="hf-0m0a" class="opintro-glow" id="opintro-glow"></div>
+    </div>
+
+    <div data-hf-id="hf-2kmb" class="clip opintro-topbar" data-start="0" data-duration="10.335" data-track-index="1">
+      <div data-hf-id="hf-rnom" class="opintro-topbar-inner" id="opintro-topbar-inner">
+        <div data-hf-id="hf-jzic" class="opintro-appicon">
+          <svg data-hf-id="hf-8o26" width="34" height="34" viewBox="0 0 34 34" fill="none">
+            <rect data-hf-id="hf-jq3n" x="4" y="6" width="26" height="5" rx="2" stroke="#38bdf8" stroke-width="2.4" />
+            <rect data-hf-id="hf-gv8a" x="4" y="14.5" width="18" height="5" rx="2" stroke="#38bdf8" stroke-width="2.4" />
+            <rect data-hf-id="hf-uszi" x="4" y="23" width="26" height="5" rx="2" stroke="#38bdf8" stroke-width="2.4" />
+          </svg>
+        </div>
+        <div data-hf-id="hf-030f" class="opintro-titleblock">
+          <div data-hf-id="hf-m3k8" class="opintro-title">Outbound Checklist</div>
+          <div data-hf-id="hf-iali" class="opintro-sub mono">SEVENUM NL · PRE-SHIPMENT VERIFICATION</div>
+        </div>
+        <div data-hf-id="hf-7jmz" class="opintro-wordmark mono">ARROW</div>
+      </div>
+    </div>
+
+    <div data-hf-id="hf-yjhw" class="clip opintro-cardzone" data-start="0" data-duration="10.335" data-track-index="2">
+      <div data-hf-id="hf-s8jb" class="opintro-swapwrap">
+        <div data-hf-id="hf-l1jm" class="opintro-skeleton" id="opintro-skeleton">
+          <div data-hf-id="hf-3bii" class="opintro-skel-bar" style="width: 32%;"></div>
+          <div data-hf-id="hf-bl9m" class="opintro-skel-bar" style="width: 58%;"></div>
+          <div data-hf-id="hf-l3lt" class="opintro-skel-bar" style="width: 44%;"></div>
+          <div data-hf-id="hf-92mo" class="opintro-skel-bar" style="width: 70%;"></div>
+        </div>
+
+        <div data-hf-id="hf-q4fi" class="opintro-card" id="opintro-card">
+          <div data-hf-id="hf-7znj" class="opintro-tabstrip">
+            <div data-hf-id="hf-adjy" class="opintro-tab is-active mono" id="opintro-tab1">Pallet 1</div>
+            <div data-hf-id="hf-jgk1" class="opintro-tab mono" id="opintro-tab2">Pallet 2</div>
+          </div>
+
+          <div data-hf-id="hf-hjmd" id="opintro-fieldtype">
+            <div data-hf-id="hf-kg23" class="opintro-field-label">Pallet Type</div>
+            <div data-hf-id="hf-lt3l" class="opintro-chiprow mono">
+              <div data-hf-id="hf-iv17" class="opintro-chip">KP</div>
+              <div data-hf-id="hf-hufz" class="opintro-chip is-selected">EP</div>
+              <div data-hf-id="hf-z43e" class="opintro-chip">BP</div>
+              <div data-hf-id="hf-q8lj" class="opintro-chip">GP</div>
+              <div data-hf-id="hf-xvti" class="opintro-chip">NP</div>
+              <div data-hf-id="hf-6p81" class="opintro-chip">AP</div>
+            </div>
+          </div>
+
+          <div data-hf-id="hf-tvi7" class="opintro-metarow">
+            <div data-hf-id="hf-nuow" class="opintro-metabox" id="opintro-fieldweight">
+              <div data-hf-id="hf-2rg8" class="opintro-field-label">Weight (kg)</div>
+              <div data-hf-id="hf-9llt" class="opintro-metaval mono">—</div>
+            </div>
+            <div data-hf-id="hf-1o15" class="opintro-metabox" id="opintro-fieldheight">
+              <div data-hf-id="hf-2v37" class="opintro-field-label">Height (cm)</div>
+              <div data-hf-id="hf-5igl" class="opintro-metaval mono">—</div>
+            </div>
+          </div>
+
+          <div data-hf-id="hf-vya2" class="opintro-statuspill mono" id="opintro-pill">PENDING</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      var tl = gsap.timeline({ paused: true });
+
+      /* Scene 1 (0.0-3.28s) — "This is Outbound Checklist -"
+         Real topbar settles in, restrained power3 entrance, no bounce. */
+      tl.fromTo(
+        '#opintro-topbar-inner',
+        { y: -26, autoAlpha: 0 },
+        { y: 0, autoAlpha: 1, duration: 0.75, ease: 'power3.out' },
+        0.05
+      );
+      tl.fromTo(
+        '#opintro-glow',
+        { autoAlpha: 0 },
+        { autoAlpha: 1, duration: 1.0, ease: 'power2.out' },
+        0.05
+      );
+      tl.fromTo(
+        '#opintro-skeleton',
+        { y: 14, autoAlpha: 0 },
+        { y: 0, autoAlpha: 1, duration: 0.6, ease: 'power3.out' },
+        0.4
+      );
+
+      /* Scene 2 (3.28-6.89s) — "...built to run scan by scan,"
+         scale-swap-transition mechanics (outgoing shrink+fade / incoming
+         scale+fade), but eased power3.out on the incoming instead of the
+         recipe's default back.out — this frame keeps the no-bounce grammar;
+         overshoot is reserved for the over-target beat later in the film. */
+      var TRIGGER = 3.28;
+      var EXIT_DUR = 0.4;
+      var OVERLAP = 0.15;
+      var ENTER_DUR = 0.6;
+
+      tl.to(
+        '#opintro-skeleton',
+        { scale: 0.7, autoAlpha: 0, duration: EXIT_DUR, ease: 'power2.in' },
+        TRIGGER
+      );
+      tl.fromTo(
+        '#opintro-card',
+        { scale: 0.7, autoAlpha: 0 },
+        { scale: 1, autoAlpha: 1, duration: ENTER_DUR, ease: 'power3.out' },
+        TRIGGER + EXIT_DUR - OVERLAP
+      );
+
+      var enterEnd = TRIGGER + EXIT_DUR - OVERLAP + ENTER_DUR; // 4.13
+      var reveal = enterEnd + 0.3; // 4.43 — inner content reveals after the container settles
+
+      tl.fromTo(
+        ['#opintro-tab1', '#opintro-tab2'],
+        { y: 10, autoAlpha: 0 },
+        { y: 0, autoAlpha: 1, duration: 0.45, ease: 'power3.out', stagger: 0.08 },
+        reveal
+      );
+      tl.fromTo(
+        '#opintro-fieldtype',
+        { y: 10, autoAlpha: 0 },
+        { y: 0, autoAlpha: 1, duration: 0.45, ease: 'power3.out' },
+        reveal + 0.25
+      );
+      tl.fromTo(
+        '#opintro-fieldweight',
+        { y: 10, autoAlpha: 0 },
+        { y: 0, autoAlpha: 1, duration: 0.4, ease: 'power3.out' },
+        reveal + 0.55
+      );
+      tl.fromTo(
+        '#opintro-fieldheight',
+        { y: 10, autoAlpha: 0 },
+        { y: 0, autoAlpha: 1, duration: 0.4, ease: 'power3.out' },
+        reveal + 0.75
+      );
+      tl.fromTo(
+        '#opintro-pill',
+        { scale: 0.85, autoAlpha: 0 },
+        { scale: 1, autoAlpha: 1, duration: 0.4, ease: 'power3.out' },
+        reveal + 1.12
+      );
+
+      /* Scene 3 (6.89-9.835s) — "right where the pallets get staged."
+         Hold static on the full app view. Settle only — no further
+         movement, so Frame 3 can pick up from this same still state. */
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines['02-product-intro'] = tl;
+    })();
+  </script>
+</template>

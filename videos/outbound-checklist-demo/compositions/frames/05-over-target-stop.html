@@ -1,0 +1,335 @@
+<template>
+<div data-hf-id="hf-u2jn" id="root" data-composition-id="05-over-target-stop" data-start="0" data-duration="10.868" data-width="1920" data-height="1080">
+  <style>
+  @font-face {
+    font-family: 'DM Sans';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/dm-sans-400.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Sans';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('assets/fonts/dm-sans-600.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/dm-mono-400.woff2') format('woff2');
+  }
+    #root {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      container-type: size;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      --paper: #0d1117;
+      --paper-2: #1c2433;
+      --card: #161b22;
+      --border: #30363d;
+      --ink: #e6edf3;
+      --ink-dim: #8b949e;
+      --ink-faint: #6e7681;
+      --accent: #38bdf8;
+      --accent-a12: rgba(56, 189, 248, 0.12);
+      --accent-a35: rgba(56, 189, 248, 0.35);
+      --green: #10b981;
+      --amber: #f59e0b;
+      --red: #dc2626;
+      --red-soft: #f87171;
+    }
+    #root * { box-sizing: border-box; }
+    #root .ots-mono {
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── background ── */
+    .ots-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70cqw 50cqw at 50% 38cqw, var(--paper-2) 0%, var(--paper) 70%);
+    }
+
+    /* ── pallet tab strip (continuity carry-over from prior frame) ── */
+    .ots-tabs {
+      position: absolute;
+      top: 10cqw;
+      left: 8cqw;
+      display: flex;
+      gap: 1cqw;
+    }
+    .ots-tab {
+      padding: 0.9cqw 2.2cqw;
+      border-radius: 0.8cqw;
+      border: 0.1cqw solid transparent;
+      font-size: 1.5cqw;
+      color: var(--ink-faint);
+    }
+    .ots-tab.is-active {
+      background: var(--accent-a12);
+      border-color: var(--accent-a35);
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    /* ── pallet card / box verification ── */
+    .ots-card {
+      position: absolute;
+      top: 16cqw;
+      left: 8cqw;
+      right: 8cqw;
+      height: 20.26cqw;
+      background: var(--card);
+      border: 0.12cqw solid var(--border);
+      border-radius: 1.2cqw;
+      padding: 2.2cqw 2.6cqw;
+      display: flex;
+      flex-direction: column;
+      gap: 1.6cqw;
+    }
+    .ots-card-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    .ots-label-tiny {
+      font-size: 1.15cqw;
+      color: var(--ink-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
+    .ots-valid-info {
+      font-size: 1.5cqw;
+      color: var(--ink);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .ots-valid-info span.ots-dim { color: var(--ink-faint); font-weight: 400; }
+
+    .ots-box-rows {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.4cqw;
+    }
+    .ots-box-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6cqw;
+    }
+    .ots-box-name {
+      font-size: 1.15cqw;
+      color: var(--ink-faint);
+      display: flex;
+      align-items: center;
+      gap: 0.5cqw;
+    }
+    .ots-scan-dot {
+      width: 0.7cqw;
+      height: 0.7cqw;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+    }
+    .ots-fieldbox {
+      width: 100%;
+      background: var(--paper);
+      border: 0.14cqw solid var(--border);
+      border-radius: 0.7cqw;
+      padding: 0.9cqw 0;
+      text-align: center;
+    }
+    .ots-fieldbox .ots-val {
+      font-size: 2.1cqw;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .ots-fieldbox.is-done { border-color: rgba(16, 185, 129, 0.4); }
+
+    /* ── progress bar (locks red at climax) ── */
+    .ots-progress-wrap {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 12cqw;
+      display: flex;
+      justify-content: center;
+    }
+    .ots-progress-track {
+      width: 70%;
+      height: 1.6cqw;
+      border-radius: 1cqw;
+      background: var(--paper-2);
+      border: 0.1cqw solid var(--border);
+      overflow: hidden;
+    }
+    .ots-progress-fill {
+      height: 100%;
+      border-radius: 1cqw;
+      background: var(--green);
+      width: 95.8%;
+    }
+
+    /* ── toast (climax) ── */
+    .ots-toast-wrap {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .ots-toast {
+      opacity: 0;
+      width: 46cqw;
+      padding: 3.6cqw 4.6cqw;
+      background: var(--card);
+      border: 0.18cqw solid var(--red);
+      border-radius: 1.4cqw;
+      text-align: center;
+      transform-origin: 50% 50%;
+    }
+    .ots-toast .ots-t {
+      font-size: 3.2cqw;
+      font-weight: 700;
+      color: var(--red-soft);
+      letter-spacing: -0.005em;
+    }
+    .ots-toast .ots-s {
+      font-size: 1.8cqw;
+      color: var(--ink);
+      margin-top: 0.7cqw;
+    }
+  </style>
+
+  <div data-hf-id="hf-j81h" class="clip ots-bg" data-start="0" data-duration="10.868" data-track-index="0"></div>
+
+  <div data-hf-id="hf-p4sb" class="clip ots-tabs" data-start="0" data-duration="10.868" data-track-index="1">
+    <div data-hf-id="hf-gpqv" class="ots-tab ots-mono">Pallet 1</div>
+    <div data-hf-id="hf-bpnb" class="ots-tab is-active ots-mono">Pallet 2</div>
+  </div>
+
+  <div data-hf-id="hf-0uy2" class="clip ots-card" data-start="0" data-duration="10.868" data-track-index="2">
+    <div data-hf-id="hf-8276" class="ots-card-head">
+      <span data-hf-id="hf-39u0" class="ots-label-tiny">Box Verification · Scan Mode</span>
+      <span data-hf-id="hf-a50l" class="ots-valid-info ots-mono"><span data-hf-id="hf-49cg" id="ots-verified">23</span><span data-hf-id="hf-0x9l" class="ots-dim"> / 24 pcs</span></span>
+    </div>
+    <div data-hf-id="hf-kaa0" class="ots-box-rows" data-layout-allow-overlap="true" data-layout-allow-occlusion="true">
+      <div data-hf-id="hf-4t7r" class="ots-box-row">
+        <span data-hf-id="hf-sb8d" class="ots-box-name">Box 1</span>
+        <div data-hf-id="hf-5csf" class="ots-fieldbox is-done"><span data-hf-id="hf-fu2v" class="ots-val ots-mono">6</span></div>
+      </div>
+      <div data-hf-id="hf-hhmv" class="ots-box-row">
+        <span data-hf-id="hf-ti5g" class="ots-box-name">Box 2 <span data-hf-id="hf-82fz" class="ots-scan-dot" id="ots-scan-dot"></span></span>
+        <div data-hf-id="hf-qu1l" class="ots-fieldbox" id="ots-box2-field"><span data-hf-id="hf-uegl" class="ots-val ots-mono" id="ots-box2-val">6</span></div>
+      </div>
+      <div data-hf-id="hf-h3bu" class="ots-box-row">
+        <span data-hf-id="hf-t3uf" class="ots-box-name">Box 3</span>
+        <div data-hf-id="hf-yyv3" class="ots-fieldbox is-done"><span data-hf-id="hf-binb" class="ots-val ots-mono">6</span></div>
+      </div>
+      <div data-hf-id="hf-gp0t" class="ots-box-row">
+        <span data-hf-id="hf-uari" class="ots-box-name">Box 4</span>
+        <div data-hf-id="hf-prr6" class="ots-fieldbox"><span data-hf-id="hf-ffru" class="ots-val ots-mono">5</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div data-hf-id="hf-rjdx" class="clip ots-progress-wrap" data-start="0" data-duration="10.868" data-track-index="3">
+    <div data-hf-id="hf-z3l6" class="ots-progress-track">
+      <div data-hf-id="hf-6p9u" class="ots-progress-fill" id="ots-fill"></div>
+    </div>
+  </div>
+
+  <div data-hf-id="hf-aypq" class="clip ots-toast-wrap" data-start="0" data-duration="10.868" data-track-index="4" data-layout-allow-overlap="true" data-layout-allow-occlusion="true">
+    <div data-hf-id="hf-jyea" class="ots-toast" id="ots-toast">
+      <div data-hf-id="hf-tpl4" class="ots-t" data-layout-allow-overlap="true" data-layout-allow-occlusion="true">⚠ OVER TARGET</div>
+      <div data-hf-id="hf-vjwj" class="ots-s ots-mono">1 pc over target</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      var toast = document.getElementById('ots-toast');
+      var fill = document.getElementById('ots-fill');
+      var box2Field = document.getElementById('ots-box2-field');
+      var box2Val = document.getElementById('ots-box2-val');
+      var verifiedText = document.getElementById('ots-verified');
+      var scanDot = document.getElementById('ots-scan-dot');
+
+      var tl = gsap.timeline({ paused: true });
+
+      /* establish hidden state for the toast before its Scene 3 entrance */
+      tl.set(toast, { scale: 0, opacity: 0, rotation: -3, y: 0 }, 0);
+
+      /* ── Scene 1 (0.0–3.0s): static hold, Pallet 2 mid-scan — a small
+         scan-cursor blink on Box 2 is the only life, keeping the hold from
+         reading dead without front-loading any new content. ── */
+      tl.to(scanDot, { opacity: 0.25, duration: 0.55, ease: "sine.inOut", yoyo: true, repeat: 4 }, 0.2);
+
+      /* ── Scene 2 (3.0–5.5s): the double-scan lands — Box 2 flashes red,
+         the progress bar begins tracking green → amber → red. ── */
+      tl.call(function () { box2Val.textContent = "8"; verifiedText.textContent = "25"; }, null, 3.0);
+      tl.to(box2Field, { borderColor: "#dc2626", backgroundColor: "rgba(220,38,38,0.32)", duration: 0.15, ease: "power1.out" }, 3.0);
+      tl.to(box2Field, { borderColor: "#f59e0b", backgroundColor: "rgba(220,38,38,0.14)", duration: 0.15, ease: "power1.inOut" }, 3.15);
+      tl.to(box2Field, { borderColor: "#dc2626", backgroundColor: "rgba(220,38,38,0.32)", duration: 0.15, ease: "power1.inOut" }, 3.3);
+      tl.to(box2Field, { borderColor: "#dc2626", backgroundColor: "rgba(220,38,38,0.24)", duration: 0.4, ease: "power1.out" }, 3.45);
+
+      tl.to(fill, { width: "100%", backgroundColor: "#f59e0b", duration: 1.0, ease: "power1.inOut" }, 3.0);
+      tl.to(fill, { width: "100%", backgroundColor: "#dc2626", duration: 1.5, ease: "power2.in" }, 4.0);
+
+      /* ── Scene 3 (5.5–7.0s): everything locks together — Box 2's field
+         settles to a solid locked red exactly as the toast pops and the
+         bar finishes its red fill. ── */
+      tl.to(box2Field, { borderColor: "#dc2626", backgroundColor: "rgba(220,38,38,0.30)", duration: 0.3, ease: "power1.out" }, 5.5);
+
+      /* ── Scene 3 (5.5–7.0s): the toast slams in — the film's one
+         explicitly-playful spring-pop exception — as the bar finishes
+         locking full red exactly under it. ── */
+      tl.fromTo(
+        toast,
+        { scale: 0, opacity: 0, rotation: -3 },
+        { scale: 1, opacity: 1, rotation: 0, duration: 0.6, ease: "back.out(1.7)" },
+        5.5
+      );
+
+      /* ── Scene 4 (7.0–10.368s): everything HOLDS. Only a bounded,
+         low-amplitude sine breath on the toast's outline (border + glow)
+         keeps the locked-red beat from reading dead — no position/scale
+         drift, so the frame lands cleanly held for the next frame's cut. ── */
+      var IDLE_START = 7.0;
+      var IDLE_DUR = 10.368 - IDLE_START;
+      var CYCLES = 1.5;
+      var phase = { p: 0 };
+      tl.to(
+        phase,
+        {
+          p: Math.PI * 2 * CYCLES,
+          duration: IDLE_DUR,
+          ease: "none",
+          onUpdate: function () {
+            var s = Math.sin(phase.p);
+            var glowAlpha = 0.32 + s * 0.14;
+            var glowSize = 16 + s * 6;
+            toast.style.boxShadow = "0 0 " + glowSize + "px rgba(220,38,38," + glowAlpha + ")";
+            toast.style.borderColor = "rgba(220,38,38," + (0.85 + s * 0.15) + ")";
+          },
+        },
+        IDLE_START
+      );
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["05-over-target-stop"] = tl;
+      tl.seek(0);
+    })();
+  </script>
+</div>
+</template>

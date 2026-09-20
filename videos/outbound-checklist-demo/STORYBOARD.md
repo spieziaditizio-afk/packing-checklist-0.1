@@ -36,7 +36,7 @@ layouts with real motion and design treatment, never redraws them.
 - beat: tension
 - blueprint: kinetic-type-beats (Adapt — Hook escalation sub-shape)
 - asset_candidates:
-- sfx: sharp flash-cut hit on each phrase's hard-cut-in
+- sfx: impact-bass-1
 
 narrativeRole: Opens on the cost of a missed scan in outcome language — no product name yet, just the stakes.
 keyMessage: A mis-scan that isn't caught costs you at the dock, not on the floor.
@@ -59,7 +59,7 @@ Scene 3 (2.8–4.0s): on "until the dock," the final phrase hard-cuts in ink whi
 - beat: curiosity → clarity
 - blueprint: compose
 - asset_candidates:
-- sfx: soft whoosh/drop as the topbar arrives
+- sfx: pop
 
 narrativeRole: Names the product and plants it in the real, physical warehouse context (not an abstract SaaS dashboard).
 keyMessage: This is a tool built for the floor, not a slide deck.
@@ -82,7 +82,7 @@ Scene 3 (4.2–6.0s): on "right on the warehouse floor," hold static on the full
 - beat: clarity → control
 - blueprint: device-surface-showcase (Adapt — static-tour variant)
 - asset_candidates:
-- sfx: three scan-click ticks, one per field landing
+- sfx: click
 
 narrativeRole: First demo cycle — establishes the core scan-and-verify loop the rest of the video builds on.
 keyMessage: Every scan gets instant, unambiguous feedback.
@@ -106,7 +106,7 @@ Scene 4 (7.0–10.0s): on "Every scan flashes green the second it lands," hold o
 - beat: control → confidence
 - blueprint: device-surface-showcase (Adapt — static-tour variant)
 - asset_candidates:
-- sfx: completion chime, then a distinct tab-switch tone
+- sfx: chime, click-soft
 
 narrativeRole: Second demo cycle — shows the workflow compounds across a whole delivery, not just one pallet.
 keyMessage: The app keeps pace with the operator; the operator never stops to drive it.
@@ -128,9 +128,9 @@ Scene 4 (8.0–10.0s): on "without touching the mouse," hold — settle only.
 - type: feature_showcase
 - persuasion: Negative contrast
 - beat: tension → relief
-- blueprint: compose — the toast slam + hard lock IS the shape; no menu entry fits a hard-stop beat cleanly
+- blueprint: compose
 - asset_candidates:
-- sfx: one clear alert tone exactly as the toast lands — no other sound competing
+- sfx: error
 
 narrativeRole: The signature differentiator — most tools would let the error ride to the next pallet or the print report; this one stops the run cold, on the spot.
 keyMessage: Over-target is a hard stop, not a warning.
@@ -154,7 +154,7 @@ Scene 4 (7.0–12.0s): on "before it ever reaches the truck," everything HOLDS �
 - beat: relief → trust
 - blueprint: titlecard-reveal (Adapt — Benefits variant)
 - asset_candidates:
-- sfx: soft confirmation chime on the MATCH flip
+- sfx: chime
 
 narrativeRole: Pays off the tension from Frame 5 — the workflow always lands on a clean, provable result.
 keyMessage: The paper trail is automatic.
@@ -177,7 +177,6 @@ Scene 3 (4.5–8.0s): on "with a print-ready report to prove it," the report-pre
 - beat: ease
 - blueprint: titlecard-reveal (Adapt)
 - asset_candidates:
-- sfx: none — calm beat, let the VO carry it
 
 narrativeRole: The differentiator against a typical SaaS pitch — this tool imposes zero setup cost on the warehouse.
 keyMessage: It's as portable as the pallet it's checking.
@@ -200,7 +199,6 @@ Scene 3 (4.5–7.0s): on "open it and start scanning," the sub-line "no server �
 - beat: confidence
 - blueprint: titlecard-reveal (Adapt — CTA/card-chain register)
 - asset_candidates:
-- sfx: none — calm close, no button, no sting
 
 narrativeRole: Closes on the brand line, calm and declarative — no "sign up," this is an internal tool closing on adoption confidence.
 keyMessage: Outbound Checklist. Every pallet, verified before it ships.

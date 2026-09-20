@@ -1,0 +1,284 @@
+<template>
+<style>
+  @font-face {
+    font-family: 'DM Sans';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/dm-sans-400.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Sans';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('assets/fonts/dm-sans-600.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/dm-mono-400.woff2') format('woff2');
+  }
+
+  #root {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
+    color: #e6edf3;
+  }
+
+  .aa-bg {
+    position: absolute;
+    inset: 0;
+    background: #0d1117;
+  }
+
+  /* ── tab strip ── */
+  .aa-tabstrip {
+    position: absolute;
+    top: 160px;
+    left: 154px;
+    display: flex;
+    gap: 16px;
+  }
+  .aa-tab {
+    padding: 14px 34px;
+    border-radius: 8px;
+    border: 1.5px solid #30363d;
+    background: transparent;
+    font-family: 'DM Mono', monospace;
+    font-weight: 400;
+    font-size: 20px;
+    letter-spacing: 0.03em;
+    color: rgb(117, 125, 135);
+  }
+
+  /* ── surface card ── */
+  .aa-card {
+    position: absolute;
+    top: 380px;
+    left: 154px;
+    right: 154px;
+    height: 440px;
+    background: #161b22;
+    border: 1.5px solid #30363d;
+    border-radius: 16px;
+    padding: 56px 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .aa-stage {
+    position: relative;
+    height: 132px;
+  }
+
+  .aa-state {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+  #aa-state-b {
+    opacity: 0;
+  }
+
+  /* state A — pallet 1 verified progress */
+  .aa-bloom-stage {
+    position: relative;
+  }
+  .aa-bloom-glow {
+    position: absolute;
+    inset: -70px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(4, 90, 66, 0.95) 0%, rgba(4, 90, 66, 0) 70%);
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .aa-bar-track {
+    position: relative;
+    z-index: 2;
+    height: 30px;
+    border-radius: 15px;
+    background: #21262d;
+    overflow: hidden;
+  }
+  .aa-bar-fill {
+    width: 100%;
+    height: 100%;
+    background: #38bdf8;
+  }
+  .aa-label-complete {
+    margin-top: 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #10b981;
+    opacity: 0;
+  }
+
+  /* state B — pallet 2 scan field */
+  .aa-field {
+    height: 64px;
+    border-radius: 10px;
+    border: 1.5px solid #38bdf8;
+    background: #0d1117;
+    display: flex;
+    align-items: center;
+    padding: 0 28px;
+    opacity: 0;
+  }
+  .aa-field-text {
+    font-family: 'DM Mono', monospace;
+    font-weight: 400;
+    font-size: 20px;
+    letter-spacing: 0.04em;
+    color: rgb(117, 125, 135);
+  }
+</style>
+
+<div data-hf-id="hf-ahjw" id="root" data-composition-id="04-auto-advance" data-width="1920" data-height="1080" data-duration="10.597">
+  <div data-hf-id="hf-mqzg" class="aa-bg clip" data-start="0" data-duration="10.597" data-track-index="0"></div>
+
+  <div data-hf-id="hf-dv2a" class="aa-tabstrip">
+    <div data-hf-id="hf-y82i" class="aa-tab" id="aa-tab1">Pallet 1</div>
+    <div data-hf-id="hf-btns" class="aa-tab" id="aa-tab2">Pallet 2</div>
+  </div>
+
+  <div data-hf-id="hf-5g35" class="aa-card">
+    <div data-hf-id="hf-80rv" class="aa-stage">
+      <div data-hf-id="hf-8900" class="aa-state" id="aa-state-a">
+        <div data-hf-id="hf-hvi9" class="aa-bloom-stage">
+          <div data-hf-id="hf-98qy" class="aa-bloom-glow" id="aa-bloom-glow"></div>
+          <div data-hf-id="hf-xye0" class="aa-bar-track">
+            <div data-hf-id="hf-a4gu" class="aa-bar-fill" id="aa-bar-fill"></div>
+          </div>
+        </div>
+        <div data-hf-id="hf-06bl" class="aa-label-complete" id="aa-label-complete">✓ auto-advanced — focus jumped, no click</div>
+      </div>
+
+      <div data-hf-id="hf-j4hn" class="aa-state" id="aa-state-b">
+        <div data-hf-id="hf-t9ua" class="aa-field" id="aa-field">
+          <span data-hf-id="hf-bz1l" class="aa-field-text">SCAN PN…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<script>
+(function () {
+  var DURATION = 10.197;
+
+  var tab1 = document.getElementById('aa-tab1');
+  var tab2 = document.getElementById('aa-tab2');
+  var barFill = document.getElementById('aa-bar-fill');
+  var bloomGlow = document.getElementById('aa-bloom-glow');
+  var labelComplete = document.getElementById('aa-label-complete');
+  var stateA = document.getElementById('aa-state-a');
+  var stateB = document.getElementById('aa-state-b');
+  var field = document.getElementById('aa-field');
+
+  var CYAN = '#38bdf8';
+  var GREEN = '#10b981';
+  var TAB_ACTIVE_BG = 'rgba(56,189,248,0.14)';
+  var TAB_ACTIVE_BORDER = '#38bdf8';
+  var TAB_ACTIVE_COLOR = '#e6edf3';
+  var TAB_DIM_BG = 'transparent';
+  var TAB_DIM_BORDER = '#30363d';
+  var TAB_DIM_COLOR = 'rgb(117, 125, 135)';
+
+  window.__timelines = window.__timelines || {};
+  var tl = gsap.timeline({ paused: true });
+
+  // ── Scene 1 (0.0–2.5s): resting state, already complete (handoff from frame 03) ──
+  tl.set(tab1, { backgroundColor: TAB_ACTIVE_BG, borderColor: TAB_ACTIVE_BORDER, color: TAB_ACTIVE_COLOR }, 0);
+  tl.set(tab2, { backgroundColor: TAB_DIM_BG, borderColor: TAB_DIM_BORDER, color: TAB_DIM_COLOR }, 0);
+  tl.set(barFill, { backgroundColor: CYAN, width: '100%' }, 0);
+  tl.set(bloomGlow, { opacity: 0, scale: 0.85 }, 0);
+  tl.set(labelComplete, { opacity: 0, y: 8 }, 0);
+  tl.set(stateA, { opacity: 1, y: 0 }, 0);
+  tl.set(stateB, { opacity: 0, y: 14 }, 0);
+  tl.set(field, { opacity: 0, boxShadow: '0 0 0 0 rgba(56,189,248,0)' }, 0);
+
+  // ── Scene 2 (2.5–5.0s): bar flips cyan→green with a one-shot completion glow,
+  //    then a beat later the tab strip crossfades + the card swaps to the scan field ──
+  var BLOOM_START = 2.5;
+  var BLOOM_DUR = 0.7;
+  tl.to(barFill, { backgroundColor: GREEN, duration: BLOOM_DUR, ease: 'power2.out' }, BLOOM_START);
+  // ambient-glow-bloom — bloom-and-hold variation (scene window < 3s, no breathe)
+  tl.fromTo(
+    bloomGlow,
+    { opacity: 0, scale: 0.85 },
+    { opacity: 0.3, scale: 1, duration: BLOOM_DUR, ease: 'power2.out' },
+    BLOOM_START
+  );
+  tl.fromTo(
+    labelComplete,
+    { opacity: 0, y: 8 },
+    { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' },
+    BLOOM_START + BLOOM_DUR
+  );
+
+  var SWAP_START = 4.3;
+  tl.to(tab1, { backgroundColor: TAB_DIM_BG, borderColor: TAB_DIM_BORDER, color: TAB_DIM_COLOR, duration: 0.5, ease: 'power2.inOut' }, SWAP_START);
+  tl.to(tab2, { backgroundColor: TAB_ACTIVE_BG, borderColor: TAB_ACTIVE_BORDER, color: TAB_ACTIVE_COLOR, duration: 0.5, ease: 'power2.inOut' }, SWAP_START);
+  // old screen pushes out
+  tl.to(stateA, { opacity: 0, y: -14, duration: 0.45, ease: 'power2.in' }, SWAP_START);
+  // new screen pulls up — Pallet 2's scan field, focus already handed to it
+  tl.to(field, { opacity: 1, duration: 0.45, ease: 'power2.out' }, SWAP_START + 0.15);
+  tl.fromTo(stateB, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: 'power2.out' }, SWAP_START + 0.15);
+
+  // ── Scene 3 (5.0–8.0s): one-shot cyan focus-ring pulse on the scan field —
+  //    the "no click" payoff, made visible. asr-keyword-glow envelope, re-aimed
+  //    at a box-shadow ring instead of text-shadow on a word. ──
+  var PULSE_START = 5.0;
+  var ATTACK_DUR = 0.25;
+  var SUSTAIN_END = 1.0; // local to the driver, i.e. PULSE_START + 1.0
+  var RELEASE = 0.6;
+  var REST_LEVEL = 0.15;
+  var PULSE_DUR = SUSTAIN_END + RELEASE; // 1.6s total, driver ease "none"
+
+  function envelope(t) {
+    if (t < 0) return 0;
+    if (t < SUSTAIN_END) return Math.min(t / ATTACK_DUR, 1);
+    var releaseEnd = SUSTAIN_END + RELEASE;
+    if (t < releaseEnd) return 1 - ((t - SUSTAIN_END) / RELEASE) * (1 - REST_LEVEL);
+    return REST_LEVEL;
+  }
+
+  var driver = { t: 0 };
+  tl.to(
+    driver,
+    {
+      t: PULSE_DUR,
+      duration: PULSE_DUR,
+      ease: 'none',
+      onUpdate: function () {
+        var env = envelope(driver.t);
+        var blur = 6 + env * 34;
+        var spread = 1 + env * 5;
+        var alpha = 0.25 + env * 0.55;
+        field.style.boxShadow =
+          '0 0 ' + blur + 'px 0 rgba(56,189,248,' + (0.15 + env * 0.35) + '), ' +
+          '0 0 0 ' + spread + 'px rgba(56,189,248,' + alpha + ')';
+      },
+    },
+    PULSE_START
+  );
+
+  // ── Scene 4 (8.0–10.197s): hold. No exit — not the final frame. ──
+  tl.to({}, { duration: DURATION }, 0);
+
+  window.__timelines['04-auto-advance'] = tl;
+})();
+</script>
+</template>

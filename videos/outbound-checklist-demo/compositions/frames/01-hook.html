@@ -1,0 +1,138 @@
+<template>
+<div data-hf-id="hf-mh4e" id="root" data-composition-id="01-hook" data-width="1920" data-height="1080" data-duration="8.293">
+  <style>
+  @font-face {
+    font-family: 'DM Sans';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/dm-sans-400.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Sans';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('assets/fonts/dm-sans-600.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/dm-mono-400.woff2') format('woff2');
+  }
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+    }
+
+    #root .fr01-bg {
+      position: absolute;
+      inset: 0;
+      background: #05070a;
+    }
+
+    #root .fr01-flash {
+      position: absolute;
+      inset: 0;
+      background: #e6edf3;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #root .fr01-textwrap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 896px; /* caption keep-out: content stays at/above y=896px on a 1080-tall frame */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #root .fr01-text {
+      width: 84cqw;
+      margin: 0 auto;
+      text-align: center;
+      font-family: 'DM Sans', Arial, Helvetica, sans-serif;
+      font-weight: 700;
+      font-size: 6.5cqw;
+      line-height: 0.95;
+      letter-spacing: -0.01em;
+      color: #e6edf3;
+      white-space: pre-line;
+    }
+  </style>
+
+  <div data-hf-id="hf-ohsf" class="fr01-bg clip" data-start="0" data-duration="8.293" data-track-index="0"></div>
+
+  <div data-hf-id="hf-elz6" class="fr01-textwrap clip" data-start="0" data-duration="8.293" data-track-index="1">
+    <div data-hf-id="hf-vnqk" class="fr01-text" id="fr01-text">One box too many.</div>
+  </div>
+
+  <div data-hf-id="hf-t8fk" class="fr01-flash clip" data-start="0" data-duration="8.293" data-track-index="2"></div>
+
+  <script>
+    (function () {
+      var DURATION = 7.893;
+
+      // Sparse discrete-text-sequence states: whole-line hard-cut swaps at
+      // time thresholds — text is set instantly (no tween on the string
+      // itself), only the accompanying flash + reverse-search driver move.
+      var STATES = [
+        { t: 0.0, text: "One box too many.", color: "#e6edf3" },
+        { t: 3.157, text: "Nobody catches it —", color: "#38bdf8" },
+        { t: 5.525, text: "until the dock.", color: "#e6edf3" },
+      ];
+
+      function stateAt(time) {
+        for (var i = STATES.length - 1; i >= 0; i--) {
+          if (time >= STATES[i].t) return STATES[i];
+        }
+        return STATES[0];
+      }
+
+      var textEl = document.getElementById("fr01-text");
+      var flashEl = document.querySelector("#root .fr01-flash");
+
+      var tl = gsap.timeline({ paused: true });
+
+      var driver = { t: 0 };
+      tl.to(
+        driver,
+        {
+          t: DURATION,
+          duration: DURATION,
+          ease: "none",
+          onUpdate: function () {
+            var s = stateAt(driver.t);
+            if (textEl.textContent !== s.text) textEl.textContent = s.text;
+            textEl.style.color = s.color;
+          },
+        },
+        0
+      );
+
+      // A brief punch of light on each hard cut — sells the "FLASH-in" beat
+      // without ever tweening the text string itself (which must stay a
+      // pure instant jump, per discrete-text-sequence).
+      STATES.forEach(function (s) {
+        tl.fromTo(
+          flashEl,
+          { opacity: 0.78 },
+          { opacity: 0, duration: 0.16, ease: "power2.out" },
+          s.t
+        );
+      });
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["01-hook"] = tl;
+    })();
+  </script>
+</div>
+</template>

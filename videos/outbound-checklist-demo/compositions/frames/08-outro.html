@@ -1,0 +1,140 @@
+<template>
+  <style>
+  @font-face {
+    font-family: 'DM Sans';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/dm-sans-400.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Sans';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('assets/fonts/dm-sans-600.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/dm-mono-400.woff2') format('woff2');
+  }
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+      font-family: 'DM Sans', sans-serif;
+      color: #e6edf3;
+    }
+    #root, #root * { box-sizing: border-box; }
+
+    /* Full-bleed ground — deep near-black "void" field for the calm hold-to-end
+       card (the sketch's deliberate simplification: no grid/hairlines on this
+       one beat, matching the Scene 1 "black field holds" cue). Lives on its own
+       class="clip" layer per the root-background rule, never painted on #root. */
+    .f08o-bg {
+      position: absolute;
+      inset: 0;
+      background: #05070a;
+    }
+
+    /* Centered card — title, tagline, brand mark. Matches the confirmed sketch's
+       .headline-block: absolute, flex column, centered, generous side padding. */
+    .f08o-card {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 1.2cqw;
+      padding: 6cqw;
+    }
+
+    .f08o-title {
+      font-size: 4.6cqw;
+      font-weight: 400;
+      line-height: 0.95;
+      color: #e6edf3;
+      opacity: 0;
+      transform-origin: 50% 50%;
+    }
+
+    .f08o-tagline {
+      font-size: 1.5cqw;
+      font-weight: 400;
+      line-height: 1.4;
+      color: #e6edf3;
+      opacity: 0;
+    }
+
+    .f08o-wordmark {
+      margin-top: 1.6cqw;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(230, 237, 243, 0.55);
+      opacity: 0;
+    }
+  </style>
+
+  <div data-hf-id="hf-ns88" id="root" data-composition-id="08-outro" data-width="1920" data-height="1080" data-duration="5.824">
+    <div data-hf-id="hf-u72s" class="clip f08o-bg" data-start="0" data-duration="5.824" data-track-index="0"></div>
+
+    <div data-hf-id="hf-eqiu" class="clip f08o-card" data-start="0" data-duration="5.824" data-track-index="1">
+      <div data-hf-id="hf-s5uk" class="f08o-title" id="f08o-title">Outbound Checklist.</div>
+      <div data-hf-id="hf-9wrs" class="f08o-tagline" id="f08o-tagline">Every pallet, verified before it ships.</div>
+      <div data-hf-id="hf-4dst" class="f08o-wordmark" id="f08o-wordmark">ARROW</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var tl = gsap.timeline({ paused: true });
+
+      // Scene 1 (0.0–2.0s): black field already holds (crossfade seam from Frame
+      // 7). On "Outbound Checklist.", the title settles dead-center with a
+      // gentle fade-in + subtle scale-up (scale-swap-transition's restrained
+      // in/settle half, power3.out — no outgoing element, this is the empty
+      // field settling into the card). Starts near t=0 so the hero is visible
+      // well before the 0.5s floor.
+      tl.fromTo(
+        '#f08o-title',
+        { opacity: 0, scale: 0.92 },
+        { opacity: 1, scale: 1, duration: 0.85, ease: 'power3.out' },
+        0.05
+      );
+
+      // Scene 2 (2.0–4.5s): on "Every pallet, verified before it ships.", the
+      // tagline slides up + fades in beneath the held title — the same
+      // slide-up-crossfade move-shape as Frame 6's badge flip (visual rhyme),
+      // single-sided here since the title itself does not exit.
+      tl.fromTo(
+        '#f08o-tagline',
+        { opacity: 0, y: 24 },
+        { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' },
+        2.0
+      );
+
+      // Scene 3 (4.5s–end): the Arrow wordmark fades in small beneath the
+      // tagline. This is the film's one true exit — after it settles (~5.1s)
+      // the whole card holds static to the final render frame at 5.824s, no
+      // further motion.
+      tl.fromTo(
+        '#f08o-wordmark',
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' },
+        4.5
+      );
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines['08-outro'] = tl;
+    })();
+  </script>
+</template>
