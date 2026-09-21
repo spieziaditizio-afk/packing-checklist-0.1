@@ -2889,19 +2889,19 @@ function validatePrintReady() {
   const issues = [];
   let palletIdx = 0;
 
-  // Validate global required fields
+  // Validate global required fields — grouped into a single "Delivery
+  // Information" issue so the modal shows one card, not one per field.
   const operator = document.getElementById('operator').value.trim();
   const deliveryNum = document.getElementById('delivery-num').value.trim();
   const deliveryPn = document.getElementById('delivery-pn').value.trim();
 
-  if (!operator) {
-    issues.push({ palletIdx: 0, pid: null, problems: ['missing operator name'], badFields: { operator: true } });
-  }
-  if (!deliveryNum) {
-    issues.push({ palletIdx: 0, pid: null, problems: ['missing delivery number'], badFields: { deliveryNum: true } });
-  }
-  if (!deliveryPn) {
-    issues.push({ palletIdx: 0, pid: null, problems: ['missing delivery part number'], badFields: { deliveryPn: true } });
+  const globalProblems = [];
+  const globalBadFields = {};
+  if (!operator) { globalProblems.push('missing operator name'); globalBadFields.operator = true; }
+  if (!deliveryNum) { globalProblems.push('missing delivery number'); globalBadFields.deliveryNum = true; }
+  if (!deliveryPn) { globalProblems.push('missing delivery part number'); globalBadFields.deliveryPn = true; }
+  if (globalProblems.length) {
+    issues.push({ palletIdx: null, pid: null, problems: globalProblems, badFields: globalBadFields });
   }
 
   blocks.forEach(b => {
@@ -2953,7 +2953,10 @@ function clearPrintIssueIfResolved(pid) {
 }
 function openPrintBlockModal(issues) {
   const list = document.getElementById('print-block-list');
-  if (list) list.innerHTML = issues.map(i => `<li><b>Pallet ${i.palletIdx}</b>${esc(i.problems.join(' · '))}</li>`).join('');
+  if (list) list.innerHTML = issues.map(i => {
+    const label = i.pid === null ? 'Delivery Information' : `Pallet ${i.palletIdx}`;
+    return `<li><b>${label}</b>${esc(i.problems.join(' · '))}</li>`;
+  }).join('');
   const m = document.getElementById('print-block-modal');
   if (m) m.style.display = 'flex';
 }
