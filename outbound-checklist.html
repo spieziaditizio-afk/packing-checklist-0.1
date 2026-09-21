@@ -852,7 +852,7 @@ let palletCounter = 0;
 let activePid = null;
 let destination = 'europe';
 const HEIGHT_LIMITS = { europe: 180, export: 160 };
-const PTYPE = { KP:'60×80', EP:'120×80', BP:'120×100', GP:'125×100', NP:'130×110', AP:'140×105' };
+const PTYPE = { KP:'80×60', EP:'120×80', BP:'120×100', GP:'125×100', NP:'130×110', AP:'140×105' };
 
 /* ══ INIT ═══════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
@@ -2888,6 +2888,21 @@ function validatePrintReady() {
   const blocks = document.querySelectorAll('.pallet-block');
   const issues = [];
   let palletIdx = 0;
+
+  // Validate global required fields
+  const operator = document.getElementById('operator').value.trim();
+  const deliveryNum = document.getElementById('delivery-num').value.trim();
+  const deliveryPn = document.getElementById('delivery-pn').value.trim();
+
+  if (!operator) {
+    issues.push({ palletIdx: 0, pid: null, problems: ['missing operator name'], badFields: { operator: true } });
+  }
+  if (!deliveryNum) {
+    issues.push({ palletIdx: 0, pid: null, problems: ['missing delivery number'], badFields: { deliveryNum: true } });
+  }
+  if (!deliveryPn) {
+    issues.push({ palletIdx: 0, pid: null, problems: ['missing delivery part number'], badFields: { deliveryPn: true } });
+  }
 
   blocks.forEach(b => {
     palletIdx++;
